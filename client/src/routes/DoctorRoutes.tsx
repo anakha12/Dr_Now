@@ -1,0 +1,43 @@
+import { Routes, Route, Navigate } from "react-router-dom";
+import DoctorRegister from "../features/doctor/DoctorRegister";
+import DoctorLogin from "../features/doctor/DoctorLogin";
+import DoctorWaitingVerification from "../features/doctor/waiting-verification";
+import DoctorRejected from "../features/doctor/DoctorRejected";
+import DoctorLayout from "../features/doctor/DoctorLayout";
+import Dashboard from "../features/doctor/DoctorDashboard";
+import DoctorProfile from "../features/doctor/DoctorProfile";
+import { useAuth } from "../context/AuthContext";
+import CurrentSchedules from "../features/doctor/CurrentSchedules";
+import DoctorAppointments from "../features/doctor/DoctorAppointments";
+
+const DoctorRoutes = () => {
+  const { isDoctorLoggedIn } = useAuth();
+  return (
+    <Routes>
+      {/* Public routes */}
+      <Route path="register" element={<DoctorRegister />} />
+      <Route path="login" element={<DoctorLogin />} />
+      <Route path="waiting-verification" element={<DoctorWaitingVerification />} />
+      <Route path="rejected" element={<DoctorRejected />} />
+
+      {/* Protected routes */}
+      <Route
+        path="/"
+        element={
+          isDoctorLoggedIn ? (
+            <DoctorLayout />
+          ) : (
+            <Navigate to="/doctor/login" replace />
+          )
+        }
+      >
+        <Route path="dashboard" element={<Dashboard />} />
+        <Route path="profile" element={<DoctorProfile />} />
+        <Route path="current-schedules" element={<CurrentSchedules/>}/>
+        <Route path="appointments" element={<DoctorAppointments />} />
+      </Route>
+    </Routes>
+  );
+};
+
+export default DoctorRoutes;
