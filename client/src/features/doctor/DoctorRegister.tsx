@@ -110,7 +110,7 @@ const DoctorRegister = () => {
     try {
       const response = await registerDoctor(email, otp);
       const doctorId = response.doctorId;
-      sessionStorage.setItem("doctorId", doctorId); 
+      localStorage.setItem("doctorId", doctorId);
       toast.success("Registration successful!");
       setTimeout(() => navigate("/doctor/profile-complete", { state: { email } }), 1500);
     } catch {

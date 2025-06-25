@@ -8,6 +8,16 @@ import userModel from "../models/userModel";
 
 export class BookingRepositoryImpl implements BookingRepository {
 
+  async hasActiveBookingsForDoctor(doctorId: string): Promise<boolean> {
+    const existing = await BookingModel.exists({
+      doctorId: new Types.ObjectId(doctorId),
+      status:"Upcoming",
+    });
+
+    return !!existing;
+  }
+
+
   async updateRefundStatus(bookingId: string, status: string): Promise<void> {
     await BookingModel.findByIdAndUpdate(bookingId, { refundStatus: status });
   }

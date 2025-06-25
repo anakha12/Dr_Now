@@ -3,8 +3,20 @@ import { useParams, useNavigate } from "react-router-dom";
 import { getDoctorById } from "../../services/userService";
 import { motion } from "framer-motion";
 
+interface Experience {
+  hospital: string;
+  role: string;
+  years: string;
+}
+
+interface Education {
+  degree: string;
+  institution: string;
+  year: string;
+}
+
 interface Doctor {
-  _id: string; 
+  _id: string;
   name: string;
   email: string;
   phone: string;
@@ -14,27 +26,30 @@ interface Doctor {
   profileImage: string;
   gender: string;
   isVerified: boolean;
+  bio: string;
+  experience: Experience[];
+  education: Education[];
+  awards: string[];
+  affiliatedHospitals: string[];
 }
 
 const DoctorDetail = () => {
-  const { id } = useParams(); 
+  const { id } = useParams();
   const navigate = useNavigate();
   const [doctor, setDoctor] = useState<Doctor | null>(null);
 
   useEffect(() => {
     const fetchDoctor = async () => {
-      if (!id) {
-        console.error("Doctor ID is missing from URL");
-        return;
-      }
+      if (!id) return console.error("Doctor ID is missing from URL");
+
       try {
         const data = await getDoctorById(id);
-        console.log("Doctor Data:", data);
         setDoctor(data);
       } catch (error) {
         console.error("Error loading doctor", error);
       }
     };
+
     fetchDoctor();
   }, [id]);
 
@@ -92,52 +107,73 @@ const DoctorDetail = () => {
         >
           {/* About Section */}
           <section>
-            <h3 className="text-xl font-semibold text-gray-800">
-              About Dr. {doctor.name.split(" ")[0]}
-            </h3>
-            <p className="text-gray-700 mt-2 leading-relaxed">
-              Dr. {doctor.name} is a compassionate and accomplished{" "}
-              {doctor.specialization} with {doctor.yearsOfExperience}+ years of
-              clinical excellence. Known for their dedication and empathy, they
-              ensure quality care and holistic treatment for every patient.
-            </p>
+            <h3 className="text-xl font-semibold text-gray-800">About</h3>
+            <p className="text-gray-700 mt-2 leading-relaxed">{doctor.bio || "No bio available."}</p>
           </section>
 
           {/* Basic Info */}
           <section>
-            <h3 className="text-xl font-semibold text-gray-800">
-              Basic Information
-            </h3>
+            <h3 className="text-xl font-semibold text-gray-800">Basic Information</h3>
             <ul className="mt-2 space-y-1 text-gray-700">
-              <li>
-                <strong>Email:</strong> {doctor.email}
-              </li>
-              <li>
-                <strong>Phone:</strong> {doctor.phone}
-              </li>
-              <li>
-                <strong>Gender:</strong> {doctor.gender}
-              </li>
-              <li>
-                <strong>Experience:</strong> {doctor.yearsOfExperience} years
-              </li>
-              <li>
-                <strong>Consultation Fee:</strong> ₹{doctor.consultFee}
-              </li>
+              <li><strong>Email:</strong> {doctor.email}</li>
+              <li><strong>Phone:</strong> {doctor.phone}</li>
+              <li><strong>Gender:</strong> {doctor.gender}</li>
+              <li><strong>Experience:</strong> {doctor.yearsOfExperience} years</li>
+              <li><strong>Consultation Fee:</strong> ₹{doctor.consultFee}</li>
             </ul>
           </section>
 
-          {/* Experience Section */}
-          <section>
-            <h3 className="text-xl font-semibold text-gray-800">Experience</h3>
-            <ul className="mt-2 list-disc pl-6 text-gray-700 space-y-1">
-              <li>Served in multi-specialty hospitals and private clinics</li>
-              <li>
-                Treated 1000+ patients with a focus on care and empathy
-              </li>
-              <li>Engaged in medical research and continuous education</li>
-            </ul>
-          </section>
+          {/* Experience */}
+          {doctor.experience?.length > 0 && (
+            <section>
+              <h3 className="text-xl font-semibold text-gray-800">Experience</h3>
+              <ul className="mt-2 list-disc pl-6 text-gray-700 space-y-1">
+                {doctor.experience.map((exp, idx) => (
+                  <li key={idx}>
+                    {exp.role} at {exp.hospital} ({exp.years} years)
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
+
+          {/* Education */}
+          {doctor.education?.length > 0 && (
+            <section>
+              <h3 className="text-xl font-semibold text-gray-800">Education</h3>
+              <ul className="mt-2 list-disc pl-6 text-gray-700 space-y-1">
+                {doctor.education.map((edu, idx) => (
+                  <li key={idx}>
+                    {edu.degree} from {edu.institution} ({edu.year})
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
+
+          {/* Awards */}
+          {doctor.awards?.length > 0 && (
+            <section>
+              <h3 className="text-xl font-semibold text-gray-800">Awards</h3>
+              <ul className="mt-2 list-disc pl-6 text-gray-700 space-y-1">
+                {doctor.awards.map((award, idx) => (
+                  <li key={idx}>{award}</li>
+                ))}
+              </ul>
+            </section>
+          )}
+
+          {/* Affiliated Hospitals */}
+          {doctor.affiliatedHospitals?.length > 0 && (
+            <section>
+              <h3 className="text-xl font-semibold text-gray-800">Affiliated Hospitals</h3>
+              <ul className="mt-2 list-disc pl-6 text-gray-700 space-y-1">
+                {doctor.affiliatedHospitals.map((hosp, idx) => (
+                  <li key={idx}>{hosp}</li>
+                ))}
+              </ul>
+            </section>
+          )}
         </motion.div>
       </div>
     </motion.div>

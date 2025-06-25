@@ -13,6 +13,7 @@ export interface BookingRepository {
   getPaidBookings(): Promise<Booking[]>;
   markPayoutAsPaid(bookingIds: string[]): Promise<void>;
   updateRefundStatus(bookingId: string, status: string): Promise<void>;
+  hasActiveBookingsForDoctor(doctorId: string): Promise<boolean>;
 
 }
 

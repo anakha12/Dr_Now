@@ -55,7 +55,8 @@ export const updateDoctorProfile = async (profileData: any) => {
     const response = await doctorAxios.put("/profile", profileData);
     return response.data;
   } catch (error: any) {
-    throw error.response?.data || { message: "Failed to update profile" };
+    const backendError = error?.response?.data?.error;
+    throw new Error(backendError || "Failed to update profile");
   }
 };
 

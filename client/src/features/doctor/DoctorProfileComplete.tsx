@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import toast, { Toaster } from "react-hot-toast";
 import { FaStethoscope } from "react-icons/fa";
 import { completeDoctorProfile } from "../../services/doctorService";
-import { useLocation } from "react-router-dom";
+
 
 
 const DoctorProfileComplete = () => {
@@ -14,10 +14,11 @@ const DoctorProfileComplete = () => {
   const [experience, setExperience] = useState([{ hospital: "", role: "", years: "" }]);
   const [affiliatedHospitals, setAffiliatedHospitals] = useState("");
   const navigate = useNavigate();
-  const location = useLocation();
-    const doctorId = location.state?.doctorId;
+  const doctorId = localStorage.getItem("doctorId");
+
 
     useEffect(() => {
+      console.log("doctorId",doctorId)
         if (!doctorId) {
             toast.error("Missing doctor ID. Please re-register.");
             navigate("/doctor/register");
@@ -47,6 +48,7 @@ if (!doctorId) return null;
 
     try {
       await completeDoctorProfile(doctorId, profileData);
+      localStorage.removeItem("doctorId"); 
       toast.success("Profile completed successfully!");
       setTimeout(() => navigate("/doctor/login"), 1500);
     } catch (error: any) {

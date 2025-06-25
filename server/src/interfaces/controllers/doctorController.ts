@@ -54,7 +54,7 @@ export class DoctorController {
     this.verifyDoctorOtp = new VerifyDoctorOtp(this.doctorRepository);
     this.loginUseCase = new DoctorLogin(this.doctorRepository);
     this.getDoctorProfileUseCase = new GetDoctorProfile(this.doctorRepository);
-    this.updateDoctorProfileUseCase = new UpdateDoctorProfile(this.doctorRepository);
+    this.updateDoctorProfileUseCase = new UpdateDoctorProfile(this.doctorRepository, this.bookingRepository);
     this.addAvailabilityUseCase = new AddDoctorAvailability(this.doctorRepository);
     this.getAvailabilityUseCase = new GetDoctorAvailability(this.doctorRepository);
     this.getDoctorBookingsUseCase = new GetDoctorBookings(this.bookingRepository);
