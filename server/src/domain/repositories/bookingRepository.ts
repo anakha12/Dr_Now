@@ -1,4 +1,4 @@
-import { Booking } from "../entities/bookingEntity"; // already present
+import { Booking } from "../entities/bookingEntity";
 import { EnrichedBooking } from "../entities/bookingEntity";
 
 export interface BookingRepository {
@@ -10,6 +10,8 @@ export interface BookingRepository {
   getBookedSlotsByDoctorAndDate(doctorId: string,date: string): Promise<{ from: string; to: string }[]>;
   cancelBooking(bookingId: string): Promise<void>;
   getDoctorBookings(doctorId: string): Promise<Booking[]>;
+  getPaidBookings(): Promise<Booking[]>;
+  markPayoutAsPaid(bookingIds: string[]): Promise<void>;
 
 }
 

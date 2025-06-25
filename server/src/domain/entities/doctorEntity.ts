@@ -28,4 +28,13 @@ export interface DoctorEntity {
   otpExpiresAt?: Date;
   availability: Availability[]; 
   isRejected?: boolean;
+  walletBalance?: number;
+  totalEarned?: number;
+  walletTransactions?: {
+    type: 'credit' | 'debit';
+    amount: number;
+    reason: string;
+    bookingId?: string;
+    date?: Date;
+  }[];
 }

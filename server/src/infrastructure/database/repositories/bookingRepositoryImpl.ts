@@ -8,6 +8,36 @@ import userModel from "../models/userModel";
 
 export class BookingRepositoryImpl implements BookingRepository {
 
+  async markPayoutAsPaid(bookingIds: string[]): Promise<void> {
+    await BookingModel.updateMany(
+      { _id: { $in: bookingIds } },
+      { $set: { payoutStatus: "Paid" } }
+    );
+  }
+
+
+  async getPaidBookings(): Promise<Booking[]> {
+    const bookings = await BookingModel.find({ paymentStatus: "paid" });
+
+    return bookings.map((b) => ({
+      id: b.id,
+      doctorId: b.doctorId.toString(),
+      userId: b.userId.toString(),
+      date: b.date,
+      slot: b.slot,
+      paymentStatus: b.paymentStatus,
+      transactionId: b.transactionId,
+      status: b.status,
+      createdAt: b.createdAt,
+      updatedAt: b.updatedAt,
+      doctorEarning: b.doctorEarning,
+      commissionAmount: b.commissionAmount,
+      payoutStatus: b.payoutStatus,
+      refundStatus: b.refundStatus
+    }));
+  }
+
+
   async getDoctorBookings(doctorId: string): Promise<EnrichedDoctorBooking[]> {
     const bookings = await BookingModel.find({
       doctorId: new Types.ObjectId(doctorId),
@@ -30,6 +60,8 @@ export class BookingRepositoryImpl implements BookingRepository {
         createdAt: booking.createdAt,
         updatedAt: booking.updatedAt,
         status: booking.status,
+        doctorEarning: booking.doctorEarning,  
+        payoutStatus: booking.payoutStatus 
       };
     });
   }
@@ -54,6 +86,9 @@ export class BookingRepositoryImpl implements BookingRepository {
     status: booking.status, 
     createdAt: booking.createdAt,
     updatedAt: booking.updatedAt,
+    commissionAmount: booking.commissionAmount,
+    doctorEarning: booking.doctorEarning,
+
   };
 }
 
@@ -81,6 +116,8 @@ export class BookingRepositoryImpl implements BookingRepository {
       paymentStatus: booking.paymentStatus,
       transactionId: booking.transactionId,
       status: "Upcoming", 
+      commissionAmount: booking.commissionAmount, 
+      doctorEarning: booking.doctorEarning 
     });
 
     return {
@@ -94,6 +131,8 @@ export class BookingRepositoryImpl implements BookingRepository {
       createdAt: created.createdAt,
       updatedAt: created.updatedAt,
       status: created.status,
+      commissionAmount: created.commissionAmount,  
+      doctorEarning: created.doctorEarning   
     };
   }
 

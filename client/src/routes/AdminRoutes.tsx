@@ -8,6 +8,7 @@ import Patients from "../features/admin/Patients";
 import { useEffect, useState } from "react";
 import adminAxios from "../services/adminAxiosInstance";
 import DepartmentList from "../features/admin/DepartmentList";
+import DoctorPaymentPage from "../features/admin/DoctorPaymentPage";
 
 const AdminRoutes = () => {
   const location = useLocation();
@@ -49,6 +50,7 @@ const AdminRoutes = () => {
         <Route path="doctors" element={<Doctors />} />
         <Route path="patients" element={<Patients />} />
         <Route path="departments" element={<DepartmentList/>}/>
+        <Route path="doctor-payment" element={<DoctorPaymentPage/>}/>
       </Route>
     </Routes>
   );

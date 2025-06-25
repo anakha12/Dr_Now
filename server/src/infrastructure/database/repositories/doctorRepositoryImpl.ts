@@ -6,11 +6,40 @@ import BookingModel from "../../database/models/bookingModel";
 
 export class DoctorRepositoryImpl implements DoctorRepository {
 
-  async removeAllSlotsOnDate(doctorId: string, date: string): Promise<void> {
+  async getDoctorById(id: string): Promise<DoctorEntity> {
+    const doctor = await DoctorModel.findById(id);
+    if (!doctor) throw new Error("Doctor not found");
+    return this.toDomain(doctor);
+  }
+
+
+  async creditWallet(doctorId: string, tx: { amount: number; description: string; date: Date }): Promise<void> {
     const doctor = await DoctorModel.findById(doctorId);
     if (!doctor) throw new Error("Doctor not found");
 
-    // Remove entire date entry
+  
+    doctor.walletBalance = doctor.walletBalance ?? 0;
+    doctor.totalEarned = doctor.totalEarned ?? 0;
+    doctor.walletTransactions = doctor.walletTransactions ?? [];
+
+    doctor.walletBalance += tx.amount;
+    doctor.totalEarned += tx.amount;
+
+    doctor.walletTransactions.push({
+      amount: tx.amount,
+      reason: tx.description,
+      type: 'credit', 
+      date: tx.date,
+    });
+
+    await doctor.save();
+  }
+
+
+
+  async removeAllSlotsOnDate(doctorId: string, date: string): Promise<void> {
+    const doctor = await DoctorModel.findById(doctorId);
+    if (!doctor) throw new Error("Doctor not found");
     doctor.availability = doctor.availability.filter(
       (entry: any) => entry.date !== date
     );
@@ -153,6 +182,9 @@ async updateBlockedStatus(id: string, isBlocked: boolean): Promise<void> {
       otpExpiresAt: doc.otpExpiresAt,
       availability: doc.availability,
       isRejected: doc.isRejected,
+      walletBalance: doc.walletBalance,
+      walletTransactions: doc.walletTransactions,
+      totalEarned: doc.totalEarned,
     };
   }
 }

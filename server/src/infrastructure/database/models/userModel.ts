@@ -19,6 +19,15 @@ export interface IUSER extends Document{
     uid?: string;
     // profileCompletion: string;
     isDonner: boolean;
+    walletBalance?: number;
+    walletTransactions?: {
+    type: 'credit' | 'debit';
+    amount: number;
+    reason: string;
+    bookingId?: mongoose.Types.ObjectId;
+    date?: Date;
+    }[];
+
 }
 
 const UserSchema: Schema =new Schema<IUSER>(
@@ -42,6 +51,21 @@ const UserSchema: Schema =new Schema<IUSER>(
 
         // profileCompletion: { type: String, default: "false" },
         isDonner: { type: Boolean, default: false },
+        walletBalance: { type: Number, default: 0 },
+        walletTransactions: [
+        {
+            type: {
+            type: String,
+            enum: ['credit', 'debit'],
+            required: true,
+            },
+            amount: { type: Number, required: true },
+            reason: { type: String, required: true },
+            bookingId: { type: mongoose.Schema.Types.ObjectId, ref: 'Booking' },
+            date: { type: Date, default: Date.now },
+        }
+        ],
+
     },{
         timestamps:true,
     }

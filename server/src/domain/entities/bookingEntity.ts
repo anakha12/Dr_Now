@@ -22,4 +22,8 @@ export interface Booking {
   status: 'Upcoming' | 'Cancelled' | 'Completed'; 
   createdAt?: Date;
   updatedAt?: Date;
+  doctorEarning?: number;
+  commissionAmount?: number;
+  payoutStatus?: 'Pending' | 'Paid';
+  refundStatus?: 'NotRequired' | 'Refunded';
 }

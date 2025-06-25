@@ -1,3 +1,5 @@
+import { Availability } from "../../domain/entities/doctorEntity"; 
+
 export class DoctorRegisterDTO {
   name: string;
   email: string;
@@ -10,7 +12,7 @@ export class DoctorRegisterDTO {
   idProof: string;
   gender: string; 
   consultFee: string;
-  availability: string;
+  availability:  Availability[];
   
 
   constructor(data: any) {
@@ -25,6 +27,6 @@ export class DoctorRegisterDTO {
     this.idProof = data.idProof;
     this.gender = data.gender;
     this.consultFee = data.consultFee;
-    this.availability = data.availability ||null
+    this.availability = data.availability ?? [];
   }
 }

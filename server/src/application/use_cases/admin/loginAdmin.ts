@@ -7,7 +7,6 @@ export class LoginAdmin {
 
   async execute(email: string, password: string): Promise<{ token: string; user: any }> {
     const user = await this.userRepository.findByEmail(email);
-   
     if (!user) throw new Error("User not found");
     if (!user.isVerified) throw new Error("Please verify your email/OTP before logging in");
     if(!user.password){

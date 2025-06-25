@@ -13,7 +13,11 @@
   import { CreateDepartmentUseCase } from "../../application/use_cases/admin/createDepartment";
   import { GetDepartmentsUseCase } from "../../application/use_cases/admin/getDepartments";
   import { ToggleDepartmentStatusUseCase } from "../../application/use_cases/admin/toggleDepartmentStatus";
-
+  import { GetPendingDoctorPayouts } from "../../application/use_cases/admin/getPendingDoctorPayouts";
+  import { BookingRepositoryImpl } from "../../infrastructure/database/repositories/bookingRepositoryImpl";
+  import { GetWalletSummary } from "../../application/use_cases/admin/getWalletSummary";
+  import { AdminWalletRepositoryImpl } from "../../infrastructure/database/repositories/adminWalletRepositoryImpl";
+  import { PayoutDoctorUseCase } from "../../application/use_cases/admin/payoutDoctor";
 
   export class AdminController {
     private loginAdmin: LoginAdmin;
@@ -27,6 +31,9 @@
     private createDepartmentUseCase: CreateDepartmentUseCase;
     private getDepartmentsUseCase: GetDepartmentsUseCase;
     private toggleDepartmentStatusUseCase: ToggleDepartmentStatusUseCase;
+    private getPendingDoctorPayoutsUseCase: GetPendingDoctorPayouts;
+    private getWalletSummaryUseCase: GetWalletSummary;
+    private payoutDoctorUseCase: PayoutDoctorUseCase;
 
     constructor(userRepository?: UserRepositoryImpl) {
       this.loginAdmin = new LoginAdmin(userRepository || new UserRepositoryImpl());
@@ -41,6 +48,19 @@
       this.createDepartmentUseCase = new CreateDepartmentUseCase(deptRepo);
       this.getDepartmentsUseCase = new GetDepartmentsUseCase(deptRepo);
       this.toggleDepartmentStatusUseCase = new ToggleDepartmentStatusUseCase(deptRepo);
+      this.getPendingDoctorPayoutsUseCase = new GetPendingDoctorPayouts(
+        new BookingRepositoryImpl(),
+        new DoctorRepositoryImpl()
+      );
+      const walletRepo = new AdminWalletRepositoryImpl();
+      const bookingRepo = new BookingRepositoryImpl();
+      this.getWalletSummaryUseCase = new GetWalletSummary(walletRepo, bookingRepo);
+      this.payoutDoctorUseCase = new PayoutDoctorUseCase(
+        new BookingRepositoryImpl(),
+        new DoctorRepositoryImpl(),
+        new AdminWalletRepositoryImpl()
+      );
+
     }
 
     async adminLogin(req: Request, res: Response): Promise<void> {
@@ -177,5 +197,33 @@
       res.status(400).json({ message: err.message });
     }
   }
+  async getPendingDoctors(req: Request, res: Response) {
+    try {
+      const list = await this.getPendingDoctorPayoutsUseCase.execute();
+      res.status(200).json(list);
+    } catch (err: any) {
+      res.status(500).json({ message: err.message });
+    }
+  }
+
+  async getWalletSummary(req: Request, res: Response) {
+    try {
+      const summary = await this.getWalletSummaryUseCase.execute();
+      res.status(200).json(summary);
+    } catch (err: any) {
+      res.status(500).json({ message: err.message });
+    }
+  }
+
+  async payoutDoctor(req: Request, res: Response): Promise<void> {
+    try {
+      const doctorId = req.params.id;
+      await this.payoutDoctorUseCase.execute(doctorId);
+      res.status(200).json({ message: "Doctor payout successful" });
+    } catch (err: any) {
+      res.status(500).json({ message: err.message });
+    }
+  }
+
 
   }

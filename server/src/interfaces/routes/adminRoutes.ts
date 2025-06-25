@@ -21,5 +21,8 @@ router.patch("/users/:id/:action", cookieAuth("admin"), (req, res) => adminContr
 router.post("/departments", cookieAuth("admin"), (req, res) => adminController.createDepartment(req, res));
 router.get("/departments", cookieAuth("admin"), (req, res) => adminController.getDepartments(req, res));
 router.patch("/departments/:id/status", cookieAuth("admin"), (req, res) => adminController.toggleDepartmentStatus(req, res));
+router.get("/pending-doctors",cookieAuth("admin"),(req, res) => adminController.getPendingDoctors(req, res));
+router.get("/wallet-summary", cookieAuth("admin"), (req, res) =>adminController.getWalletSummary(req, res));
+router.post("/pay-doctor/:id", cookieAuth("admin"), (req, res) =>adminController.payoutDoctor(req, res));
 
 export default router;

@@ -1,13 +1,13 @@
 // src/interfaces/controllers/stripeWebhookController.ts
 import { Request, Response } from "express";
 import { StripeWebhookUseCase } from "../../application/use_cases/stripe/stripeWebhookUseCase";
+import { AdminWalletRepositoryImpl } from "../../infrastructure/database/repositories/adminWalletRepositoryImpl";
 import { stripe } from "../../config/stripe"; 
 
 export class StripeWebhookController {
   constructor(private stripeWebhookUseCase: StripeWebhookUseCase) {}
 
   handleStripeWebhook = async (req: Request, res: Response) => {
-    console.log('hiii stripe...')
     const sig = req.headers["stripe-signature"];
     const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET!;
     let event;

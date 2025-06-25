@@ -119,3 +119,37 @@ export const addDepartment = async (data: {
     throw new Error(message);
   }
 };
+
+
+export const getWalletSummary = async () => {
+  try {
+    const response = await adminAxios.get("/wallet-summary");
+    return response.data;
+  } catch (error: any) {
+    const message = error.response?.data?.message || "Failed to fetch wallet summary";
+    throw new Error(message);
+  }
+};
+
+
+export const getPendingDoctors = async () => {
+  try {
+    const response = await adminAxios.get("/pending-doctors");
+    return response.data;
+  } catch (error: any) {
+    const message = error.response?.data?.message || "Failed to fetch pending doctors";
+    throw new Error(message);
+  }
+};
+
+
+export const payoutDoctor = async (doctorId: string) => {
+  try {
+    const response = await adminAxios.post(`/pay-doctor/${doctorId}`);
+    return response.data;
+  } catch (error: any) {
+    const message = error.response?.data?.message || "Doctor payout failed";
+    throw new Error(message);
+  }
+};
+

@@ -14,5 +14,7 @@ export interface DoctorRepository {
   removeSlot(doctorId: string, date: string, slot: Slot): Promise<void>;
   checkIfAnySlotBooked(doctorId: string, date: string, slots: Slot[]): Promise<boolean>;
   removeAllSlotsOnDate(doctorId: string, date: string): Promise<void>;
+  creditWallet(doctorId: string,tx: { amount: number; description: string; date: Date }): Promise<void>;
+  getDoctorById(id: string): Promise<DoctorEntity>;
 
 }

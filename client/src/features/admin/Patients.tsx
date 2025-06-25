@@ -51,79 +51,78 @@ const Patients = () => {
   const handleNext = () => setCurrentPage((prev) => Math.min(totalPages, prev + 1));
 
   return (
-    <div className="p-8">
-      <h1 className="text-2xl font-bold text-teal-800 mb-6">All Patients</h1>
+    <div className="max-w-4xl mx-auto p-4">
+      {/* Header */}
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-2xl font-bold text-teal-700">All Patients</h2>
+      </div>
 
-      {loading ? (
-        <p>Loading patients...</p>
-      ) : (
-        <div className="overflow-x-auto">
-          <table className="min-w-full border border-teal-300 bg-white shadow-md rounded-lg">
-            <thead className="bg-teal-200 text-teal-800 font-semibold">
+      {/* Table */}
+      <div className="overflow-x-auto bg-white rounded-lg shadow">
+        <table className="min-w-full divide-y divide-gray-200 text-sm">
+          <thead className="bg-teal-100">
+            <tr>
+              <th className="px-6 py-3 text-left font-medium text-teal-800">Name</th>
+              <th className="px-6 py-3 text-left font-medium text-teal-800">Email</th>
+              <th className="px-6 py-3 text-left font-medium text-teal-800">Status</th>
+              <th className="px-6 py-3 text-left font-medium text-teal-800">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {currentPatients.length === 0 ? (
               <tr>
-                <th className="p-4 text-left">Name</th>
-                <th className="p-4 text-left">Email</th>
-                <th className="p-4 text-left">Status</th>
-                <th className="p-4 text-left">Action</th>
+                <td colSpan={4} className="text-center p-6 text-gray-500">
+                  No patients available.
+                </td>
               </tr>
-            </thead>
-            <tbody>
-              {currentPatients.length === 0 ? (
-                <tr>
-                  <td colSpan={4} className="text-center p-6 text-gray-600 text-lg">
-                    No patients available.
+            ) : (
+              currentPatients.map((user) => (
+                <tr key={user._id} className="border-b hover:bg-teal-50">
+                  <td className="px-6 py-4">{user.name}</td>
+                  <td className="px-6 py-4">{user.email}</td>
+                  <td className="px-6 py-4">
+                    <span
+                      className={`font-semibold ${
+                        user.isBlocked ? "text-red-600" : "text-green-600"
+                      }`}
+                    >
+                      {user.isBlocked ? "Blocked" : "Active"}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4">
+                    <button
+                      onClick={() => handleToggleBlock(user._id, user.isBlocked || false)}
+                      className={`px-4 py-2 rounded text-white font-medium transition shadow ${
+                        user.isBlocked
+                          ? "bg-green-500 hover:bg-green-600"
+                          : "bg-red-500 hover:bg-red-600"
+                      }`}
+                    >
+                      {user.isBlocked ? "Unblock" : "Block"}
+                    </button>
                   </td>
                 </tr>
-              ) : (
-                currentPatients.map((user) => (
-                  <tr key={user._id} className="border-b border-teal-100 hover:bg-teal-50">
-                    <td className="p-4">{user.name}</td>
-                    <td className="p-4">{user.email}</td>
-                    <td className="p-4">
-                      <span
-                        className={`font-semibold ${
-                          user.isBlocked ? "text-red-600" : "text-green-600"
-                        }`}
-                      >
-                        {user.isBlocked ? "Blocked" : "Active"}
-                      </span>
-                    </td>
-                    <td className="p-4">
-                      <button
-                        onClick={() => handleToggleBlock(user._id, user.isBlocked || false)}
-                        className={`px-4 py-2 rounded-lg text-white font-medium shadow transition ${
-                          user.isBlocked
-                            ? "bg-green-500 hover:bg-green-600"
-                            : "bg-red-500 hover:bg-red-600"
-                        }`}
-                      >
-                        {user.isBlocked ? "Unblock" : "Block"}
-                      </button>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-      )}
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
 
-      {!loading && (
-        <div className="flex justify-between items-center mt-6 max-w-xs mx-auto">
+      {/* Pagination */}
+      {!loading && totalPages > 1 && (
+        <div className="mt-4 flex justify-center items-center space-x-2">
           <button
             onClick={handlePrev}
             disabled={currentPage === 1}
-            className="px-4 py-2 rounded-lg bg-teal-200 text-teal-700 font-semibold disabled:opacity-50"
+            className="px-3 py-1 bg-gray-200 hover:bg-gray-300 rounded disabled:opacity-50"
           >
-            Previous
+            Prev
           </button>
-          <span className="text-teal-800 font-semibold">
-            Page {currentPage} of {totalPages}
-          </span>
+          <span className="text-gray-700 font-medium">Page {currentPage} of {totalPages}</span>
           <button
             onClick={handleNext}
             disabled={currentPage === totalPages}
-            className="px-4 py-2 rounded-lg bg-teal-200 text-teal-700 font-semibold disabled:opacity-50"
+            className="px-3 py-1 bg-gray-200 hover:bg-gray-300 rounded disabled:opacity-50"
           >
             Next
           </button>

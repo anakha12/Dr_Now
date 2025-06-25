@@ -48,6 +48,7 @@ export class CreateStripeSession {
       date,
       slotFrom: slot.from,
       slotTo: slot.to,
+      fee: fee.toString()
     },
   });
 

@@ -14,7 +14,9 @@ import { BookingRepositoryImpl } from "../../infrastructure/database/repositorie
 import { EditDoctorAvailability } from "../../application/use_cases/doctor/editDoctorAvailability";
 import { RemoveDoctorSlot } from "../../application/use_cases/doctor/removeDoctorSlot";
 import { CancelDoctorBooking } from "../../application/use_cases/doctor/cancelDoctorBooking";
-
+import { GetAllDepartments } from "../../application/use_cases/doctor/getAllDepartments";
+import { DepartmentRepositoryImpl } from "../../infrastructure/database/repositories/departmentRepositoryImpl";
+import { GetDoctorWalletSummary } from "../../application/use_cases/doctor/getDoctorWalletSummary";
 
 interface MulterFiles {
   profileImage?: Express.Multer.File[];
@@ -42,6 +44,8 @@ export class DoctorController {
   private editAvailabilityUseCase:EditDoctorAvailability;
   private removeDoctorSlotUseCase:RemoveDoctorSlot;
   private cancelDoctorBookingUseCase: CancelDoctorBooking;
+  private getAllDepartmentsUseCase: GetAllDepartments;
+  private getDoctorWalletSummaryUseCase: GetDoctorWalletSummary;
   constructor() {
     this.doctorRepository = new DoctorRepositoryImpl();
      this.bookingRepository = new BookingRepositoryImpl();
@@ -56,6 +60,8 @@ export class DoctorController {
     this.editAvailabilityUseCase = new EditDoctorAvailability(this.doctorRepository);
     this.removeDoctorSlotUseCase = new RemoveDoctorSlot(this.doctorRepository);
     this.cancelDoctorBookingUseCase = new CancelDoctorBooking(this.bookingRepository);
+    this.getAllDepartmentsUseCase = new GetAllDepartments(new DepartmentRepositoryImpl());
+    this.getDoctorWalletSummaryUseCase = new GetDoctorWalletSummary(this.doctorRepository);
   }
 
   // Registration endpoint
@@ -237,6 +243,31 @@ async cancelBooking(req: AuthRequest, res: Response): Promise<void> {
     await this.cancelDoctorBookingUseCase.execute(doctorId, bookingId);
 
     res.status(200).json({ message: "Booking cancelled successfully" });
+  } catch (error: any) {
+    res.status(400).json({ error: error.message });
+  }
+}
+
+async getAllDepartments(_: Request, res: Response): Promise<void> {
+  try {
+    const departments = await this.getAllDepartmentsUseCase.execute();
+    res.status(200).json(departments);
+  } catch (error: any) {
+    res.status(500).json({ message: error.message });
+  }
+}
+
+async getWalletSummary(req: AuthRequest, res: Response): Promise<void> {
+  try {
+    const doctorId = req.user?.userId;
+    if (!doctorId) throw new Error("Unauthorized");
+
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 5;
+
+    const summary = await this.getDoctorWalletSummaryUseCase.execute(doctorId, page, limit);
+
+    res.status(200).json(summary);
   } catch (error: any) {
     res.status(400).json({ error: error.message });
   }

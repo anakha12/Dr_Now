@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { sendOtp, registerDoctor } from "../../services/doctorService";
+import { sendOtp, registerDoctor,getAllDepartments } from "../../services/doctorService";
 import toast, { Toaster } from "react-hot-toast";
 import { FaStethoscope } from "react-icons/fa";
 
@@ -20,6 +20,7 @@ const DoctorRegister = () => {
   const [profileImage, setProfileImage] = useState<File | null>(null);
   const [idProof, setIdProof] = useState<File | null>(null);
   const [medicalLicense, setMedicalLicense] = useState<File | null>(null);
+  const [departments, setDepartments] = useState<{ _id: string; Departmentname: string }[]>([]);
 
   const navigate = useNavigate();
 
@@ -92,6 +93,17 @@ const DoctorRegister = () => {
       toast.error("Failed to send OTP.");
     }
   };
+  useEffect(() => {
+    const fetchDepartments = async () => {
+      try {
+        const data = await getAllDepartments();
+        setDepartments(data);
+      } catch {
+        toast.error("Unable to load specializations");
+      }
+    };
+    fetchDepartments();
+  }, []);
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -139,7 +151,20 @@ const DoctorRegister = () => {
                 <input type="tel" placeholder="Phone" value={phone} onChange={(e) => setPhone(e.target.value)} className="input-style" required />
                 <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} className="input-style sm:col-span-2" required />
                 <input type="text" placeholder="Language(s)" value={language} onChange={(e) => setLanguage(e.target.value)} className="input-style sm:col-span-2" required />
-                <input type="text" placeholder="Specialisation" value={specialization} onChange={(e) => setSpecialization(e.target.value)} className="input-style" required />
+                <select
+                  value={specialization}
+                  onChange={(e) => setSpecialization(e.target.value)}
+                  className="input-style"
+                  required
+                >
+                  <option value="">Select Specialization</option>
+                  {departments.map((dept) => (
+                    <option key={dept._id} value={dept.Departmentname}>
+                      {dept.Departmentname}
+                    </option>
+                  ))}
+                </select>
+
                 <input type="number" placeholder="Years of Experience" value={yearsOfExperience} onChange={(e) => setYearsOfExperience(e.target.value)} className="input-style" min={0} required />
                 <input type="number" placeholder="Consultation Fee" value={consultFee} onChange={(e) => setConsultFee(e.target.value)} className="input-style" min={0} required />
                 <input type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} className="input-style" required />

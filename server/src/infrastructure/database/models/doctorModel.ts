@@ -31,6 +31,16 @@ export interface IDoctor extends Document {
   otpExpiresAt?: Date;
   availability: Availability[]; 
   isRejected?: boolean;
+  walletBalance?: number;
+  totalEarned?: number;
+  walletTransactions?: {
+    type: 'credit' | 'debit';
+    amount: number;
+    reason: string;
+    bookingId?: mongoose.Types.ObjectId;
+    date?: Date;
+  }[];
+
 }
 
 const slotSchema = new Schema<Slot>({
@@ -63,6 +73,22 @@ const DoctorSchema: Schema = new Schema<IDoctor>(
     otpExpiresAt: { type: Date },
     availability: { type: [availabilitySchema], default: [] }, 
     isRejected: { type: Boolean, default: false },
+    walletBalance: { type: Number, default: 0 },
+    totalEarned: { type: Number, default: 0 },
+    walletTransactions: [
+      {
+        type: {
+          type: String,
+          enum: ['credit', 'debit'],
+          required: true,
+        },
+        amount: { type: Number, required: true },
+        reason: { type: String, required: true },
+        bookingId: { type: mongoose.Schema.Types.ObjectId, ref: 'Booking' },
+        date: { type: Date, default: Date.now },
+      }
+    ],
+
   },
   {
     timestamps: true,

@@ -10,13 +10,18 @@ export interface Slot {
 export interface IBooking extends Document {
   doctorId: mongoose.Types.ObjectId;
   userId: mongoose.Types.ObjectId;
-  date: string; // booking date (format: YYYY-MM-DD)
-  slot: Slot;   // single time slot
+  date: string; 
+  slot: Slot; 
   paymentStatus: 'pending' | 'paid' | 'failed';
   transactionId?: string; 
   status: 'Upcoming' | 'Cancelled' | 'Completed';
   createdAt?: Date;
   updatedAt?: Date;
+  doctorEarning?: number;
+  commissionAmount?: number;
+  payoutStatus?: 'Pending' | 'Paid';
+  refundStatus?: 'NotRequired' | 'Refunded';
+
 }
 
 const slotSchema = new Schema<Slot>({
@@ -41,6 +46,19 @@ const BookingSchema: Schema = new Schema<IBooking>(
       enum: ['Upcoming', 'Cancelled', 'Completed'],
       default: 'Upcoming',
     }, 
+    doctorEarning: { type: Number },
+    commissionAmount: { type: Number },
+    payoutStatus: {
+      type: String,
+      enum: ['Pending', 'Paid'],
+      default: 'Pending',
+    },
+    refundStatus: {
+      type: String,
+      enum: ['NotRequired', 'Refunded'],
+      default: 'NotRequired',
+    },
+
   },
   {
     timestamps: true,

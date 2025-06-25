@@ -5,12 +5,14 @@ import bodyParser from "body-parser";
 import { BookingRepositoryImpl } from "../../infrastructure/database/repositories/bookingRepositoryImpl";
 import { StripeWebhookUseCase } from "../../application/use_cases/stripe/stripeWebhookUseCase";
 import { StripeWebhookController } from "../controllers/stripeWebhookController";
+import { AdminWalletRepositoryImpl } from "../../infrastructure/database/repositories/adminWalletRepositoryImpl";
 
 const router = express.Router();
 
-// 🧩 Dependency Injection
+
 const bookingRepo = new BookingRepositoryImpl();
-const webhookUseCase = new StripeWebhookUseCase(bookingRepo);
+const adminWalletRepo = new AdminWalletRepositoryImpl(); 
+const webhookUseCase = new StripeWebhookUseCase(bookingRepo, adminWalletRepo); 
 const stripeWebhookController = new StripeWebhookController(webhookUseCase);
 
 

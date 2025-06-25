@@ -30,7 +30,7 @@ export class SendDoctorOtp {
       idProof: dto.idProof,
       gender: dto.gender,
       consultFee: dto.consultFee,
-      availability: dto.availability,
+      availability:dto.availability || [],
       isVerified: false,
       isBlocked: false,
       isActive: false,

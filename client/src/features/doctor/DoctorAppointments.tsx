@@ -16,7 +16,11 @@ interface Booking {
 
 const DoctorAppointments = () => {
   const [bookings, setBookings] = useState<Booking[]>([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5;
+
   const { addNotification, confirmMessage } = useNotifications();
+
   useEffect(() => {
     const fetchBookings = async () => {
       try {
@@ -26,13 +30,13 @@ const DoctorAppointments = () => {
         addNotification("Failed to load appointments", "error");
       }
     };
-
     fetchBookings();
   }, []);
 
   const handleCancel = async (bookingId: string) => {
     const confirm = await confirmMessage("Are you sure you want to cancel this appointment?");
     if (!confirm) return;
+
     try {
       await cancelDoctorBooking(bookingId);
       setBookings((prev) =>
@@ -44,11 +48,17 @@ const DoctorAppointments = () => {
     }
   };
 
+  const paginatedBookings = bookings.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
   return (
-    <div>
-      <h2 className="text-2xl font-bold mb-4 text-teal-700">Appointments</h2>
-      <div className="overflow-x-auto rounded-lg shadow">
-        <table className="w-full table-auto bg-white text-sm text-left">
+    <div className="max-w-5xl mx-auto p-4">
+      <h2 className="text-2xl font-bold mb-6 text-teal-700">Appointments</h2>
+
+      <div className="overflow-x-auto bg-white rounded-lg shadow">
+        <table className="min-w-full table-auto text-sm text-left">
           <thead className="bg-teal-100 text-teal-700 font-semibold">
             <tr>
               <th className="p-3">Patient</th>
@@ -59,14 +69,14 @@ const DoctorAppointments = () => {
             </tr>
           </thead>
           <tbody>
-            {bookings.length === 0 ? (
+            {paginatedBookings.length === 0 ? (
               <tr>
                 <td colSpan={5} className="text-center p-4 text-gray-500">
                   No bookings found.
                 </td>
               </tr>
             ) : (
-              bookings.map((b) => (
+              paginatedBookings.map((b) => (
                 <tr key={b.id} className="border-t">
                   <td className="p-3">{b.patientName}</td>
                   <td className="p-3">{b.date}</td>
@@ -100,6 +110,27 @@ const DoctorAppointments = () => {
           </tbody>
         </table>
       </div>
+
+      {/* Pagination */}
+      {bookings.length > itemsPerPage && (
+        <div className="mt-4 flex justify-center items-center space-x-2">
+          <button
+            className="px-3 py-1 bg-gray-200 hover:bg-gray-300 rounded"
+            disabled={currentPage === 1}
+            onClick={() => setCurrentPage((p) => p - 1)}
+          >
+            Prev
+          </button>
+          <span className="text-gray-700 font-medium">Page {currentPage}</span>
+          <button
+            className="px-3 py-1 bg-gray-200 hover:bg-gray-300 rounded"
+            disabled={currentPage * itemsPerPage >= bookings.length}
+            onClick={() => setCurrentPage((p) => p + 1)}
+          >
+            Next
+          </button>
+        </div>
+      )}
     </div>
   );
 };

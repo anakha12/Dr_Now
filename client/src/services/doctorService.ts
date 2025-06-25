@@ -129,6 +129,27 @@ export const editDoctorSchedule = async (
   }
 };
 
+export const getAllDepartments = async () => {
+  try {
+    const response = await doctorAxios.get("/departments"); 
+    return response.data;
+  } catch (error: any) {
+    throw error.response?.data || { message: "Failed to load departments" };
+  }
+};
+
+// Wallet Summary with Pagination
+export const getWalletSummary = async (page: number, limit: number) => {
+  try {
+    const response = await doctorAxios.get("/wallet-summary", {
+      params: { page, limit },
+    });
+    return response.data; 
+  } catch (error: any) {
+    throw error.response?.data || { message: "Failed to fetch wallet summary" };
+  }
+};
+
 
   
 
