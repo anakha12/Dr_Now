@@ -6,6 +6,28 @@ import BookingModel from "../../database/models/bookingModel";
 
 export class DoctorRepositoryImpl implements DoctorRepository {
 
+  async completeProfile(doctorId: string, profileData: any): Promise<any> {
+  const updated = await DoctorModel.findByIdAndUpdate(
+    doctorId,
+    {
+      $set: {
+        bio: profileData.bio,
+        education: profileData.education,
+        awards: profileData.awards,
+        experience: profileData.experience,
+        affiliatedHospitals: profileData.affiliatedHospitals,
+        isProfileComplete: true, 
+      },
+    },
+    { new: true }
+  );
+  console.log("updated",updated)
+  if (!updated) throw new Error("Doctor not found");
+
+  return this.toDomain(updated); 
+}
+
+
   async getDoctorById(id: string): Promise<DoctorEntity> {
     const doctor = await DoctorModel.findById(id);
     if (!doctor) throw new Error("Doctor not found");
@@ -185,6 +207,11 @@ async updateBlockedStatus(id: string, isBlocked: boolean): Promise<void> {
       walletBalance: doc.walletBalance,
       walletTransactions: doc.walletTransactions,
       totalEarned: doc.totalEarned,
+      bio: doc.bio,
+      education: doc.education,
+      awards: doc.awards,
+      experience: doc.experience,
+      affiliatedHospitals: doc.affiliatedHospitals,
     };
   }
 }

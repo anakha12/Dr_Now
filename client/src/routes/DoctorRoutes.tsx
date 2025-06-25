@@ -10,6 +10,7 @@ import { useAuth } from "../context/AuthContext";
 import CurrentSchedules from "../features/doctor/CurrentSchedules";
 import DoctorAppointments from "../features/doctor/DoctorAppointments";
 import DoctorWallet from "../features/doctor/DoctorWallet";
+import DoctorProfileComplete from "../features/doctor/DoctorProfileComplete";
 
 const DoctorRoutes = () => {
   const { isDoctorLoggedIn } = useAuth();
@@ -17,6 +18,7 @@ const DoctorRoutes = () => {
     <Routes>
       {/* Public routes */}
       <Route path="register" element={<DoctorRegister />} />
+       <Route path="profile-complete" element={<DoctorProfileComplete />} />
       <Route path="login" element={<DoctorLogin />} />
       <Route path="waiting-verification" element={<DoctorWaitingVerification />} />
       <Route path="rejected" element={<DoctorRejected />} />

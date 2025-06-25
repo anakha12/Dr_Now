@@ -12,6 +12,7 @@ export interface BookingRepository {
   getDoctorBookings(doctorId: string): Promise<Booking[]>;
   getPaidBookings(): Promise<Booking[]>;
   markPayoutAsPaid(bookingIds: string[]): Promise<void>;
+  updateRefundStatus(bookingId: string, status: string): Promise<void>;
 
 }
 

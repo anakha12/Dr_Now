@@ -30,4 +30,7 @@ router.get("/bookings", cookieAuth("doctor"), (req, res) =>doctorController.getB
 router.put("/doctors/:doctorId/availability",cookieAuth("doctor"),(req, res) => doctorController.editAvailability(req, res));
 router.get("/wallet-summary", cookieAuth("doctor"), (req, res) =>doctorController.getWalletSummary(req, res));
 router.put("/bookings/:bookingId/cancel", cookieAuth("doctor"), (req, res) =>doctorController.cancelBooking(req, res));
+router.put("/complete-profile/:doctorId", (req, res) => doctorController.completeProfile(req, res));
+
+
 export default router;

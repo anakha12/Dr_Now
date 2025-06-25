@@ -8,6 +8,11 @@ import userModel from "../models/userModel";
 
 export class BookingRepositoryImpl implements BookingRepository {
 
+  async updateRefundStatus(bookingId: string, status: string): Promise<void> {
+    await BookingModel.findByIdAndUpdate(bookingId, { refundStatus: status });
+  }
+
+
   async markPayoutAsPaid(bookingIds: string[]): Promise<void> {
     await BookingModel.updateMany(
       { _id: { $in: bookingIds } },
@@ -70,32 +75,36 @@ export class BookingRepositoryImpl implements BookingRepository {
 
 
   async findById(bookingId: string): Promise<Booking | null> {
-  const found = await BookingModel.findById(bookingId);
-  if (!found) return null;
+    const found = await BookingModel.findById(bookingId);
+    if (!found) return null;
 
-  const booking = found as IBooking;
+    const booking = found as IBooking;
 
-  return {
-    id: booking.id,
-    doctorId: booking.doctorId.toString(),
-    userId: booking.userId.toString(),
-    date: booking.date,
-    slot: booking.slot,
-    paymentStatus: booking.paymentStatus,
-    transactionId: booking.transactionId,
-    status: booking.status, 
-    createdAt: booking.createdAt,
-    updatedAt: booking.updatedAt,
-    commissionAmount: booking.commissionAmount,
-    doctorEarning: booking.doctorEarning,
+    return {
+      id: booking.id,
+      doctorId: booking.doctorId.toString(),
+      userId: booking.userId.toString(),
+      date: booking.date,
+      slot: booking.slot,
+      paymentStatus: booking.paymentStatus,
+      transactionId: booking.transactionId,
+      status: booking.status, 
+      createdAt: booking.createdAt,
+      updatedAt: booking.updatedAt,
+      commissionAmount: booking.commissionAmount,
+      doctorEarning: booking.doctorEarning,
 
-  };
+    };
+  }
+
+async cancelBooking(bookingId: string): Promise<void> {
+  await BookingModel.findByIdAndUpdate(bookingId, {
+    status: "Cancelled",
+    doctorEarning: 0,
+    commissionAmount: 0
+  });
 }
 
-
-  async cancelBooking(bookingId: string): Promise<void> {
-    await BookingModel.findByIdAndUpdate(bookingId, { status: "Cancelled" });
-  }
 
 
   async getBookedSlotsByDoctorAndDate(doctorId: string,date: string): Promise<{ from: string; to: string }[]> {

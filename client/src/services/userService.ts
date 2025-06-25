@@ -122,5 +122,10 @@ export const getDepartments = async () => {
   return response.data.departments;
 };
 
+export const getUserWallet = async () => {
+  const response = await userAxios.get("/user/wallet");
+  return response.data;
+};
+
 
 

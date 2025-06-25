@@ -1,4 +1,6 @@
 
+import { WalletTransactionUser } from "./walletTransactionUserEntity";
+
 
 export interface UserEntity {
   id?: string;
@@ -19,5 +21,7 @@ export interface UserEntity {
   otp?: string; 
   otpExpiresAt?: Date;
   isDonner: boolean;
-  uid?: string; // For Google login
+  uid?: string; 
+  walletBalance?: number;
+  walletTransactions?: WalletTransactionUser[];
 }

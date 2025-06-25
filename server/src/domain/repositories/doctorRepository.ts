@@ -16,5 +16,15 @@ export interface DoctorRepository {
   removeAllSlotsOnDate(doctorId: string, date: string): Promise<void>;
   creditWallet(doctorId: string,tx: { amount: number; description: string; date: Date }): Promise<void>;
   getDoctorById(id: string): Promise<DoctorEntity>;
+  completeProfile(
+  doctorId: string,
+  profileData: {
+    bio: string;
+    education: { degree: string; institution: string; year: string }[];
+    awards: string[];
+    experience: { hospital: string; role: string; years: string }[];
+    affiliatedHospitals: string[];
+  }
+): Promise<DoctorEntity>;
 
 }

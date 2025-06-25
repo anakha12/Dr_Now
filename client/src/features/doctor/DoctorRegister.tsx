@@ -108,9 +108,11 @@ const DoctorRegister = () => {
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await registerDoctor(email, otp);
+      const response = await registerDoctor(email, otp);
+      const doctorId = response.doctorId;
+      sessionStorage.setItem("doctorId", doctorId); 
       toast.success("Registration successful!");
-      setTimeout(() => navigate("/doctor/login"), 1500);
+      setTimeout(() => navigate("/doctor/profile-complete", { state: { email } }), 1500);
     } catch {
       toast.error("Invalid OTP. Try again.");
     }

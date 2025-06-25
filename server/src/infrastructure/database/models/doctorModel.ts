@@ -40,6 +40,19 @@ export interface IDoctor extends Document {
     bookingId?: mongoose.Types.ObjectId;
     date?: Date;
   }[];
+  bio?: string;
+  education?: {
+    degree: string;
+    institution: string;
+    year: string;
+  }[];
+  awards?: string[];
+  experience?: {
+    hospital: string;
+    role: string;
+    years: String ;
+  }[];
+  affiliatedHospitals?: string[];
 
 }
 
@@ -88,8 +101,25 @@ const DoctorSchema: Schema = new Schema<IDoctor>(
         date: { type: Date, default: Date.now },
       }
     ],
-
+    bio: { type: String },
+    education: [
+      {
+        degree: String,
+        institution: String,
+        year: String,
+      },
+    ],
+    awards: [String],
+    experience: [
+      {
+        hospital: String,
+        role: String,
+        years: String ,
+      },
+    ],
+    affiliatedHospitals: [String],
   },
+
   {
     timestamps: true,
   }

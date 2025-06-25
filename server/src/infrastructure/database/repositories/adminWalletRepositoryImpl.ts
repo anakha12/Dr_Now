@@ -7,6 +7,41 @@ import mongoose from "mongoose";
 
 export class AdminWalletRepositoryImpl implements AdminWalletRepository {
 
+
+  async debitCommission(transaction: AdminWalletTransaction, amount: number): Promise<void> {
+    const existingWallet = await AdminWalletModel.findOne();
+
+    if (existingWallet) {
+      existingWallet.totalBalance -= amount;
+      existingWallet.transactions.push({
+        ...transaction,
+        date: new Date(),
+        type: "debit",
+        amount,
+        doctorId: transaction.doctorId ? new mongoose.Types.ObjectId(transaction.doctorId) : undefined,
+        userId: transaction.userId ? new mongoose.Types.ObjectId(transaction.userId) : undefined,
+        bookingId: transaction.bookingId ? new mongoose.Types.ObjectId(transaction.bookingId) : undefined,
+      });
+      await existingWallet.save();
+    } else {
+      await AdminWalletModel.create({
+        totalBalance: -amount,
+        transactions: [
+          {
+            ...transaction,
+            date: new Date(),
+            type: "debit",
+            amount,
+            doctorId: transaction.doctorId ? new mongoose.Types.ObjectId(transaction.doctorId) : undefined,
+            userId: transaction.userId ? new mongoose.Types.ObjectId(transaction.userId) : undefined,
+            bookingId: transaction.bookingId ? new mongoose.Types.ObjectId(transaction.bookingId) : undefined,
+          },
+        ],
+      });
+    }
+  }
+
+
   async createTransaction(transaction: AdminWalletTransaction): Promise<void> {
     await this.creditCommission(transaction, -transaction.amount); 
   }

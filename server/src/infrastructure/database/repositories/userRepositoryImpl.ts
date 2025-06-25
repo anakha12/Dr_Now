@@ -2,8 +2,17 @@
 import UserModel from "../models/userModel";
 import { UserRepository } from "../../../domain/repositories/userRepository";
 import { UserEntity } from "../../../domain/entities/userEntity";
+import { WalletTransactionUser } from "../../../domain/entities/walletTransactionUserEntity";
 
 export class UserRepositoryImpl implements UserRepository {
+
+  async updateUserWalletAndTransactions(userId: string, amount: number, transaction: WalletTransactionUser): Promise<void> {
+    await UserModel.findByIdAndUpdate(userId, {
+      $inc: { walletBalance: amount },
+      $push: { walletTransactions: transaction }
+    });
+  }
+
 
   async findUserById(userId: string): Promise<UserEntity | null> {
     const user = await UserModel.findById(userId);
@@ -33,10 +42,10 @@ export class UserRepositoryImpl implements UserRepository {
   }
 
   async createUser(userData: UserEntity): Promise<UserEntity> {
-  const newUser = new UserModel(userData);
-  const savedUser = await newUser.save();
-  return this.toDomain(savedUser);
-}
+    const newUser = new UserModel(userData);
+    const savedUser = await newUser.save();
+    return this.toDomain(savedUser);
+  }
 
 async updateUserByEmail(email: string, updates: Partial<UserEntity>): Promise<UserEntity> {
     const updatedUser = await UserModel.findOneAndUpdate({ email }, updates, { new: true });
@@ -70,6 +79,8 @@ async updateUserByEmail(email: string, updates: Partial<UserEntity>): Promise<Us
       role: user.role,
       otpExpiresAt: user.otpExpiresAt,
       isVerified: user.isVerified,
+      walletBalance: user.walletBalance,
+      walletTransactions: user.walletTransactions,
     };
   }
 }

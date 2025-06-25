@@ -26,4 +26,6 @@ router.get("/user/profile", verifyToken("user"), (req, res) => userController.ge
 router.get("/user/bookings", verifyToken("user"), (req: Request, res: Response) => userController.getUserBookings(req, res));
 router.post("/user/bookings/:id/cancel", verifyToken("user"), (req: Request, res: Response) =>userController.cancelBooking(req, res));
 router.get("/departments", verifyToken("user"),(req: Request, res: Response) => userController.getDepartments(req, res));
+router.get("/user/wallet",verifyToken("user"),(req: Request, res: Response) => userController.getWalletInfo(req, res));
+
 export default router;

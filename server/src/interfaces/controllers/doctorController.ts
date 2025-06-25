@@ -17,7 +17,7 @@ import { CancelDoctorBooking } from "../../application/use_cases/doctor/cancelDo
 import { GetAllDepartments } from "../../application/use_cases/doctor/getAllDepartments";
 import { DepartmentRepositoryImpl } from "../../infrastructure/database/repositories/departmentRepositoryImpl";
 import { GetDoctorWalletSummary } from "../../application/use_cases/doctor/getDoctorWalletSummary";
-
+import { CompleteDoctorProfile } from "../../application/use_cases/doctor/completeDoctorProfile";
 interface MulterFiles {
   profileImage?: Express.Multer.File[];
   medicalLicense?: Express.Multer.File[];
@@ -46,6 +46,7 @@ export class DoctorController {
   private cancelDoctorBookingUseCase: CancelDoctorBooking;
   private getAllDepartmentsUseCase: GetAllDepartments;
   private getDoctorWalletSummaryUseCase: GetDoctorWalletSummary;
+  private completeProfileUseCase: CompleteDoctorProfile;
   constructor() {
     this.doctorRepository = new DoctorRepositoryImpl();
      this.bookingRepository = new BookingRepositoryImpl();
@@ -62,6 +63,7 @@ export class DoctorController {
     this.cancelDoctorBookingUseCase = new CancelDoctorBooking(this.bookingRepository);
     this.getAllDepartmentsUseCase = new GetAllDepartments(new DepartmentRepositoryImpl());
     this.getDoctorWalletSummaryUseCase = new GetDoctorWalletSummary(this.doctorRepository);
+    this.completeProfileUseCase = new CompleteDoctorProfile(this.doctorRepository);
   }
 
   // Registration endpoint
@@ -94,8 +96,8 @@ export class DoctorController {
         return;
       }
 
-      await this.verifyDoctorOtp.execute(email, otp);
-      res.status(200).json({ message: "OTP verified successfully" });
+      const doctorId = await this.verifyDoctorOtp.execute(email, otp);
+      res.status(200).json({ message: "OTP verified successfully", doctorId });
     } catch (err: any) {
       res.status(400).json({ error: err.message });
     }
@@ -272,6 +274,22 @@ async getWalletSummary(req: AuthRequest, res: Response): Promise<void> {
     res.status(400).json({ error: error.message });
   }
 }
+
+
+async completeProfile(req: Request, res: Response): Promise<void> {
+  try {
+    const doctorId = req.params.doctorId;
+    if (!doctorId) throw new Error("Doctor ID is required");
+
+    const profileData = req.body;
+    const updatedProfile = await this.completeProfileUseCase.execute(doctorId, profileData);
+
+    res.status(200).json({ message: "Profile completed", profile: updatedProfile });
+  } catch (err: any) {
+    res.status(400).json({ error: err.message });
+  }
+}
+
 
 
 }

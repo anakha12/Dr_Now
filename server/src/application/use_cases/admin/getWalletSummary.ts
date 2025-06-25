@@ -20,7 +20,6 @@ export class GetWalletSummary {
         pendingDoctorPayouts += booking.doctorEarning || 0;
       }
     }
-    console.log('pendingDoctorPayouts',pendingDoctorPayouts);
     return {
       totalBalance: wallet.totalBalance,
       transactionCount: wallet.transactionCount,

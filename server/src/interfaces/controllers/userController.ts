@@ -20,6 +20,10 @@ import { GetUserBookings } from "../../application/use_cases/user/getUserBooking
 import { CancelUserBookingUseCase } from "../../application/use_cases/user/cancelUserBooking";
 import { GetDepartmentsUser } from "../../application/use_cases/user/getDepartmentsUser";
 import { DepartmentRepositoryImpl } from "../../infrastructure/database/repositories/departmentRepositoryImpl";
+import { AdminWalletRepository } from "../../domain/repositories/adminWalletRepository";
+import { AdminWalletRepositoryImpl } from "../../infrastructure/database/repositories/adminWalletRepositoryImpl";
+import { GetUserWalletUseCase } from "../../application/use_cases/user/getUserWallet";
+
 
 interface AuthenticatedRequest extends Request {
   user?: {
@@ -45,6 +49,7 @@ export class UserController {
   private getUserBookingsUseCase: GetUserBookings;
   private cancelUserBookingUseCase: CancelUserBookingUseCase;
   private getDepartmentsUseCase: GetDepartmentsUser;
+  private getUserWalletUseCase: GetUserWalletUseCase;
   constructor() {
     this.userRepository = new UserRepositoryImpl();
     this.registerUser = new RegisterUser(this.userRepository);
@@ -63,10 +68,15 @@ export class UserController {
     );
     this.getUserProfileUseCase = new GetUserProfile(this.userRepository);
     this.getUserBookingsUseCase = new GetUserBookings(new BookingRepositoryImpl());
-    this.cancelUserBookingUseCase = new CancelUserBookingUseCase(new BookingRepositoryImpl());
+    this.cancelUserBookingUseCase = new CancelUserBookingUseCase(
+      new BookingRepositoryImpl(),
+      this.userRepository,
+      new AdminWalletRepositoryImpl()
+    );
+
     const deptRepo = new DepartmentRepositoryImpl();
     this.getDepartmentsUseCase = new GetDepartmentsUser(deptRepo);
-
+    this.getUserWalletUseCase = new GetUserWalletUseCase(this.userRepository);
   }
 
   
@@ -240,28 +250,28 @@ export class UserController {
   }
 
     async cancelBooking(req: AuthenticatedRequest, res: Response): Promise<void> {
-    try {
-      const userId = req.user?.userId;
-      const bookingId = req.params.id;
+      try {
+        const userId = req.user?.userId;
+        const bookingId = req.params.id;
 
-      if (!userId) {
-        res.status(401).json({ error: "Unauthorized" });
-        return;
+        if (!userId) {
+          res.status(401).json({ error: "Unauthorized" });
+          return;
+        }
+
+        const result = await this.cancelUserBookingUseCase.execute(bookingId, userId);
+
+        if (!result.success) {
+          res.status(400).json({ error: result.message });
+          return;
+        }
+
+        res.status(200).json({ message: "Booking cancelled successfully" });
+      } catch (err: any) {
+        console.error("Cancel booking error:", err.message);
+        res.status(500).json({ error: "Failed to cancel booking" });
       }
-
-      const result = await this.cancelUserBookingUseCase.execute(bookingId, userId);
-
-      if (!result.success) {
-        res.status(400).json({ error: result.message });
-        return;
-      }
-
-      res.status(200).json({ message: "Booking cancelled successfully" });
-    } catch (err: any) {
-      console.error("Cancel booking error:", err.message);
-      res.status(500).json({ error: "Failed to cancel booking" });
     }
-  }
 
   
   async getDepartments(req: Request, res: Response) {
@@ -274,5 +284,22 @@ export class UserController {
       res.status(500).json({ message: err.message });
     }
   }
+
+  async getWalletInfo(req: AuthenticatedRequest, res: Response): Promise<void> {
+    try {
+      const userId = req.user?.userId;
+      if (!userId) {
+        res.status(401).json({ error: "Unauthorized" });
+        return;
+      }
+
+      const walletData = await this.getUserWalletUseCase.execute(userId);
+      res.status(200).json(walletData);
+    } catch (error: any) {
+      console.error("Wallet error:", error.message);
+      res.status(500).json({ error: error.message || "Internal server error" });
+    }
+  }
+
   
 }

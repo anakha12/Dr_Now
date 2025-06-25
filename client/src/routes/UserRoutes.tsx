@@ -15,7 +15,7 @@ import UserProfile from "../features/user/UserProfile";
 import UserBookings from "../features/user/UserBookings";
 import ProfileLayout from "../features/user/ProfileLayout";
 import UserNotifications from "../features/user/UserNotifications";
-
+import UserWallet from "../features/user/UserWallet";
 
 
 const UserRoutes = () => {
@@ -69,6 +69,7 @@ const UserRoutes = () => {
         <Route path="" element={<ProfileLayout />}>
           <Route path="profile" element={<UserProfile />} />
           <Route path="bookings" element={<UserBookings />} />
+          <Route path="wallet" element={<UserWallet />} />
         </Route>
 
        

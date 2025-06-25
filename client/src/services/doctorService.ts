@@ -151,5 +151,27 @@ export const getWalletSummary = async (page: number, limit: number) => {
 };
 
 
+export const completeDoctorProfile = async (
+  doctorId: string,
+  profileData: {
+    bio: string;
+    education: { degree: string; institution: string; year: string }[];
+    awards: string[];
+    experience: { hospital: string; role: string; years: string }[];
+    affiliatedHospitals: string[];
+  }
+) => {
+  try {
+    const response = await doctorAxios.put(`/complete-profile/${doctorId}`, profileData);
+    return response.data;
+  } catch (error: any) {
+    throw error.response?.data || { message: "Failed to complete profile" };
+  }
+};
+
+
+
+
+
   
 

@@ -9,12 +9,14 @@ import {
 import { motion } from "framer-motion";
 import { Outlet, useNavigate } from "react-router-dom";
 
+
 const navItems = [
   { href: "/user/update-profile", icon: <FaUserEdit />, label: "Update Profile" },
   { href: "/user/bookings", icon: <FaCalendarCheck />, label: "See Bookings" },
   { href: "/user/prescriptions", icon: <FaFilePrescription />, label: "Prescriptions" },
   { href: "/user/chat", icon: <FaComments />, label: "Chat" },
   { href: "/user/fund-request", icon: <FaHandHoldingUsd />, label: "Fund Request" },
+  { href: "/user/wallet", icon: <FaHandHoldingUsd />, label: "Wallet" },
 ];
 
 const ProfileLayout = () => {

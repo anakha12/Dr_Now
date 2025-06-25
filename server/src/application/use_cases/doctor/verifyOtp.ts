@@ -3,7 +3,7 @@ import { DoctorRepository } from "../../../domain/repositories/doctorRepository"
 export class VerifyDoctorOtp {
   constructor(private doctorRepository: DoctorRepository) {}
 
-  async execute(email: string, otp: string): Promise<boolean> {
+  async execute(email: string, otp: string): Promise<string > {
     const doctor = await this.doctorRepository.findByEmail(email);
     if (!doctor) throw new Error("Doctor not found");
     if (doctor.otp !== otp) throw new Error("Invalid OTP");
@@ -15,6 +15,6 @@ export class VerifyDoctorOtp {
       otp: undefined,
       otpExpiresAt: undefined,
     });
-    return true;
+    return doctor.id!;
   }
 }

@@ -13,6 +13,19 @@ export class DoctorRegisterDTO {
   gender: string; 
   consultFee: string;
   availability:  Availability[];
+  bio?: string;
+  education?: {
+    degree: string;
+    institution: string;
+    year: string;
+  }[];
+  awards?: string[];
+  experience?: {
+    hospital: string;
+    role: string;
+    years: string;
+  }[];
+  affiliatedHospitals?: string[];
   
 
   constructor(data: any) {
@@ -28,5 +41,10 @@ export class DoctorRegisterDTO {
     this.gender = data.gender;
     this.consultFee = data.consultFee;
     this.availability = data.availability ?? [];
+    this.bio = data.bio;
+    this.education = data.education;
+    this.awards = data.awards;
+    this.experience = data.experience;
+    this.affiliatedHospitals = data.affiliatedHospitals;
   }
 }

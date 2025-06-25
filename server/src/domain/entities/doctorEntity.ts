@@ -37,4 +37,17 @@ export interface DoctorEntity {
     bookingId?: string;
     date?: Date;
   }[];
+  bio?: string;
+  education?: {
+    degree: string;
+    institution: string;
+    year: number;
+  }[];
+  awards?: string[];
+  experience?: {
+    hospital: string;
+    role: string;
+    years: number;
+  }[];
+  affiliatedHospitals?: string[];
 }
