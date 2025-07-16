@@ -1,4 +1,4 @@
-// src/models/booking.ts
+
 
 import mongoose, { Schema, Document } from 'mongoose';
 
@@ -21,7 +21,7 @@ export interface IBooking extends Document {
   commissionAmount?: number;
   payoutStatus?: 'Pending' | 'Paid';
   refundStatus?: 'NotRequired' | 'Refunded';
-
+  cancellationReason?: string;
 }
 
 const slotSchema = new Schema<Slot>({
@@ -58,6 +58,10 @@ const BookingSchema: Schema = new Schema<IBooking>(
       enum: ['NotRequired', 'Refunded'],
       default: 'NotRequired',
     },
+    cancellationReason: {
+      type: String,
+      default: ''
+    }
 
   },
   {

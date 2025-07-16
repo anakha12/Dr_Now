@@ -1,21 +1,21 @@
-import { BookingRepository } from "../../../domain/repositories/bookingRepository";
-import { DoctorRepository } from "../../../domain/repositories/doctorRepository";
+import { IBookingRepository } from "../../../domain/repositories/bookingRepository";
+import { IDoctorRepository } from "../../../domain/repositories/doctorRepository";
 
 export class GetPendingDoctorPayouts {
   constructor(
-    private bookingRepo: BookingRepository,
-    private doctorRepo: DoctorRepository
+    private _bookingRepo: IBookingRepository,
+    private _doctorRepo: IDoctorRepository
   ) {}
 
   async execute() {
  
-    const allDoctors = await this.doctorRepo.getAllDoctors();
+    const allDoctors = await this._doctorRepo.getAllDoctors();
     const result = [];
 
     for (const doctor of allDoctors) {
         
       if (!doctor.id) continue; 
-      const bookings = await this.bookingRepo.getDoctorBookings(doctor.id);
+      const bookings = await this._bookingRepo.getDoctorBookings(doctor.id);
 
       const unpaid = bookings.filter(
         (b) =>

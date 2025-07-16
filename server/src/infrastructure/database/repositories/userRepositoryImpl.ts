@@ -1,29 +1,76 @@
-
 import UserModel from "../models/userModel";
-import { UserRepository } from "../../../domain/repositories/userRepository";
+import { IUserRepository } from "../../../domain/repositories/userRepository";
 import { UserEntity } from "../../../domain/entities/userEntity";
 import { WalletTransactionUser } from "../../../domain/entities/walletTransactionUserEntity";
 
-export class UserRepositoryImpl implements UserRepository {
+export class UserRepositoryImpl implements IUserRepository {
 
-  async updateUserWalletAndTransactions(userId: string, amount: number, transaction: WalletTransactionUser): Promise<void> {
+  async getPaginatedUsers(page: number, limit: number): Promise<{
+    users: UserEntity[];
+    totalPages: number;
+  }> {
+    const skip = (page - 1) * limit;
+    const totalUsers = await UserModel.countDocuments({ role: "user" });
+    const users = await UserModel.find({ role: "user" })
+      .skip(skip)
+      .limit(limit)
+      .sort({ createdAt: -1 });
+
+    return {
+      users: users.map(this._toDomain),
+      totalPages: Math.ceil(totalUsers / limit),
+    };
+  }
+
+
+ async getPaginatedWallet(
+  userId: string,
+  page: number,
+  limit: number
+): Promise<{
+  walletBalance: number;
+  walletTransactions: WalletTransactionUser[];
+  totalTransactions: number;
+}> {
+  const user = await UserModel.findById(userId).lean();
+  if (!user) throw new Error("User not found");
+
+  const allTransactions = user.walletTransactions || [];
+
+  const sorted = allTransactions.sort(
+    (a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime()
+  );
+
+  const skip = (page - 1) * limit;
+  const paginated = sorted.slice(skip, skip + limit);
+
+  return {
+    walletBalance: user.walletBalance || 0,
+    walletTransactions: paginated as WalletTransactionUser[],
+    totalTransactions: sorted.length,
+  };
+}
+
+
+  async updateUserWalletAndTransactions(
+    userId: string,
+    amount: number,
+    transaction: WalletTransactionUser
+  ): Promise<void> {
     await UserModel.findByIdAndUpdate(userId, {
       $inc: { walletBalance: amount },
-      $push: { walletTransactions: transaction }
+      $push: { walletTransactions: transaction },
     });
   }
 
-
   async findUserById(userId: string): Promise<UserEntity | null> {
     const user = await UserModel.findById(userId);
-    if (!user) return null;
-    return this.toDomain(user);
+    return user ? this._toDomain(user) : null;
   }
-
 
   async getAllUsers(): Promise<UserEntity[]> {
     const users = await UserModel.find({ role: "user" });
-    return users.map((user) => this.toDomain(user));
+    return users.map(this._toDomain);
   }
 
   async toggleBlockStatus(userId: string, block: boolean): Promise<UserEntity> {
@@ -33,34 +80,33 @@ export class UserRepositoryImpl implements UserRepository {
       { new: true }
     );
     if (!updatedUser) throw new Error("User not found");
-    return this.toDomain(updatedUser);
+    return this._toDomain(updatedUser);
   }
+
   async findByEmail(email: string): Promise<UserEntity | null> {
     const user = await UserModel.findOne({ email });
-    if (!user) return null;
-    return this.toDomain(user);
+    return user ? this._toDomain(user) : null;
   }
 
   async createUser(userData: UserEntity): Promise<UserEntity> {
     const newUser = new UserModel(userData);
     const savedUser = await newUser.save();
-    return this.toDomain(savedUser);
+    return this._toDomain(savedUser);
   }
 
-async updateUserByEmail(email: string, updates: Partial<UserEntity>): Promise<UserEntity> {
+  async updateUserByEmail(email: string, updates: Partial<UserEntity>): Promise<UserEntity> {
     const updatedUser = await UserModel.findOneAndUpdate({ email }, updates, { new: true });
     if (!updatedUser) throw new Error("User not found");
-    return this.toDomain(updatedUser);
+    return this._toDomain(updatedUser);
   }
-
 
   async updateUser(id: string, updates: Partial<UserEntity>): Promise<UserEntity> {
     const updatedUser = await UserModel.findByIdAndUpdate(id, updates, { new: true });
     if (!updatedUser) throw new Error("User not found");
-    return this.toDomain(updatedUser);
+    return this._toDomain(updatedUser);
   }
 
-  private toDomain(user: any): UserEntity {
+  private _toDomain(user: any): UserEntity {
     return {
       id: user._id.toString(),
       name: user.name,

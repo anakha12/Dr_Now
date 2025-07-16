@@ -11,6 +11,8 @@ import CurrentSchedules from "../features/doctor/CurrentSchedules";
 import DoctorAppointments from "../features/doctor/DoctorAppointments";
 import DoctorWallet from "../features/doctor/DoctorWallet";
 import DoctorProfileComplete from "../features/doctor/DoctorProfileComplete";
+import DoctorBookingDetails from "../features/doctor/DoctorBookingDetails";
+
 
 const DoctorRoutes = () => {
   const { isDoctorLoggedIn } = useAuth();
@@ -39,6 +41,8 @@ const DoctorRoutes = () => {
         <Route path="current-schedules" element={<CurrentSchedules/>}/>
         <Route path="appointments" element={<DoctorAppointments />} />
         <Route path="wallet" element={<DoctorWallet />} />
+        <Route path="/bookings/:id" element={<DoctorBookingDetails />} />
+
       </Route>
     </Routes>
   );

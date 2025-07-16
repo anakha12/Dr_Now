@@ -1,10 +1,10 @@
-import { DoctorRepository } from "../../../domain/repositories/doctorRepository";
+import { IDoctorRepository } from "../../../domain/repositories/doctorRepository";
 
 export class GetDoctorWalletSummary {
-  constructor(private doctorRepository: DoctorRepository) {}
+  constructor(private _doctorRepository: IDoctorRepository) {}
 
   async execute(doctorId: string, page: number, limit: number) {
-    const doctor = await this.doctorRepository.getDoctorById(doctorId);
+    const doctor = await this._doctorRepository.getDoctorById(doctorId);
 
     const walletBalance = doctor.walletBalance ?? 0;
     const allTransactions = doctor.walletTransactions ?? [];

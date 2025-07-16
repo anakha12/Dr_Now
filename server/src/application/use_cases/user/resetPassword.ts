@@ -1,11 +1,11 @@
-import { UserRepository } from "../../../domain/repositories/userRepository";
+import { IUserRepository } from "../../../domain/repositories/userRepository";
 import bcrypt from "bcrypt";
 
 export class ResetPassword {
-  constructor(private readonly userRepository: UserRepository) {}
+  constructor(private readonly _userRepository: IUserRepository) {}
 
   async execute(email: string, otp: string, newPassword: string): Promise<void> {
-    const user = await this.userRepository.findByEmail(email);
+    const user = await this._userRepository.findByEmail(email);
     if (!user || !user.otp || !user.otpExpiresAt) {
       throw new Error("OTP not requested or expired");
     }
@@ -16,7 +16,7 @@ export class ResetPassword {
 
     const hashedPassword = await bcrypt.hash(newPassword, 10);
 
-    await this.userRepository.updateUserByEmail(email, {
+    await this._userRepository.updateUserByEmail(email, {
       password: hashedPassword,
       otp: undefined,
       otpExpiresAt: undefined,

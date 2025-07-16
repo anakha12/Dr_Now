@@ -109,7 +109,7 @@ const DoctorPaymentPage = () => {
             {paginatedDoctors.length === 0 ? (
               <tr>
                 <td colSpan={3} className="text-center py-6 text-gray-500">
-                  No pending payouts 🎉
+                  No pending payouts 
                 </td>
               </tr>
             ) : (

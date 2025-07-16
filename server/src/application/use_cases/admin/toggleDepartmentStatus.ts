@@ -1,10 +1,10 @@
-import { DepartmentRepository } from "../../../domain/repositories/departmentRepository";
+import { IDepartmentRepository } from "../../../domain/repositories/departmentRepository";
 
 
 export class ToggleDepartmentStatusUseCase {
-  constructor(private departmentRepo: DepartmentRepository) {}
+  constructor(private _departmentRepo: IDepartmentRepository) {}
 
   async execute(id: string, status: 'Listed' | 'Unlisted'): Promise<void> {
-    return await this.departmentRepo.toggleDepartmentStatus(id, status);
+    return await this._departmentRepo.toggleDepartmentStatus(id, status);
   }
 }

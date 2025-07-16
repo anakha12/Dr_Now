@@ -1,4 +1,4 @@
-import { DoctorRepository } from "../../../domain/repositories/doctorRepository";
+import { IDoctorRepository } from "../../../domain/repositories/doctorRepository";
 
 interface Slot {
   from: string;
@@ -12,7 +12,7 @@ interface AvailabilityPayload {
 }
 
 export class AddDoctorAvailability {
-  constructor(private doctorRepo: DoctorRepository) {}
+  constructor(private _doctorRepo: IDoctorRepository) {}
 
   private generateTimeSlots(from: string, to: string, interval: number = 30): Slot[] {
     const slots: Slot[] = [];
@@ -31,6 +31,10 @@ export class AddDoctorAvailability {
     return slots;
   }
 
+  private isOverlapping(slot1: Slot, slot2: Slot): boolean {
+    return slot1.from < slot2.to && slot1.to > slot2.from;
+  }
+
   async execute(doctorId: string, payload: AvailabilityPayload) {
     const { date, from, to } = payload;
 
@@ -38,12 +42,37 @@ export class AddDoctorAvailability {
       throw new Error("Date, from, and to are required");
     }
 
-    const slots = this.generateTimeSlots(from, to);
-
-    if (slots.length === 0) {
+    const newSlots = this.generateTimeSlots(from, to);
+    if (newSlots.length === 0) {
       throw new Error("Invalid time range — no slots generated");
     }
 
-    return await this.doctorRepo.addAvailability(doctorId, { date, slots });
+    const doctor = await this._doctorRepo.getDoctorById(doctorId);
+    if (!doctor) {
+      throw new Error("Doctor not found");
+    }
+
+    const existingDay = doctor.availability.find((entry) => entry.date === date);
+
+    if (existingDay) {
+
+      for (const newSlot of newSlots) {
+        const conflict = existingDay.slots.some(existingSlot =>
+          this.isOverlapping(existingSlot, newSlot)
+        );
+
+        if (conflict) {
+          throw new Error(`Slot ${newSlot.from}–${newSlot.to} overlaps with existing schedule`);
+        }
+      }
+
+      existingDay.slots.push(...newSlots);
+    } else {
+
+      doctor.availability.push({ date, slots: newSlots });
+    }
+    await this._doctorRepo.updateDoctor(doctorId, { availability: doctor.availability });
+
+    return { message: "Availability added successfully" };
   }
 }

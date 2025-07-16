@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { cancelUserBooking, getUserBookings } from "../../services/userService";
 import { useNotifications } from "../../context/NotificationContext";
@@ -20,58 +21,70 @@ const ITEMS_PER_PAGE = 4;
 const UserBookings = () => {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(true);
-  const { addNotification, confirmMessage } = useNotifications();
+  const { addNotification, confirmMessage, promptInput } = useNotifications();
+  const navigate = useNavigate();
 
-  const totalPages = Math.ceil(bookings.length / ITEMS_PER_PAGE);
+  const fetchBookings = async (page: number) => {
+    setLoading(true);
+    try {
+      const res = await getUserBookings(page, ITEMS_PER_PAGE);
+      setBookings(res.bookings);
+      setTotalPages(res.totalPages);
+    } catch (error) {
+      addNotification("Failed to load bookings", "error");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchBookings = async () => {
-      try {
-        const res = await getUserBookings();
-        setBookings(res);
-      } catch (error) {
-        addNotification("Failed to load bookings", "error");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchBookings();
-  }, [addNotification]);
+    fetchBookings(currentPage);
+  }, [currentPage]);
 
   const handleCancel = async (bookingId: string) => {
     const confirmed = await confirmMessage("Are you sure you want to cancel this appointment?");
     if (!confirmed) return;
 
+    const reason = await promptInput("Please provide a reason for cancellation", "e.g. emergency, change of plans");
+    if (!reason || reason.trim() === "") {
+      addNotification("Cancellation reason is required", "warning");
+      return;
+    }
+
     try {
-      await cancelUserBooking(bookingId);
+      await cancelUserBooking(bookingId, reason);
       addNotification("Booking cancelled", "success");
-      setBookings(prev =>
-        prev.map(b => (b.id === bookingId ? { ...b, status: "Cancelled", canCancel: false } : b))
-      );
+      fetchBookings(currentPage);
     } catch (err) {
       addNotification("Cancellation failed", "error");
     }
   };
 
-  const paginatedBookings = bookings.slice(
-    (currentPage - 1) * ITEMS_PER_PAGE,
-    currentPage * ITEMS_PER_PAGE
-  );
-
   const handlePrev = () => {
-    if (currentPage > 1) setCurrentPage(prev => prev - 1);
+    if (currentPage > 1) setCurrentPage((prev) => prev - 1);
   };
 
   const handleNext = () => {
-    if (currentPage < totalPages) setCurrentPage(prev => prev + 1);
+    if (currentPage < totalPages) setCurrentPage((prev) => prev + 1);
+  };
+
+  const statusColor = (status: string) => {
+    switch (status) {
+      case "Cancelled":
+        return "bg-red-100 text-red-600 border-red-300";
+      case "Completed":
+        return "bg-green-100 text-green-600 border-green-300";
+      default:
+        return "bg-blue-100 text-blue-600 border-blue-300";
+    }
   };
 
   return (
-    <div className="p-6 min-h-screen bg-gradient-to-br from-blue-50 to-gray-100">
+    <div className="p-6 min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
       <motion.h1
-        className="text-3xl font-bold text-teal-700 mb-6"
+        className="text-4xl font-bold text-indigo-800 mb-10 text-center"
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
       >
@@ -79,81 +92,77 @@ const UserBookings = () => {
       </motion.h1>
 
       {loading ? (
-        <p>Loading...</p>
+        <p className="text-center text-gray-600">Loading...</p>
       ) : bookings.length === 0 ? (
-        <p className="text-gray-600">No bookings found.</p>
+        <p className="text-center text-gray-500 text-lg">No bookings found.</p>
       ) : (
         <>
-          <div className="space-y-6">
-            {paginatedBookings.map((booking, index) => (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {bookings.map((booking, index) => (
               <motion.div
                 key={booking.id}
-                className="bg-white rounded-xl shadow-md p-5 space-y-2"
+                className="bg-white/80 backdrop-blur-md border border-gray-200 rounded-2xl shadow-md p-6 hover:shadow-xl transition-all duration-300"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.05 }}
               >
-                <div className="flex justify-between">
-                  <div>
-                    <h2 className="font-bold text-lg text-teal-700">
-                      Dr. {booking.doctorName}
-                    </h2>
-                    <p className="text-sm text-gray-600">
-                      Date: <span className="font-medium">{booking.date}</span>
-                    </p>
-                    <p className="text-sm text-gray-600">
-                      Time: <span className="font-medium">{booking.time}</span>
-                    </p>
-                    <p className="text-sm">
-                      Status:{" "}
-                      <span
-                        className={`font-semibold ${
-                          booking.status === "Cancelled"
-                            ? "text-red-500"
-                            : booking.status === "Completed"
-                            ? "text-green-600"
-                            : "text-blue-600"
-                        }`}
-                      >
-                        {booking.status}
-                      </span>
-                    </p>
-                  </div>
+                <h2 className="text-xl font-bold text-indigo-700 mb-2">
+                  Dr. {booking.doctorName}
+                </h2>
+                <div className="space-y-1 text-sm text-gray-700">
+                  <p><strong>Date:</strong> {booking.date}</p>
+                  <p><strong>Time:</strong> {booking.time}</p>
+                  <p><strong>Department:</strong> {booking.department}</p>
+                  <p>
+                    <strong>Status:</strong>{" "}
+                    <span
+                      className={`inline-block px-2 py-0.5 text-xs font-semibold rounded-full border ${statusColor(booking.status)}`}
+                    >
+                      {booking.status}
+                    </span>
+                  </p>
+                  <p><strong>Amount:</strong> ₹{booking.amount}</p>
+                </div>
 
-                  <div className="flex items-center">
-                    {booking.status !== "Cancelled" && booking.canCancel && (
-                      <button
-                        onClick={() => handleCancel(booking.id)}
-                        className="bg-red-500 hover:bg-red-600 text-white px-4 py-1.5 rounded-lg transition"
-                      >
-                        Cancel
-                      </button>
-                    )}
-                  </div>
+                <div className="mt-4 flex justify-end gap-3">
+                  {booking.status !== "Cancelled" && booking.canCancel && (
+                    <button
+                      onClick={() => handleCancel(booking.id)}
+                      className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-semibold transition"
+                    >
+                      Cancel
+                    </button>
+                  )}
+                  <button
+                    onClick={() => navigate(`/user/bookings/${booking.id}`)}
+                    className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition"
+                  >
+                    View Details
+                  </button>
                 </div>
               </motion.div>
             ))}
           </div>
 
           {/* Pagination */}
-          {bookings.length > ITEMS_PER_PAGE && (
-            <div className="flex justify-between items-center mt-8">
+          {totalPages > 1 && (
+            <div className="flex justify-center items-center mt-10 gap-6">
               <button
                 onClick={handlePrev}
                 disabled={currentPage === 1}
-                className="px-4 py-2 bg-gray-200 rounded disabled:opacity-50"
+                className="px-5 py-2 bg-gray-300 rounded-full text-sm font-medium hover:bg-gray-400 disabled:opacity-50 transition"
               >
-                Previous
+                ← Previous
               </button>
-              <span className="text-sm text-gray-600">
-                Page {currentPage} of {totalPages}
+              <span className="text-gray-700 text-sm">
+                Page <strong>{currentPage}</strong> of {totalPages}
               </span>
               <button
                 onClick={handleNext}
                 disabled={currentPage === totalPages}
-                className="px-4 py-2 bg-gray-200 rounded disabled:opacity-50"
+                className="px-5 py-2 bg-gray-300 rounded-full text-sm font-medium hover:bg-gray-400 disabled:opacity-50 transition"
               >
-                Next
+                Next →
               </button>
             </div>
           )}

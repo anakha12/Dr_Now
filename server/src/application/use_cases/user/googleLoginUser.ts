@@ -1,4 +1,4 @@
-import { UserRepository } from "../../../domain/repositories/userRepository";
+import { IUserRepository } from "../../../domain/repositories/userRepository";
 import jwt from "jsonwebtoken";
 import { UserEntity } from "../../../domain/entities/userEntity";
 
@@ -10,13 +10,13 @@ interface GoogleUserPayload {
 }
 
 export class GoogleLoginUser {
-  constructor(private userRepository: UserRepository) {}
+  constructor(private _userRepository: IUserRepository) {}
 
   async execute(googleUser: GoogleUserPayload): Promise<{ token: string; user: any }> {
-    let user = await this.userRepository.findByEmail(googleUser.email);
+    let user = await this._userRepository.findByEmail(googleUser.email);
 
     if (!user) {
-      user = await this.userRepository.createUser({
+      user = await this._userRepository.createUser({
         email: googleUser.email,
         uid: googleUser.uid,
         name: googleUser.name,

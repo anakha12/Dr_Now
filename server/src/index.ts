@@ -19,7 +19,7 @@ const app = express();
 
 app.use("/api/stripe", webhookRoutes); 
 
-// Middlewares
+
 app.use(
   cors({
     origin: "http://localhost:5173", 
@@ -30,12 +30,12 @@ app.use(cookieParser());
 app.use(express.json()); 
 app.use('/uploads', express.static(path.join(__dirname, '..', 'uploads')));
 
-// MongoDB Connect
+
 mongoose.connect(process.env.MONGO_URI || "mongodb://127.0.0.1:27017/drnow")
   .then(() => console.log("MongoDB Connected"))
   .catch(err => console.error("MongoDB Error", err));
 
-// Other Routes
+
 app.use("/api/users", userRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/doctor", doctorRoutes);

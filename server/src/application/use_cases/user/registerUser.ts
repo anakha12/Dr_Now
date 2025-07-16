@@ -1,14 +1,14 @@
-import { UserRepository } from "../../../domain/repositories/userRepository";
+import { IUserRepository } from "../../../domain/repositories/userRepository";
 import { UserEntity } from "../../../domain/entities/userEntity";
 import bcrypt from "bcrypt";
 
 export class RegisterUser {
-  constructor(private userRepository: UserRepository) {}
+  constructor(private _userRepository: IUserRepository) {}
 
   async execute(userData: UserEntity): Promise<UserEntity> {
     const { email, password } = userData;
 
-    const existing = await this.userRepository.findByEmail(email);
+    const existing = await this._userRepository.findByEmail(email);
     if (!existing) throw new Error("User not found");
 
     if (!password) throw new Error("Password is required");
@@ -16,7 +16,7 @@ export class RegisterUser {
     const hashedPassword = await bcrypt.hash(password, 10);
 
 
-    const updatedUser = await this.userRepository.updateUserByEmail(email, {
+    const updatedUser = await this._userRepository.updateUserByEmail(email, {
       password: hashedPassword
     });
 

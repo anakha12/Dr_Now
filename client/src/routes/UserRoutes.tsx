@@ -16,7 +16,8 @@ import UserBookings from "../features/user/UserBookings";
 import ProfileLayout from "../features/user/ProfileLayout";
 import UserNotifications from "../features/user/UserNotifications";
 import UserWallet from "../features/user/UserWallet";
-
+import DoctorListing from "../features/user/DoctorListing";
+import BookingDetails from "../features/user/BookingDetails";
 
 const UserRoutes = () => {
   const location = useLocation();
@@ -60,11 +61,12 @@ const UserRoutes = () => {
       >
         <Route path="dashboard" element={<Dashboard />} />
         <Route path="online-consultation" element={<OnlineConsultation />} />
+        <Route path="/user/doctors" element={<DoctorListing />} />
         <Route path="consult/doctor/:id" element={<DoctorDetail />} />
         <Route path="book/:id" element={<BookAppointment />} />
         <Route path="success" element={<Success />} />
         <Route path="notifications" element={<UserNotifications />} />
-
+        <Route path="/user/bookings/:id" element={<BookingDetails />} />
         {/* ProfileLayout nested routes */}
         <Route path="" element={<ProfileLayout />}>
           <Route path="profile" element={<UserProfile />} />

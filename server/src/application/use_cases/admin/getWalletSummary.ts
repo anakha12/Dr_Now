@@ -1,15 +1,15 @@
-import { AdminWalletRepository } from "../../../domain/repositories/adminWalletRepository";
-import { BookingRepository } from "../../../domain/repositories/bookingRepository";
+import { IAdminWalletRepository } from "../../../domain/repositories/adminWalletRepository";
+import { IBookingRepository } from "../../../domain/repositories/bookingRepository";
 
 export class GetWalletSummary {
   constructor(
-    private walletRepo: AdminWalletRepository,
-    private bookingRepo: BookingRepository
+    private _walletRepo: IAdminWalletRepository,
+    private _bookingRepo: IBookingRepository
   ) {}
 
   async execute() {
-    const wallet = await this.walletRepo.getSummary();
-    const bookings = await this.bookingRepo.getPaidBookings(); 
+    const wallet = await this._walletRepo.getSummary();
+    const bookings = await this._bookingRepo.getPaidBookings(); 
 
     let totalCommission = 0;
     let pendingDoctorPayouts = 0;

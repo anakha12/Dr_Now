@@ -5,8 +5,22 @@ import { upload } from "../../interfaces/middleware/multerConfig";
 import { cookieAuth } from "../../interfaces/middleware/cookieAuth";
 
 
+import { UserRepositoryImpl } from "../../infrastructure/database/repositories/userRepositoryImpl";
+import { DoctorRepositoryImpl } from "../../infrastructure/database/repositories/doctorRepositoryImpl";
+import { DepartmentRepositoryImpl } from "../../infrastructure/database/repositories/departmentRepositoryImpl";
+import { BookingRepositoryImpl } from "../../infrastructure/database/repositories/bookingRepositoryImpl";
+import { AdminWalletRepositoryImpl } from "../../infrastructure/database/repositories/adminWalletRepositoryImpl";
+
+
 const router = express.Router();
-const doctorController = new DoctorController();
+
+const doctorController = new DoctorController({
+  userRepository: new UserRepositoryImpl(),
+  doctorRepository: new DoctorRepositoryImpl(),
+  departmentRepository: new DepartmentRepositoryImpl(),
+  bookingRepository: new BookingRepositoryImpl(),
+  adminWalletRepository: new AdminWalletRepositoryImpl(),
+});
 
 router.post(
   "/send-otp",
@@ -31,6 +45,7 @@ router.put("/doctors/:doctorId/availability",cookieAuth("doctor"),(req, res) => 
 router.get("/wallet-summary", cookieAuth("doctor"), (req, res) =>doctorController.getWalletSummary(req, res));
 router.put("/bookings/:bookingId/cancel", cookieAuth("doctor"), (req, res) =>doctorController.cancelBooking(req, res));
 router.put("/complete-profile/:doctorId", (req, res) => doctorController.completeProfile(req, res));
+router.get("/bookings/:bookingId", cookieAuth("doctor"), (req, res) => doctorController.getBookingDetails(req, res));
 
 
 export default router;

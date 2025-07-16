@@ -5,6 +5,7 @@ export interface Slot {
 export interface EnrichedBooking extends Booking {
   doctorName: string;
   department: string;
+  patientName: string;
 }
 
 export interface EnrichedDoctorBooking extends Booking {
@@ -26,4 +27,5 @@ export interface Booking {
   commissionAmount?: number;
   payoutStatus?: 'Pending' | 'Paid';
   refundStatus?: 'NotRequired' | 'Refunded';
+  cancellationReason?: string;
 }

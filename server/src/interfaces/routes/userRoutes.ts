@@ -5,9 +5,22 @@ import { cookieAuth  } from "../middleware/cookieAuth";
 import { AuthRequest } from "../middleware/cookieAuth"; 
 import { verifyToken } from "../middleware/authMiddleware";
 
+import { UserRepositoryImpl } from "../../infrastructure/database/repositories/userRepositoryImpl";
+import { DoctorRepositoryImpl } from "../../infrastructure/database/repositories/doctorRepositoryImpl";
+import { DepartmentRepositoryImpl } from "../../infrastructure/database/repositories/departmentRepositoryImpl";
+import { BookingRepositoryImpl } from "../../infrastructure/database/repositories/bookingRepositoryImpl";
+import { AdminWalletRepositoryImpl } from "../../infrastructure/database/repositories/adminWalletRepositoryImpl";
+
+
 
 const router = express.Router();        
-const userController = new UserController();
+const userController = new UserController({
+  userRepository: new UserRepositoryImpl(),
+  doctorRepository: new DoctorRepositoryImpl(),
+  departmentRepository: new DepartmentRepositoryImpl(),
+  bookingRepository: new BookingRepositoryImpl(),
+  adminWalletRepository: new AdminWalletRepositoryImpl(),
+});
 router.get("/protected", verifyToken("user"), (req, res) => {
   res.status(200).json({ message: "User authenticated" });
 });
@@ -27,5 +40,8 @@ router.get("/user/bookings", verifyToken("user"), (req: Request, res: Response) 
 router.post("/user/bookings/:id/cancel", verifyToken("user"), (req: Request, res: Response) =>userController.cancelBooking(req, res));
 router.get("/departments", verifyToken("user"),(req: Request, res: Response) => userController.getDepartments(req, res));
 router.get("/user/wallet",verifyToken("user"),(req: Request, res: Response) => userController.getWalletInfo(req, res));
+router.post("/book-with-wallet", verifyToken("user"), (req: Request, res: Response) =>userController.bookWithWallet(req, res));
+router.get("/doctors/filter", (req: Request, res: Response) =>userController.getFilteredDoctors(req, res));
+router.get("/user/bookings/:id", verifyToken("user"), (req: Request, res: Response) =>userController.getBookingDetails(req, res));
 
 export default router;

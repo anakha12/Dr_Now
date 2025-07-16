@@ -59,13 +59,13 @@ export const googleLogin = async (data: {
   return response.data;
 };
 
-// Forgot Password - Send Reset OTP
+
 export const sendResetOtp = async (email: string) => {
   const response = await userAxios.post("/send-reset-otp", { email });
   return response.data;
 };
 
-// Forgot Password - Verify OTP and Reset
+
 export const verifyResetOtp = async (data: {
   email: string;
   otp: string;
@@ -107,13 +107,16 @@ export const getUserProfile = async () => {
   return response.data;
 };
 
-export const getUserBookings = async () => {
-  const response = await userAxios.get("/user/bookings");
+export const getUserBookings = async (page = 1, limit = 4) => {
+  const response = await userAxios.get("/user/bookings", {
+    params: { page, limit },
+  });
   return response.data; 
 };
 
-export const cancelUserBooking = async (bookingId: string) => {
-  const response = await userAxios.post(`/user/bookings/${bookingId}/cancel`);
+
+export const cancelUserBooking = async (bookingId: string, reason: string) => {
+  const response = await userAxios.post(`/user/bookings/${bookingId}/cancel`,{ reason });
   return response.data;
 };
 
@@ -122,10 +125,55 @@ export const getDepartments = async () => {
   return response.data.departments;
 };
 
-export const getUserWallet = async () => {
-  const response = await userAxios.get("/user/wallet");
+export const getUserWallet = async (page: number, limit: number) => {
+  const response = await userAxios.get(`/user/wallet?page=${page}&limit=${limit}`);
   return response.data;
 };
 
 
 
+export const bookAppointmentWithWallet = async (
+  doctorId: string,
+  userId: string,
+  slot: Slot,
+  amount: number,
+  date: string
+) => {
+  try {
+    const response = await userAxios.post("/book-with-wallet", {
+      doctorId,
+      userId,
+      slot,
+      amount,
+      date,
+    });
+    return response.data;
+  } catch (error: any) {
+    const errorMessage = error?.response?.data?.error || "Booking failed";
+    throw new Error(errorMessage); 
+  }
+};
+
+export const getFilteredDoctors = async (filters: {
+  search?: string;
+  specialization?: string;
+  maxFee?: number;
+  gender?: string;
+  page?: number;
+}) => {
+  try {
+    const response = await userAxios.get("/doctors/filter", {
+      params: filters,
+    });
+    return response.data;
+  } catch (error: any) {
+    throw error.response?.data || { message: "Failed to fetch filtered doctors" };
+  }
+};
+
+
+export const getBookingDetails = async (bookingId: string | undefined) => {
+  if (!bookingId) throw new Error("Booking ID is required");
+  const response = await userAxios.get(`/user/bookings/${bookingId}`);
+  return response.data;
+};

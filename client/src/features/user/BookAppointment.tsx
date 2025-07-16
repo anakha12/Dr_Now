@@ -1,8 +1,15 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { getDoctorById, createStripeSession, getBookedSlots,getUserProfile } from "../../services/userService";
-import { toast } from "react-hot-toast";
+import {
+  getDoctorById,
+  createStripeSession,
+  getBookedSlots,
+  getUserProfile,
+  bookAppointmentWithWallet,
+} from "../../services/userService";
+
 import { loadStripe } from "@stripe/stripe-js";
+import { useNotifications } from "../../context/NotificationContext"; 
 
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY!);
 
@@ -17,7 +24,7 @@ interface Availability {
 }
 
 interface Doctor {
-  _id: string;
+  id: string;
   name: string;
   email: string;
   phone: string;
@@ -30,12 +37,16 @@ interface Doctor {
   availability?: Availability[];
 }
 
-const BookAppointment = () => {
+const BookAppointment = () => { 
   const { id } = useParams();
+  console.log(id)
   const [doctor, setDoctor] = useState<Doctor | null>(null);
   const [selectedDate, setSelectedDate] = useState<string>("");
   const [selectedSlot, setSelectedSlot] = useState<Slot | null>(null);
   const [bookedSlots, setBookedSlots] = useState<Slot[]>([]);
+  const [paymentMethod, setPaymentMethod] = useState<"stripe" | "wallet">("stripe");
+  const { addNotification } = useNotifications();
+
 
   useEffect(() => {
     const fetchDoctor = async () => {
@@ -44,7 +55,7 @@ const BookAppointment = () => {
         const data = await getDoctorById(id);
         setDoctor(data);
       } catch (error) {
-        toast.error("Failed to load doctor data");
+        addNotification("Failed to load doctor data");
       }
     };
 
@@ -53,10 +64,10 @@ const BookAppointment = () => {
 
   useEffect(() => {
     const fetchBookedSlots = async () => {
-      if (!selectedDate || !doctor?._id) return;
+      if (!selectedDate || !doctor?.id) return;
 
       try {
-        const data = await getBookedSlots(doctor._id, selectedDate);
+        const data = await getBookedSlots(doctor.id, selectedDate);
         setBookedSlots(data);
       } catch (err) {
         console.error("Failed to fetch booked slots:", err);
@@ -64,39 +75,64 @@ const BookAppointment = () => {
     };
 
     fetchBookedSlots();
-  }, [selectedDate, doctor?._id]);
+  }, [selectedDate, doctor?.id]);
 
   const handleBook = async () => {
-    console.log('handile book is clicked ')
-    if (!selectedDate || !selectedSlot || !doctor) {
-      console.log("Missing input:", { selectedDate, selectedSlot, doctor });
-      return toast.error("Please select date and slot");
+
+    console.log("selectedDate:", selectedDate);
+console.log("selectedSlot:", selectedSlot);
+console.log("doctor:", doctor);
+console.log("doctor._id:", doctor?.id);
+
+    if (!selectedDate || !selectedSlot || !doctor|| !doctor.id) {
+      return addNotification("Please select date and slot");
     }
 
     try {
-      
-      const user = await getUserProfile(); 
+      const user = await getUserProfile();
       const userId = user.id || user.userId;
+      console.log("Booking info:", {
+  doctorId: doctor.id,
+  userId,
+  selectedSlot,
+  consultFee: doctor.consultFee,
+  selectedDate,
+});
+
+      if (paymentMethod === "wallet") {
+        await bookAppointmentWithWallet(
+          doctor.id,
+          userId,
+          selectedSlot,
+          doctor.consultFee,
+          selectedDate
+        );
+        addNotification("Appointment booked using wallet!", "success");
+        setTimeout(() => {
+          window.location.reload();
+        }, 1500); 
+        return;
+      }
+
+      // Stripe flow
       const { sessionId } = await createStripeSession(
-        doctor._id,
+        doctor.id,
         userId,
         selectedSlot,
         doctor.consultFee,
         selectedDate
       );
-      console.log("Stripe session ID:", sessionId);
       const stripe = await stripePromise;
-      console.log(stripe);
-      
-      if (!stripe) return toast.error("Stripe initialization failed");
-
+      if (!stripe) return addNotification("Stripe initialization failed");
       await stripe.redirectToCheckout({ sessionId });
-    } catch (error) {
-      console.error("Stripe checkout error:", error);
-      toast.error("Something went wrong while booking");
-    }
-  };
+    } catch (error: any) {
+        console.error("Booking error:", error);
+        const errorMessage =
+          error?.response?.data?.message || error.message || "Something went wrong while booking";
+        addNotification(errorMessage, "error");
+      }
 
+  };
 
   const getSlotsForDate = (date: string): Slot[] => {
     const dayAvailability = doctor?.availability?.find((a) => a.date === date);
@@ -109,7 +145,11 @@ const BookAppointment = () => {
     );
   };
 
-  const availableDates = doctor?.availability?.map((a) => a.date) || [];
+  const today = new Date();
+  const availableDates =
+    doctor?.availability
+      ?.map((a) => a.date)
+      .filter((dateStr) => new Date(dateStr) >= today) || [];
 
   if (!doctor) {
     return (
@@ -141,6 +181,21 @@ const BookAppointment = () => {
           </div>
         </div>
 
+        {/* Payment Method */}
+        <div>
+          <label className="block text-gray-700 font-medium mb-1">
+            Select Payment Method
+          </label>
+          <select
+            value={paymentMethod}
+            onChange={(e) => setPaymentMethod(e.target.value as "stripe" | "wallet")}
+            className="w-full border border-gray-300 rounded px-3 py-2"
+          >
+            <option value="stripe">Pay Online (Stripe)</option>
+            <option value="wallet">Pay with Wallet</option>
+          </select>
+        </div>
+
         {/* Date Selection */}
         <div>
           <label className="block text-gray-700 font-medium mb-1">
@@ -170,10 +225,6 @@ const BookAppointment = () => {
               Available Slots
             </label>
             <div className="flex flex-wrap gap-2">
-              {/* Option A: Hide Booked Slots */}
-              {/* getSlotsForDate(selectedDate).map(...) */}
-              {/* Uncomment below if you want to SHOW but DISABLE booked slots instead: */}
-
               {doctor?.availability
                 ?.find((a) => a.date === selectedDate)
                 ?.slots.map((slot, index) => {
@@ -204,7 +255,6 @@ const BookAppointment = () => {
                   );
                 })}
 
-              {/* Show message if all are booked */}
               {getSlotsForDate(selectedDate).length === 0 && (
                 <p className="text-sm text-gray-500 italic">
                   No slots available for this date.

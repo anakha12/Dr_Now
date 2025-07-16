@@ -35,6 +35,7 @@ interface Doctor {
 
 const DoctorDetail = () => {
   const { id } = useParams();
+  
   const navigate = useNavigate();
   const [doctor, setDoctor] = useState<Doctor | null>(null);
 
@@ -90,7 +91,7 @@ const DoctorDetail = () => {
           </p>
 
           <motion.button
-            onClick={() => navigate(`/user/book/${doctor._id}`)}
+            onClick={() => navigate(`/user/book/${id}`)}
             className="mt-5 bg-gradient-to-r from-teal-500 to-teal-700 hover:from-teal-600 hover:to-teal-800 text-white px-6 py-2 rounded-lg shadow-md transition"
             whileTap={{ scale: 0.95 }}
           >

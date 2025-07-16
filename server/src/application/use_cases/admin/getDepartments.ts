@@ -1,11 +1,11 @@
-import { DepartmentRepository } from "../../../domain/repositories/departmentRepository";
+import { IDepartmentRepository } from "../../../domain/repositories/departmentRepository";
 import { DepartmentEntity } from "../../../domain/entities/department.entity";
 
 
 export class GetDepartmentsUseCase {
-  constructor(private departmentRepo: DepartmentRepository) {}
+  constructor(private _departmentRepo: IDepartmentRepository) {}
 
-  async execute(page: number, limit: number): Promise<DepartmentEntity[]> {
-    return await this.departmentRepo.getDepartments(page, limit);
+  async execute(page: number, limit: number): Promise<{ departments: DepartmentEntity[], totalPages: number }> {
+    return await this._departmentRepo.getPaginatedDepartments(page, limit);
   }
 }

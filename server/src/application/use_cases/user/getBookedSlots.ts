@@ -1,10 +1,10 @@
-import { BookingRepository } from "../../../domain/repositories/bookingRepository";
+import { IBookingRepository } from "../../../domain/repositories/bookingRepository";
 
 export class GetBookedSlots {
-  constructor(private bookingRepo: BookingRepository) {}
+  constructor(private _bookingRepo: IBookingRepository) {}
 
   async execute(doctorId: string, date: string) {
-    return await this.bookingRepo.getBookedSlotsByDoctorAndDate(doctorId, date);
+    return await this._bookingRepo.getBookedSlotsByDoctorAndDate(doctorId, date);
   }
 }
 

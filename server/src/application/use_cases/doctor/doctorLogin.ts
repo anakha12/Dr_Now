@@ -1,16 +1,16 @@
-import { DoctorRepository } from "../../../domain/repositories/doctorRepository";
+import { IDoctorRepository } from "../../../domain/repositories/doctorRepository";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 
 export class DoctorLogin {
-  constructor(private doctorRepo: DoctorRepository) {}
+  constructor(private _doctorRepo: IDoctorRepository) {}
 
   async execute(email: string, password: string): Promise<
     | { token: string; name: string }
     | { notVerified: true; name: string; email: string }
     | { isRejected: true; name: string; email: string }
   > {
-    const doctor = await this.doctorRepo.findByEmail(email);
+    const doctor = await this._doctorRepo.findByEmail(email);
     if (!doctor) throw new Error("Doctor not found");
    
     if(String(doctor.isRejected) === 'true'){

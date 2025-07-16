@@ -157,7 +157,13 @@ const OnlineConsultation = () => {
 
       {/* Doctors Carousel */}
       <section className="py-16 px-6 md:px-16 lg:px-24 bg-white relative">
-        <h2 className="text-3xl font-bold text-center text-teal-800 mb-10">Meet Our Doctors</h2>
+        <h2
+          onClick={() => navigate("/user/doctors")}
+          className="text-3xl font-bold text-center text-teal-800 mb-10 cursor-pointer hover:underline"
+        >
+          Meet Our Doctors
+        </h2>
+
         <div
           ref={docRef}
           className="flex gap-6 overflow-x-auto px-2 scroll-smooth"

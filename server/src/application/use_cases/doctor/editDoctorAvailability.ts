@@ -1,4 +1,4 @@
-import { DoctorRepositoryImpl } from "../../../infrastructure/database/repositories/doctorRepositoryImpl";
+import { IDoctorRepository } from "../../../domain/repositories/doctorRepository";
 
 interface Slot {
   from: string;
@@ -6,7 +6,7 @@ interface Slot {
 }
 
 export class EditDoctorAvailability {
-  constructor(private doctorRepo: DoctorRepositoryImpl) {}
+  constructor(private _doctorRepo: IDoctorRepository) {}
 
   private generateTimeSlots(from: string, to: string, interval: number = 30): Slot[] {
     const slots: Slot[] = [];
@@ -33,17 +33,17 @@ export class EditDoctorAvailability {
     const oldSlots = this.generateTimeSlots(oldSlot.from, oldSlot.to);
 
     
-    const booked = await this.doctorRepo.checkIfAnySlotBooked(doctorId, oldSlot.date, oldSlots);
+    const booked = await this._doctorRepo.checkIfAnySlotBooked(doctorId, oldSlot.date, oldSlots);
 
     if (booked) {
       throw new Error("One or more slots in the old schedule are already booked and cannot be edited.");
     }
 
    
-    await this.doctorRepo.removeAllSlotsOnDate(doctorId, oldSlot.date);
+    await this._doctorRepo.removeAllSlotsOnDate(doctorId, oldSlot.date);
     const newSlots = this.generateTimeSlots(newSlot.from, newSlot.to);
 
-    return await this.doctorRepo.addAvailability(doctorId, {
+    return await this._doctorRepo.addAvailability(doctorId, {
       date: newSlot.date,
       slots: newSlots,
     });

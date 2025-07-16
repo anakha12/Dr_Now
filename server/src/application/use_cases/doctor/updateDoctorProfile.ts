@@ -1,28 +1,27 @@
-import { DoctorRepository } from "../../../domain/repositories/doctorRepository";
-import { BookingRepository } from "../../../domain/repositories/bookingRepository";
+import { IDoctorRepository } from "../../../domain/repositories/doctorRepository";
+import { IBookingRepository } from "../../../domain/repositories/bookingRepository";
 
 export class UpdateDoctorProfile {
   constructor(
-    private doctorRepository: DoctorRepository,
-    private bookingRepository: BookingRepository
+    private _doctorRepository: IDoctorRepository,
+    private _bookingRepository: IBookingRepository
   ) {}
 
   async execute(doctorId: string, updates: any) {
-    const hasActiveBookings = await this.bookingRepository.hasActiveBookingsForDoctor(doctorId);
+    const hasActiveBookings = await this._bookingRepository.hasActiveBookingsForDoctor(doctorId);
     
     if (hasActiveBookings) {
       throw new Error("You cannot update your profile while bookings exist.");
     }
 
-    // If confirmation not received, return message
+   
     if (!updates.confirm) {
       return { message: "confirmation_required" };
     }
 
-    const updated = await this.doctorRepository.updateDoctor(doctorId, {
+    const updated = await this._doctorRepository.updateDoctor(doctorId, {
       ...updates,
       isVerified: false,
-      isBlocked: true,
     });
 
     if (!updated) throw new Error("Failed to update profile");

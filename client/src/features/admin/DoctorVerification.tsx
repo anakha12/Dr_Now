@@ -19,8 +19,8 @@ const DoctorVerification = () => {
   useEffect(() => {
     const fetchDoctors = async () => {
       try {
-        const data = await getUnverifiedDoctors();
-        setDoctors(data);
+        const data = await getUnverifiedDoctors(currentPage, ITEMS_PER_PAGE);
+        setDoctors(data.doctors);
       } catch (err) {
         console.error((err as Error).message);
       } finally {
@@ -29,7 +29,8 @@ const DoctorVerification = () => {
     };
 
     fetchDoctors();
-  }, []);
+  }, [currentPage]); 
+
 
   const totalPages = Math.ceil(doctors.length / ITEMS_PER_PAGE);
   const startIdx = (currentPage - 1) * ITEMS_PER_PAGE;

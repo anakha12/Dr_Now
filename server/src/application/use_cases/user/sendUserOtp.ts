@@ -1,16 +1,16 @@
-import { UserRepository } from "../../../domain/repositories/userRepository";
+import { IUserRepository } from "../../../domain/repositories/userRepository";
 import { sendMail } from "../../../services/mailService";
 import { UserRegisterDTO } from "../../dto/userRegister.dto";
 import { UserEntity } from "../../../domain/entities/userEntity";
 
 export class SendUserOtp {
-  constructor(private userRepository: UserRepository) {}
+  constructor(private _userRepository: IUserRepository) {}
 
   async execute(dto: UserRegisterDTO): Promise<void> {
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
     const otpExpiresAt = new Date(Date.now() + 10 * 60 * 1000); 
     console.log(`Generated OTP: ${otp}, Expires At: ${otpExpiresAt}`);
-    const existingUser = await this.userRepository.findByEmail(dto.email);
+    const existingUser = await this._userRepository.findByEmail(dto.email);
     const userEntity: Partial<UserEntity> = {
       name: dto.name,
       email: dto.email,
@@ -30,9 +30,9 @@ export class SendUserOtp {
     };
 
     if (existingUser) {
-      await this.userRepository.updateUser(existingUser.id!, userEntity);
+      await this._userRepository.updateUser(existingUser.id!, userEntity);
     } else {
-      await this.userRepository.createUser(userEntity as UserEntity);
+      await this._userRepository.createUser(userEntity as UserEntity);
     }
 
     await sendMail(dto.email, "Your OTP Code", `Your OTP is: ${otp}`);

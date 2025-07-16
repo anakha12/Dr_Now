@@ -14,7 +14,8 @@ interface NotificationContextType {
   notifications: Notification[];
   addNotification: (message: string, type?: NotificationType) => void;
   markAllAsRead: () => void;
-  confirmMessage: (message: string) => Promise<boolean>; 
+  confirmMessage: (message: string) => Promise<boolean>;
+  promptInput: (message: string, placeholder?: string) => Promise<string | null>;
 }
 
 const NotificationContext = createContext<NotificationContextType | null>(null);
@@ -24,6 +25,12 @@ export const NotificationProvider = ({ children }: { children: ReactNode }) => {
   const [confirmState, setConfirmState] = useState<{
     message: string;
     resolve: (val: boolean) => void;
+  } | null>(null);
+
+  const [inputPromptState, setInputPromptState] = useState<{
+    message: string;
+    placeholder?: string;
+    resolve: (val: string | null) => void;
   } | null>(null);
 
   const addNotification = (message: string, type: NotificationType = "info") => {
@@ -47,6 +54,12 @@ export const NotificationProvider = ({ children }: { children: ReactNode }) => {
     });
   };
 
+  const promptInput = (message: string, placeholder = ""): Promise<string | null> => {
+    return new Promise((resolve) => {
+      setInputPromptState({ message, placeholder, resolve });
+    });
+  };
+
   const markAllAsRead = () => {
     setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
   };
@@ -58,11 +71,20 @@ export const NotificationProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  const handleInputSubmit = (value: string | null) => {
+    if (inputPromptState) {
+      inputPromptState.resolve(value);
+      setInputPromptState(null);
+    }
+  };
+
   return (
-    <NotificationContext.Provider value={{ notifications, addNotification, markAllAsRead, confirmMessage }}>
+    <NotificationContext.Provider
+      value={{ notifications, addNotification, markAllAsRead, confirmMessage, promptInput }}
+    >
       {children}
 
-     
+      {/* Notifications */}
       <div className="fixed top-5 right-5 z-50 space-y-2 w-80">
         {notifications.map((n) => (
           <div
@@ -79,6 +101,7 @@ export const NotificationProvider = ({ children }: { children: ReactNode }) => {
         ))}
       </div>
 
+      {/* Confirm Modal */}
       {confirmState && (
         <div className="fixed inset-0 bg-white/10 backdrop-blur-sm z-50 flex justify-center items-center">
           <div className="bg-gray-200 rounded-2xl p-6 shadow-lg w-[90%] max-w-md">
@@ -95,6 +118,43 @@ export const NotificationProvider = ({ children }: { children: ReactNode }) => {
                 className="px-4 py-2 rounded bg-red-600 hover:bg-red-700 text-white"
               >
                 Confirm
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Input Prompt Modal */}
+      {inputPromptState && (
+        <div className="fixed inset-0 bg-white/10 backdrop-blur-sm z-50 flex justify-center items-center">
+          <div className="bg-white rounded-2xl p-6 shadow-xl w-[90%] max-w-md">
+            <p className="text-lg font-semibold text-gray-800 mb-4">{inputPromptState.message}</p>
+            <input
+              type="text"
+              placeholder={inputPromptState.placeholder}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg mb-4"
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  handleInputSubmit((e.target as HTMLInputElement).value);
+                }
+              }}
+              autoFocus
+            />
+            <div className="flex justify-end gap-4">
+              <button
+                onClick={() => handleInputSubmit(null)}
+                className="px-4 py-2 rounded bg-gray-300 hover:bg-gray-400"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  const input = document.querySelector<HTMLInputElement>("input");
+                  handleInputSubmit(input?.value || null);
+                }}
+                className="px-4 py-2 rounded bg-blue-600 hover:bg-blue-700 text-white"
+              >
+                Submit
               </button>
             </div>
           </div>

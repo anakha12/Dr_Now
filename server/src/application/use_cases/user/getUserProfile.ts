@@ -1,15 +1,15 @@
 // src/application/use_cases/user/getUserProfile.ts
-import { UserRepository } from "../../../domain/repositories/userRepository";
+import { IUserRepository } from "../../../domain/repositories/userRepository";
 
 export class GetUserProfile {
-  private userRepository: UserRepository;
+  private _userRepository: IUserRepository;
 
-  constructor(userRepository: UserRepository) {
-    this.userRepository = userRepository;
+  constructor(userRepository: IUserRepository) {
+    this._userRepository = userRepository;
   }
 
   async execute(userId: string) {
-    const user = await this.userRepository.findUserById(userId);
+    const user = await this._userRepository.findUserById(userId);
     if (!user) throw new Error("User not found");
     return {
       name: user.name,

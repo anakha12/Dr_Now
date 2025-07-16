@@ -12,20 +12,22 @@ interface Doctor {
 const Doctors = () => {
   const [doctors, setDoctors] = useState<Doctor[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
   const doctorsPerPage = 5;
-
-  useEffect(() => {
-    fetchDoctors();
-  }, []);
 
   const fetchDoctors = async () => {
     try {
-      const data = await getAllDoctors();
-      setDoctors(data);
+      const data = await getAllDoctors(currentPage, doctorsPerPage);
+      setDoctors(data.doctors);
+      setTotalPages(data.totalPages);
     } catch (error) {
       toast.error("Failed to load doctors");
     }
   };
+
+  useEffect(() => {
+    fetchDoctors();
+  }, [currentPage]);
 
   const handleBlockToggle = async (id: string, currentStatus: boolean) => {
     try {
@@ -41,22 +43,15 @@ const Doctors = () => {
     alert(`View details for doctor ID: ${id}`);
   };
 
-  const indexOfLastDoctor = currentPage * doctorsPerPage;
-  const indexOfFirstDoctor = indexOfLastDoctor - doctorsPerPage;
-  const currentDoctors = doctors.slice(indexOfFirstDoctor, indexOfLastDoctor);
-  const totalPages = Math.ceil(doctors.length / doctorsPerPage);
-
   const handlePrev = () => setCurrentPage((p) => Math.max(1, p - 1));
   const handleNext = () => setCurrentPage((p) => Math.min(totalPages, p + 1));
 
   return (
     <div className="max-w-4xl mx-auto p-4">
-      {/* Header */}
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-2xl font-bold text-teal-700">All Doctors</h2>
       </div>
 
-      {/* Table */}
       <div className="overflow-x-auto bg-white rounded-lg shadow">
         <table className="min-w-full divide-y divide-gray-200 text-sm">
           <thead className="bg-teal-100">
@@ -69,14 +64,14 @@ const Doctors = () => {
             </tr>
           </thead>
           <tbody>
-            {currentDoctors.length === 0 ? (
+            {doctors.length === 0 ? (
               <tr>
                 <td colSpan={5} className="text-center py-6 text-gray-500">
                   No doctors available.
                 </td>
               </tr>
             ) : (
-              currentDoctors.map((doctor) => (
+              doctors.map((doctor) => (
                 <tr key={doctor.id} className="border-b hover:bg-teal-50">
                   <td className="px-6 py-4">{doctor.name}</td>
                   <td className="px-6 py-4">{doctor.email}</td>

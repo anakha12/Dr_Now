@@ -1,12 +1,12 @@
 // application/usecases/admin/toggleUserBlockStatus.ts
 
-import { UserRepository } from "../../../domain/repositories/userRepository";
+import { IUserRepository } from "../../../domain/repositories/userRepository";
 import { UserEntity } from "../../../domain/entities/userEntity";
 
 export class ToggleUserBlockStatusUseCase {
-  constructor(private userRepository: UserRepository) {}
+  constructor(private _userRepository: IUserRepository) {}
 
   async execute(userId: string, block: boolean): Promise<UserEntity> {
-    return await this.userRepository.toggleBlockStatus(userId, block);
+    return await this._userRepository.toggleBlockStatus(userId, block);
   }
 }

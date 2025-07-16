@@ -1,14 +1,13 @@
-import { DoctorRepository } from "../../../domain/repositories/doctorRepository";
+import { IDoctorRepository } from "../../../domain/repositories/doctorRepository";
 
 export class GetUnverifiedDoctors {
-  private doctorRepo: DoctorRepository;
+  constructor(private _doctorRepo: IDoctorRepository) {}
 
-  constructor(doctorRepo: DoctorRepository) {
-    this.doctorRepo = doctorRepo;
-  }
+  async execute(page: number, limit: number) {
+    const skip = (page - 1) * limit;
+    const doctors = await this._doctorRepo.getUnverifiedDoctorsPaginated(skip, limit);
+    const total = await this._doctorRepo.countUnverifiedDoctors();
 
-  async execute() {
-    const doctors = await this.doctorRepo.findUnverifiedDoctors();
-    return doctors;
+    return { doctors, total };
   }
 }

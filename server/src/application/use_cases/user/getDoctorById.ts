@@ -1,9 +1,9 @@
-import { DoctorRepository } from "../../../domain/repositories/doctorRepository";
+import { IDoctorRepository } from "../../../domain/repositories/doctorRepository";
 
 export class GetDoctorById {
-  constructor(private doctorRepo: DoctorRepository) {}
+  constructor(private _doctorRepo: IDoctorRepository) {}
 
   async execute(id: string) {
-    return await this.doctorRepo.findById(id);
+    return await this._doctorRepo.findById(id);
   }
 }

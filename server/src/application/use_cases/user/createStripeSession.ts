@@ -1,5 +1,5 @@
 import Stripe from "stripe";
-import { DoctorRepository } from "../../../domain/repositories/doctorRepository";
+import { IDoctorRepository } from "../../../domain/repositories/doctorRepository";
 
 interface Slot {
   from: string;
@@ -7,12 +7,12 @@ interface Slot {
 }
 
 export class CreateStripeSession {
-  private doctorRepo: DoctorRepository;
-  private stripe: Stripe;
+  private _doctorRepo:IDoctorRepository;
+  private _stripe: Stripe;
 
-  constructor(doctorRepo: DoctorRepository, stripeInstance: Stripe) {
-    this.doctorRepo = doctorRepo;
-    this.stripe = stripeInstance;
+  constructor(doctorRepo: IDoctorRepository, stripeInstance: Stripe) {
+    this._doctorRepo = doctorRepo;
+    this._stripe = stripeInstance;
   }
 
   async execute(
@@ -22,10 +22,10 @@ export class CreateStripeSession {
     fee: number,
     date: string
   ): Promise<{ sessionId: string }> {
-    const doctor = await this.doctorRepo.findById(doctorId);
+    const doctor = await this._doctorRepo.findById(doctorId);
     if (!doctor) throw new Error("Doctor not found");
 
-    const session = await this.stripe.checkout.sessions.create({
+    const session = await this._stripe.checkout.sessions.create({
     payment_method_types: ["card"],
     mode: "payment",
     line_items: [

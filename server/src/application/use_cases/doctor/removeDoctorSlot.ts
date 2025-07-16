@@ -1,4 +1,4 @@
-import { DoctorRepository } from "../../../domain/repositories/doctorRepository";
+import { IDoctorRepository } from "../../../domain/repositories/doctorRepository";
 
 interface Slot {
   from: string;
@@ -6,15 +6,14 @@ interface Slot {
 }
 
 export class RemoveDoctorSlot {
-  constructor(private doctorRepo: DoctorRepository) {}
+  constructor(private _doctorRepo: IDoctorRepository) {}
 
   async execute(doctorId: string, date: string, slot: Slot): Promise<void> {
     if (!date || !slot.from || !slot.to) {
       throw new Error("Date and slot times are required.");
     }
 
-    // Step 1: Get doctor and availability
-    const doctor = await this.doctorRepo.findById(doctorId);
+    const doctor = await this._doctorRepo.findById(doctorId);
     if (!doctor) throw new Error("Doctor not found");
 
     const availabilityEntry = doctor.availability.find((entry) => entry.date === date);
@@ -30,13 +29,11 @@ export class RemoveDoctorSlot {
       throw new Error("Slot does not exist or has already been removed.");
     }
 
-    // Step 2: Check if booked
-    const isBooked = await this.doctorRepo.checkIfAnySlotBooked(doctorId, date, [slot]);
+    const isBooked = await this._doctorRepo.checkIfAnySlotBooked(doctorId, date, [slot]);
     if (isBooked) {
       throw new Error("Cannot remove: slot is already booked.");
     }
 
-    // Step 3: Safe to remove
-    await this.doctorRepo.removeSlot(doctorId, date, slot);
+    await this._doctorRepo.removeSlot(doctorId, date, slot);
   }
 }

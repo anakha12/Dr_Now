@@ -1,14 +1,11 @@
 import { Types } from "mongoose";
-import { DepartmentRepository } from "../../../domain/repositories/departmentRepository";
+import { IDepartmentRepository } from "../../../domain/repositories/departmentRepository";
 import DepartmentModel, { IDepartment } from "../models/departmentModel";
 import { DepartmentEntity } from "../../../domain/entities/department.entity";
 
-export class DepartmentRepositoryImpl implements DepartmentRepository {
+export class DepartmentRepositoryImpl implements IDepartmentRepository {
 
-  async findByName(name: string): Promise<DepartmentEntity | null> {
-    const dep = await DepartmentModel.findOne({ Departmentname: name });
-    if (!dep) return null;
-
+  private _toDomain(dep: IDepartment): DepartmentEntity {
     return {
       id: dep._id.toString(),
       Departmentname: dep.Departmentname,
@@ -18,40 +15,44 @@ export class DepartmentRepositoryImpl implements DepartmentRepository {
       updatedAt: dep.updatedAt,
     };
   }
-  
-  async createDepartment(data: DepartmentEntity): Promise<DepartmentEntity> {
-    const created: IDepartment = await DepartmentModel.create(data);
 
-    return {
-      id: created._id.toString(),
-      Departmentname: created.Departmentname,
-      Description: created.Description,
-      status: created.status,
-      createdAt: created.createdAt,
-      updatedAt: created.updatedAt,
-    };
-  }
-
-  // Fetch departments with pagination
-  async getDepartments(page: number, limit: number): Promise<DepartmentEntity[]> {
+  async getPaginatedDepartments(page: number, limit: number): Promise<{ departments: DepartmentEntity[], totalPages: number }> {
     const skip = (page - 1) * limit;
+    const totalDepartments = await DepartmentModel.countDocuments();
+    const totalPages = Math.ceil(totalDepartments / limit);
 
-    const departments: IDepartment[] = await DepartmentModel.find()
+    const departments = await DepartmentModel.find()
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit);
 
-    return departments.map((dep) => ({
-      id: dep._id.toString(),
-      Departmentname: dep.Departmentname,
-      Description: dep.Description,
-      status: dep.status,
-      createdAt: dep.createdAt,
-      updatedAt: dep.updatedAt,
-    }));
+    return {
+      departments: departments.map(this._toDomain),
+      totalPages,
+    };
   }
 
-  // Toggle List/Unlist department
+
+  async findByName(name: string): Promise<DepartmentEntity | null> {
+    const dep = await DepartmentModel.findOne({ Departmentname: name });
+    return dep ? this._toDomain(dep) : null;
+  }
+
+  async createDepartment(data: DepartmentEntity): Promise<DepartmentEntity> {
+    const created = await DepartmentModel.create(data);
+    return this._toDomain(created);
+  }
+
+  async getDepartments(page: number, limit: number): Promise<DepartmentEntity[]> {
+    const skip = (page - 1) * limit;
+    const departments = await DepartmentModel.find()
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit);
+
+    return departments.map(this._toDomain);
+  }
+
   async toggleDepartmentStatus(id: string, status: 'Listed' | 'Unlisted'): Promise<void> {
     await DepartmentModel.findByIdAndUpdate(
       new Types.ObjectId(id),

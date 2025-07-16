@@ -1,12 +1,15 @@
 // application/usecases/admin/getAllUsers.ts
 
-import { UserRepository } from "../../../domain/repositories/userRepository";
+import { IUserRepository } from "../../../domain/repositories/userRepository";
 import { UserEntity } from "../../../domain/entities/userEntity";
 
 export class GetAllUsersUseCase {
-  constructor(private userRepository: UserRepository) {}
+  constructor(private _userRepository: IUserRepository) {}
 
-  async execute(): Promise<UserEntity[]> {
-    return await this.userRepository.getAllUsers();
+  async execute(page: number, limit: number): Promise<{
+    users: UserEntity[];
+    totalPages: number;
+  }> {
+    return await this._userRepository.getPaginatedUsers(page, limit);
   }
 }

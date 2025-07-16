@@ -2,9 +2,28 @@ import express from "express";
 import { AdminController } from "../controllers/adminController";
 import { cookieAuth } from "../middleware/cookieAuth";
 import { verifyToken } from "../middleware/authMiddleware";
+import {AuthController} from "../controllers/authController"
+import { TokenService } from "../../infrastructure/services/TokenService";
+
+
+import { UserRepositoryImpl } from "../../infrastructure/database/repositories/userRepositoryImpl";
+import { DoctorRepositoryImpl } from "../../infrastructure/database/repositories/doctorRepositoryImpl";
+import { DepartmentRepositoryImpl } from "../../infrastructure/database/repositories/departmentRepositoryImpl";
+import { BookingRepositoryImpl } from "../../infrastructure/database/repositories/bookingRepositoryImpl";
+import { AdminWalletRepositoryImpl } from "../../infrastructure/database/repositories/adminWalletRepositoryImpl";
 
 const router = express.Router();
-const adminController = new AdminController();
+const adminController = new AdminController({
+  userRepository: new UserRepositoryImpl(),
+  doctorRepository: new DoctorRepositoryImpl(),
+  departmentRepository: new DepartmentRepositoryImpl(),
+  bookingRepository: new BookingRepositoryImpl(),
+  adminWalletRepository: new AdminWalletRepositoryImpl(),
+});
+
+const authController = new AuthController(new TokenService(), "refreshToken");
+
+router.get("/refresh-token", (req, res) => authController.refreshToken(req, res));
 
 router.post("/login", (req, res) => adminController.adminLogin(req, res));
 router.get("/protected", verifyToken("admin"), (req, res) => {

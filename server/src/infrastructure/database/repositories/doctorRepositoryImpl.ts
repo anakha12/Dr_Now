@@ -1,45 +1,139 @@
-import DoctorModel, { IDoctor } from "../../database/models/doctorModel";
-import { DoctorRepository } from "../../../domain/repositories/doctorRepository";
+import DoctorModel, { IDoctor, Slot } from "../../database/models/doctorModel";
+import { IDoctorRepository } from "../../../domain/repositories/doctorRepository";
 import { DoctorEntity } from "../../../domain/entities/doctorEntity";
-import { Slot } from "../../database/models/doctorModel";
 import BookingModel from "../../database/models/bookingModel";
 
-export class DoctorRepositoryImpl implements DoctorRepository {
+export class DoctorRepositoryImpl implements IDoctorRepository {
 
-  async completeProfile(doctorId: string, profileData: any): Promise<any> {
-  const updated = await DoctorModel.findByIdAndUpdate(
-    doctorId,
-    {
-      $set: {
-        bio: profileData.bio,
-        education: profileData.education,
-        awards: profileData.awards,
-        experience: profileData.experience,
-        affiliatedHospitals: profileData.affiliatedHospitals,
-        isProfileComplete: true, 
-      },
-    },
-    { new: true }
-  );
-  console.log("updated",updated)
-  if (!updated) throw new Error("Doctor not found");
+  async getPaginatedDoctors(skip: number, limit: number): Promise<DoctorEntity[]> {
+    const doctors = await DoctorModel.find({})
+      .skip(skip)
+      .limit(limit)
+      .sort({ createdAt: -1 }); 
+    return doctors.map(this._toDomain);
+  }
 
-  return this.toDomain(updated); 
+
+async getUnverifiedDoctorsPaginated(skip: number, limit: number): Promise<DoctorEntity[]> {
+  const unverified = await DoctorModel.find({ isVerified: false, isRejected: false })
+    .skip(skip)
+    .limit(limit)
+    .sort({ createdAt: -1 });
+
+  return unverified.map(this._toDomain);
 }
 
+async countUnverifiedDoctors(): Promise<number> {
+  return await DoctorModel.countDocuments({ isVerified: false, isRejected: false });
+}
+
+
+async countDoctors(): Promise<number> {
+  return await DoctorModel.countDocuments({});
+}
+
+async countFilteredDoctors(filters: {
+  search?: string;
+  specialization?: string;
+  maxFee?: number;
+  gender?: string;
+}): Promise<number> {
+  const query: any = {
+    isVerified: true,
+    isBlocked: false,
+  };
+
+  if (filters.search) {
+    query.name = { $regex: filters.search, $options: "i" };
+  }
+
+  if (filters.specialization) {
+    query.specialization = filters.specialization;
+  }
+
+  if (filters.maxFee !== undefined) {
+    query.$expr = { $lte: [{ $toDouble: "$consultFee" }, filters.maxFee] };
+  }
+
+  if (filters.gender) {
+    query.gender = filters.gender;
+  }
+
+  return await DoctorModel.countDocuments(query);
+}
+
+
+
+ async getFilteredDoctors(
+  filters: {
+    search?: string;
+    specialization?: string;
+    maxFee?: number;
+    gender?: string;
+  },
+  skip: number,
+  limit: number
+): Promise<DoctorEntity[]> {
+  const query: any = {
+    isVerified: true,
+    isBlocked: false,
+  };
+
+  if (filters.search) {
+    query.name = { $regex: filters.search, $options: "i" };
+  }
+
+  if (filters.specialization) {
+    query.specialization = filters.specialization;
+  }
+
+  if (filters.maxFee !== undefined) {
+    query.$expr = { $lte: [{ $toDouble: "$consultFee" }, filters.maxFee] };
+  }
+
+  if (filters.gender) {
+    query.gender = filters.gender;
+  }
+
+  const doctors = await DoctorModel.find(query).skip(skip).limit(limit);
+  return doctors.map(this._toDomain);
+}
+
+
+
+  async completeProfile(doctorId: string, profileData: any): Promise<DoctorEntity> {
+    const updated = await DoctorModel.findByIdAndUpdate(
+      doctorId,
+      {
+        $set: {
+          bio: profileData.bio,
+          education: profileData.education,
+          awards: profileData.awards,
+          experience: profileData.experience,
+          affiliatedHospitals: profileData.affiliatedHospitals,
+          isProfileComplete: true,
+        },
+      },
+      { new: true }
+    );
+
+    if (!updated) throw new Error("Doctor not found");
+    return this._toDomain(updated);
+  }
 
   async getDoctorById(id: string): Promise<DoctorEntity> {
     const doctor = await DoctorModel.findById(id);
     if (!doctor) throw new Error("Doctor not found");
-    return this.toDomain(doctor);
+    return this._toDomain(doctor);
   }
 
-
-  async creditWallet(doctorId: string, tx: { amount: number; description: string; date: Date }): Promise<void> {
+  async creditWallet(
+    doctorId: string,
+    tx: { amount: number; description: string; date: Date }
+  ): Promise<void> {
     const doctor = await DoctorModel.findById(doctorId);
     if (!doctor) throw new Error("Doctor not found");
 
-  
     doctor.walletBalance = doctor.walletBalance ?? 0;
     doctor.totalEarned = doctor.totalEarned ?? 0;
     doctor.walletTransactions = doctor.walletTransactions ?? [];
@@ -50,77 +144,69 @@ export class DoctorRepositoryImpl implements DoctorRepository {
     doctor.walletTransactions.push({
       amount: tx.amount,
       reason: tx.description,
-      type: 'credit', 
+      type: "credit",
       date: tx.date,
     });
 
     await doctor.save();
   }
 
-
-
   async removeAllSlotsOnDate(doctorId: string, date: string): Promise<void> {
     const doctor = await DoctorModel.findById(doctorId);
     if (!doctor) throw new Error("Doctor not found");
-    doctor.availability = doctor.availability.filter(
-      (entry: any) => entry.date !== date
-    );
 
+    doctor.availability = doctor.availability.filter((entry: any) => entry.date !== date);
     await doctor.save();
   }
 
   async checkIfAnySlotBooked(doctorId: string, date: string, slots: Slot[]): Promise<boolean> {
     for (const slot of slots) {
-      const existingBooking = await BookingModel.findOne({
+      const existing = await BookingModel.findOne({
         doctorId,
         date,
         "slot.from": slot.from,
         "slot.to": slot.to,
         status: { $in: ["Upcoming", "Completed"] },
       });
-
-      if (existingBooking) {
-        return true; 
-      }
+      if (existing) return true;
     }
+    return false;
+  }
 
-  return false; 
-}
-
-
-async updateBlockedStatus(id: string, isBlocked: boolean): Promise<void> {
-  await DoctorModel.findByIdAndUpdate(id, { isBlocked });
-}
+  async updateBlockedStatus(id: string, isBlocked: boolean): Promise<void> {
+    await DoctorModel.findByIdAndUpdate(id, { isBlocked });
+  }
 
   async getAllDoctors(): Promise<DoctorEntity[]> {
-  const doctors = await DoctorModel.find({});
-  return doctors.map(doc => this.toDomain(doc));
-}
+    const doctors = await DoctorModel.find({});
+    return doctors.map(this._toDomain);
+  }
 
   async findById(id: string): Promise<DoctorEntity | null> {
-    return await DoctorModel.findById(id);
+    const doctor = await DoctorModel.findById(id);
+    return doctor ? this._toDomain(doctor) : null;
   }
 
   async findUnverifiedDoctors(): Promise<DoctorEntity[]> {
-    const unverifiedDoctors = await DoctorModel.find({ isVerified: false,isRejected: false });
-    return unverifiedDoctors.map(doc => this.toDomain(doc));
+    const unverified = await DoctorModel.find({ isVerified: false, isRejected: false });
+    return unverified.map(this._toDomain);
   }
 
   async findByEmail(email: string): Promise<DoctorEntity | null> {
     const doctor = await DoctorModel.findOne({ email });
-    return doctor ? this.toDomain(doctor) : null;
+    return doctor ? this._toDomain(doctor) : null;
   }
 
   async createDoctor(doctor: DoctorEntity): Promise<DoctorEntity> {
-    const persistenceDoctor = this.toPersistence(doctor);
+    const persistenceDoctor = this._toPersistence(doctor);
     const created = await DoctorModel.create(persistenceDoctor);
-    return this.toDomain(created);
+    return this._toDomain(created);
   }
 
   async updateDoctor(id: string, updates: Partial<DoctorEntity>): Promise<DoctorEntity> {
     const updated = await DoctorModel.findByIdAndUpdate(id, updates, { new: true });
     if (!updated) throw new Error("Doctor not found");
-    return this.toDomain(updated);
+    return this._toDomain(updated);
   }
 
   async addAvailability(
@@ -128,15 +214,10 @@ async updateBlockedStatus(id: string, isBlocked: boolean): Promise<void> {
     payload: { date: string; slots: Slot[] }
   ): Promise<void> {
     const doctor = await DoctorModel.findById(doctorId);
+    if (!doctor) throw new Error("Doctor not found");
 
-    if (!doctor) {
-      throw new Error("Doctor not found");
-    }
-    if (!Array.isArray(doctor.availability)) {
-      doctor.availability = [];
-    }
+    doctor.availability = doctor.availability ?? [];
     doctor.availability.push(payload);
-
     await doctor.save();
   }
 
@@ -144,24 +225,19 @@ async updateBlockedStatus(id: string, isBlocked: boolean): Promise<void> {
     const doctor = await DoctorModel.findById(doctorId);
     if (!doctor) throw new Error("Doctor not found");
 
-    const availabilityEntry = doctor.availability.find((entry: any) => entry.date === date);
-    if (!availabilityEntry) throw new Error("Date not found in availability");
+    const entry = doctor.availability.find((a: any) => a.date === date);
+    if (!entry) throw new Error("Date not found in availability");
 
-    availabilityEntry.slots = availabilityEntry.slots.filter(
-      (s: any) => !(s.from === slot.from && s.to === slot.to)
-    );
+    entry.slots = entry.slots.filter((s: any) => s.from !== slot.from || s.to !== slot.to);
 
-    if (availabilityEntry.slots.length === 0) {
-      doctor.availability = doctor.availability.filter((entry: any) => entry.date !== date);
+    if (entry.slots.length === 0) {
+      doctor.availability = doctor.availability.filter((a: any) => a.date !== date);
     }
 
     await doctor.save();
   }
 
-
-
-
-  private toPersistence(entity: DoctorEntity): Partial<IDoctor> {
+  private _toPersistence(entity: DoctorEntity): Partial<IDoctor> {
     return {
       name: entity.name,
       email: entity.email,
@@ -183,7 +259,7 @@ async updateBlockedStatus(id: string, isBlocked: boolean): Promise<void> {
     };
   }
 
-  private toDomain(doc: any): DoctorEntity {
+  private _toDomain(doc: any): DoctorEntity {
     return {
       id: doc._id.toString(),
       name: doc.name,

@@ -7,7 +7,7 @@ export interface AuthRequest extends Request {
 
 export const cookieAuth = (requiredRole: "admin" | "user" | "doctor") => {
   return (req: AuthRequest, res: Response, next: NextFunction) => {
-    // use 'accessToken' for doctor, 'userAccessToken' for user/admin
+  
     const token =
       requiredRole === "doctor"
         ? req.cookies?.accessToken

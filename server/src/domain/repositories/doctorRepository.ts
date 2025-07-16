@@ -2,7 +2,7 @@ import { DoctorEntity } from "../entities/doctorEntity";
 import { Slot } from "../entities/doctorEntity";
 
 
-export interface DoctorRepository {
+export interface IDoctorRepository {
   findByEmail(email: string): Promise<DoctorEntity | null>;
   createDoctor(doctor: DoctorEntity): Promise<DoctorEntity>;
   updateDoctor(id: string, updates: Partial<DoctorEntity>): Promise<DoctorEntity>;
@@ -26,5 +26,29 @@ export interface DoctorRepository {
     affiliatedHospitals: string[];
   }
 ): Promise<DoctorEntity>;
+
+  getFilteredDoctors(
+  filters: {
+    search?: string;
+    specialization?: string;
+    maxFee?: number;
+    gender?: string;
+  },
+  skip: number,
+  limit: number
+): Promise<DoctorEntity[]>;
+
+countFilteredDoctors(filters: {
+  search?: string;
+  specialization?: string;
+  maxFee?: number;
+  gender?: string;
+}): Promise<number>;
+getPaginatedDoctors(skip: number, limit: number): Promise<DoctorEntity[]>;
+countDoctors(): Promise<number>;
+
+getUnverifiedDoctorsPaginated(skip: number, limit: number): Promise<DoctorEntity[]>;
+countUnverifiedDoctors(): Promise<number>;
+
 
 }

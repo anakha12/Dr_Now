@@ -1,4 +1,4 @@
-import { DoctorRepository } from "../../../domain/repositories/doctorRepository";
+import { IDoctorRepository } from "../../../domain/repositories/doctorRepository";
 
 interface Education {
   degree: string;
@@ -19,13 +19,13 @@ interface CompleteProfileDTO {
   experience: Experience[];
   affiliatedHospitals: string[];
 }
-
+ 
 export class CompleteDoctorProfile {
-  constructor(private readonly doctorRepo: DoctorRepository) {}
+  constructor(private readonly _doctorRepo: IDoctorRepository) {}
 
   async execute(doctorId: string, profileData: CompleteProfileDTO) {
     if (!doctorId) throw new Error("Doctor ID is required");
 
-    return await this.doctorRepo.completeProfile(doctorId, profileData);
+    return await this._doctorRepo.completeProfile(doctorId, profileData);
   }
 }

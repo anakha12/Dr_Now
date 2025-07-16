@@ -1,15 +1,15 @@
-import { DepartmentRepository } from "../../../domain/repositories/departmentRepository";
+import { IDepartmentRepository } from "../../../domain/repositories/departmentRepository";
 import { DepartmentEntity } from "../../../domain/entities/department.entity";
 
 export class CreateDepartmentUseCase {
-  constructor(private departmentRepo: DepartmentRepository) {}
+  constructor(private _departmentRepo: IDepartmentRepository) {}
 
   async execute(data: DepartmentEntity): Promise<DepartmentEntity> {
-    const existing = await this.departmentRepo.findByName(data.Departmentname);
+    const existing = await this._departmentRepo.findByName(data.Departmentname);
     if (existing) {
       throw new Error("Department name already exists");
     }
 
-    return await this.departmentRepo.createDepartment(data);
+    return await this._departmentRepo.createDepartment(data);
   }
 }

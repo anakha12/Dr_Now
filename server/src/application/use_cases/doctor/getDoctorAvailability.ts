@@ -1,10 +1,10 @@
-import { DoctorRepository } from "../../../domain/repositories/doctorRepository";
+import { IDoctorRepository } from "../../../domain/repositories/doctorRepository";
 
 export class GetDoctorAvailability {
-  constructor(private readonly doctorRepository: DoctorRepository) {}
+  constructor(private readonly _doctorRepository: IDoctorRepository) {}
 
   async execute(doctorId: string) {
-    const doctor = await this.doctorRepository.findById(doctorId);
+    const doctor = await this._doctorRepository.findById(doctorId);
     if (!doctor) {
       throw new Error("Doctor not found");
     }

@@ -1,6 +1,6 @@
 import mongoose, { Schema, Document } from 'mongoose';
 
-export interface AdminWalletTransaction {
+export interface IAdminWalletTransaction {
   type: 'credit' | 'debit';
   amount: number;
   doctorId?: mongoose.Types.ObjectId;
@@ -12,7 +12,7 @@ export interface AdminWalletTransaction {
 
 export interface IAdminWallet extends Document {
   totalBalance: number;
-  transactions: AdminWalletTransaction[];
+  transactions: IAdminWalletTransaction[];
 }
 
 const adminWalletSchema = new Schema<IAdminWallet>({

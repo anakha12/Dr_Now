@@ -14,30 +14,27 @@ const ITEMS_PER_PAGE = 3;
 
 const UserWallet = () => {
   const [balance, setBalance] = useState<number>(0);
-  const [allTransactions, setAllTransactions] = useState<Transaction[]>([]);
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [totalTransactions, setTotalTransactions] = useState<number>(0);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const { addNotification } = useNotifications();
 
-  const totalPages = Math.ceil(allTransactions.length / ITEMS_PER_PAGE);
+  const totalPages = Math.ceil(totalTransactions / ITEMS_PER_PAGE);
 
   useEffect(() => {
     const fetchWallet = async () => {
       try {
-        const data = await getUserWallet();
+        const data = await getUserWallet(currentPage, ITEMS_PER_PAGE);
         setBalance(data.walletBalance);
-        setAllTransactions(data.walletTransactions || []);
+        setTransactions(data.walletTransactions || []);
+        setTotalTransactions(data.totalTransactions || 0);
       } catch (err) {
         addNotification("Failed to load wallet info", "error");
       }
     };
 
     fetchWallet();
-  }, [addNotification]);
-
-  const paginatedTransactions = allTransactions.slice(
-    (currentPage - 1) * ITEMS_PER_PAGE,
-    currentPage * ITEMS_PER_PAGE
-  );
+  }, [currentPage, addNotification]);
 
   const handlePrev = () => {
     if (currentPage > 1) setCurrentPage((prev) => prev - 1);
@@ -48,63 +45,76 @@ const UserWallet = () => {
   };
 
   return (
-    <div>
-      <h1 className="text-2xl font-bold text-teal-700 mb-4">Wallet</h1>
-      <p className="text-xl font-semibold mb-6">Balance: ₹{balance}</p>
+    <div className="p-6 min-h-screen bg-gradient-to-br from-cyan-100 to-blue-200">
+      <div className="max-w-3xl mx-auto bg-white/80 backdrop-blur-md p-8 rounded-2xl shadow-lg">
+        <h1 className="text-3xl font-bold text-center text-teal-800 mb-6">My Wallet</h1>
+        <div className="text-center mb-8">
+          <p className="text-lg font-medium text-gray-600">Available Balance</p>
+          <p className="text-4xl font-bold text-green-700">₹{balance}</p>
+        </div>
 
-      <h2 className="text-lg font-semibold mb-2">Transaction History</h2>
-      {paginatedTransactions.length === 0 ? (
-        <p className="text-gray-500">No transactions yet.</p>
-      ) : (
-        <>
-          <ul className="space-y-2">
-            {paginatedTransactions.map((tx, index) => (
-              <li
-                key={index}
-                className={`p-4 rounded shadow ${
-                  tx.type === "credit" ? "bg-green-100" : "bg-red-100"
-                }`}
-              >
-                <p className="font-semibold">
-                  {tx.type === "credit" ? "+" : "-"}₹{tx.amount}
-                </p>
-                <p className="text-sm">{tx.reason}</p>
-                {tx.bookingId && (
-                  <p className="text-xs text-gray-500">Booking: {tx.bookingId}</p>
-                )}
-                <p className="text-xs text-gray-500">
-                  {new Date(tx.date).toLocaleString()}
-                </p>
-              </li>
-            ))}
-          </ul>
+        <h2 className="text-xl font-semibold text-gray-800 mb-4 border-b pb-2">Transaction History</h2>
 
-          {/* Pagination Controls */}
-          {/* Pagination Controls */}
-          {allTransactions.length > ITEMS_PER_PAGE && (
-            <div className="flex justify-between items-center mt-4">
-              <button
-                onClick={handlePrev}
-                disabled={currentPage === 1}
-                className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
-              >
-                Previous
-              </button>
-              <span className="text-sm text-gray-700">
-                Page {currentPage} of {totalPages}
-              </span>
-              <button
-                onClick={handleNext}
-                disabled={currentPage === totalPages}
-                className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
-              >
-                Next
-              </button>
-            </div>
-          )}
+        {transactions.length === 0 ? (
+          <p className="text-center text-gray-500">No transactions yet.</p>
+        ) : (
+          <>
+            <ul className="space-y-4">
+              {transactions.map((tx, index) => (
+                <li
+                  key={index}
+                  className={`p-5 rounded-xl shadow-sm transition-transform transform hover:scale-[1.02] border-l-4 ${
+                    tx.type === "credit" ? "border-green-500 bg-green-50" : "border-red-500 bg-red-50"
+                  }`}
+                >
+                  <div className="flex justify-between items-center mb-1">
+                    <span
+                      className={`text-sm font-semibold px-2 py-1 rounded-full ${
+                        tx.type === "credit" ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"
+                      }`}
+                    >
+                      {tx.type.toUpperCase()}
+                    </span>
+                    <span className="text-lg font-bold">
+                      {tx.type === "credit" ? "+" : "-"}₹{tx.amount}
+                    </span>
+                  </div>
+                  <p className="text-sm text-gray-700">{tx.reason}</p>
+                  {tx.bookingId && (
+                    <p className="text-xs text-gray-500 mt-1">Booking: {tx.bookingId}</p>
+                  )}
+                  <p className="text-xs text-gray-400">
+                    {new Date(tx.date).toLocaleString()}
+                  </p>
+                </li>
+              ))}
+            </ul>
 
-        </>
-      )}
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <div className="flex justify-center items-center mt-8 gap-4">
+                <button
+                  onClick={handlePrev}
+                  disabled={currentPage === 1}
+                  className="px-4 py-2 bg-gray-200 rounded-full text-sm hover:bg-gray-300 disabled:opacity-50 transition"
+                >
+                  Previous
+                </button>
+                <span className="text-gray-600 text-sm">
+                  Page {currentPage} of {totalPages}
+                </span>
+                <button
+                  onClick={handleNext}
+                  disabled={currentPage === totalPages}
+                  className="px-4 py-2 bg-gray-200 rounded-full text-sm hover:bg-gray-300 disabled:opacity-50 transition"
+                >
+                  Next
+                </button>
+              </div>
+            )}
+          </>
+        )}
+      </div>
     </div>
   );
 };

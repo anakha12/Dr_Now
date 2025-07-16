@@ -1,24 +1,24 @@
-import { BookingRepository } from "../../../domain/repositories/bookingRepository";
-import { AdminWalletRepository } from "../../../domain/repositories/adminWalletRepository";
-import { DoctorRepository } from "../../../domain/repositories/doctorRepository";
+import { IBookingRepository } from "../../../domain/repositories/bookingRepository";
+import { IAdminWalletRepository } from "../../../domain/repositories/adminWalletRepository";
+import { IDoctorRepository } from "../../../domain/repositories/doctorRepository";
 import { AdminWalletTransaction } from "../../../domain/entities/adminWalletEntity";
 
 export class PayoutDoctorUseCase {
   constructor(
-    private bookingRepo: BookingRepository,
-    private doctorRepo: DoctorRepository,
-    private walletRepo: AdminWalletRepository
+    private _bookingRepo: IBookingRepository,
+    private _doctorRepo: IDoctorRepository,
+    private _walletRepo: IAdminWalletRepository
   ) {}
 
   async execute(doctorId: string): Promise<void> {
-    const bookings = await this.bookingRepo.getDoctorBookings(doctorId);
+    const bookings = await this._bookingRepo.getDoctorBookings(doctorId);
 
     const pendingBookings = bookings.filter(
-      (b) => b.payoutStatus === "Pending"
+      (b) => b.payoutStatus === "Pending" && b.status === "Completed"
     );
 
     if (!pendingBookings.length) {
-      throw new Error("No pending payouts for this doctor");
+      throw new Error("No completed bookings with pending payout for this doctor");
     }
 
     const totalAmount = pendingBookings.reduce(
@@ -35,17 +35,16 @@ export class PayoutDoctorUseCase {
     };
 
 
-    await this.walletRepo.createTransaction(transaction);
+    await this._walletRepo.createTransaction(transaction);
 
 
-    await this.doctorRepo.creditWallet(doctorId, {
+    await this._doctorRepo.creditWallet(doctorId, {
       amount: totalAmount,
       description: "Payout for completed bookings",
       date: new Date(),
     });
 
-    // 3. Update payoutStatus of those bookings
     const bookingIds = pendingBookings.map((b) => b.id).filter(Boolean) as string[];
-    await this.bookingRepo.markPayoutAsPaid(bookingIds);
+    await this._bookingRepo.markPayoutAsPaid(bookingIds);
   }
 }

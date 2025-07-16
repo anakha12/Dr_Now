@@ -1,11 +1,11 @@
-import { BookingRepository } from "../../../domain/repositories/bookingRepository";
+import { IBookingRepository } from "../../../domain/repositories/bookingRepository";
 import { Booking } from "../../../domain/entities/bookingEntity";
 
 export class GetDoctorBookings {
-  constructor(private bookingRepository: BookingRepository) {}
+  constructor(private _bookingRepository: IBookingRepository) {}
 
-  async execute(doctorId: string): Promise<Booking[]> {
-    const bookings = await this.bookingRepository.getDoctorBookings(doctorId);
-    return bookings;
+  async execute(doctorId: string, page: number, limit: number): Promise<{ bookings: Booking[], totalPages: number }> {
+    return await this._bookingRepository.getDoctorBookings(doctorId, page, limit);
   }
 }
+

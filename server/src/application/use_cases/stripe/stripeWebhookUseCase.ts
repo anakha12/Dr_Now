@@ -1,12 +1,12 @@
 import { Stripe } from "stripe";
-import { BookingRepository } from "../../../domain/repositories/bookingRepository";
+import { IBookingRepository } from "../../../domain/repositories/bookingRepository";
 import { Booking } from "../../../domain/entities/bookingEntity";
-import { AdminWalletRepository } from "../../../domain/repositories/adminWalletRepository";
+import { IAdminWalletRepository } from "../../../domain/repositories/adminWalletRepository";
 
 export class StripeWebhookUseCase {
   constructor(
-    private bookingRepo: BookingRepository,
-    private adminWalletRepo: AdminWalletRepository
+    private _bookingRepo: IBookingRepository,
+    private _adminWalletRepo: IAdminWalletRepository
   ) {}
 
   async handleCheckoutSession(session: Stripe.Checkout.Session) {
@@ -39,7 +39,7 @@ export class StripeWebhookUseCase {
         doctorEarning,
       };
 
-      const savedBooking = await this.bookingRepo.createBooking(booking);
+      const savedBooking = await this._bookingRepo.createBooking(booking);
       console.log(" Booking saved with ID:", savedBooking.id);
 
       console.log(" About to credit commission to admin wallet...");
@@ -52,7 +52,7 @@ export class StripeWebhookUseCase {
         type: "credit",
       });
 
-      await this.adminWalletRepo.creditCommission(
+      await this._adminWalletRepo.creditCommission(
         {
           amount: fee,
           doctorId: metadata.doctorId,

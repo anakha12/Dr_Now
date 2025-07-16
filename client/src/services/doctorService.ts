@@ -1,4 +1,4 @@
-// src/services/doctorService.ts
+
 import doctorAxios from "./doctorAxiosInstance";
 
 interface Slot {
@@ -7,7 +7,7 @@ interface Slot {
 }
 
 
-// Send OTP - Step 1
+
 export const sendOtp = async (formData: FormData) => {
   try {
     const response = await doctorAxios.post("/send-otp", formData, {
@@ -19,7 +19,7 @@ export const sendOtp = async (formData: FormData) => {
   }
 };
 
-// Verify OTP - Step 2
+
 export const registerDoctor = async (email: string, otp: string) => {
   try {
     const response = await doctorAxios.post("/verify-otp", { email, otp });
@@ -29,7 +29,7 @@ export const registerDoctor = async (email: string, otp: string) => {
   }
 };
 
-// Login
+
 export const doctorLogin = async ({ email, password }: { email: string; password: string }) => {
   try {
     const response = await doctorAxios.post("/login", { email, password });
@@ -39,7 +39,7 @@ export const doctorLogin = async ({ email, password }: { email: string; password
   }
 };
 
-// Get Profile
+
 export const getDoctorProfile = async () => {
   try {
     const response = await doctorAxios.get("/profile");
@@ -49,7 +49,7 @@ export const getDoctorProfile = async () => {
   }
 };
 
-// Update Profile
+
 export const updateDoctorProfile = async (profileData: any) => {
   try {
     const response = await doctorAxios.put("/profile", profileData);
@@ -60,7 +60,7 @@ export const updateDoctorProfile = async (profileData: any) => {
   }
 };
 
-// Schedule APIs
+
 
 export const fetchDoctorAvailability = async (doctorId: string) => {
   try {
@@ -99,14 +99,21 @@ export const deleteDoctorSlot = async (
   }
 };
 
-export const getDoctorBookings = async () => {
-  const response = await doctorAxios.get("/bookings");
-  return response.data;
+export const getDoctorBookings = async (page: number, limit: number) => {
+  try {
+    const response = await doctorAxios.get("/bookings", {
+      params: { page, limit },
+    });
+    return response.data; 
+  } catch (error: any) {
+    throw error.response?.data || { message: "Failed to fetch bookings" };
+  }
 };
 
 
-export const cancelDoctorBooking = async (bookingId: string) => {
-  const response = await doctorAxios.put(`/bookings/${bookingId}/cancel`);
+
+export const cancelDoctorBooking = async (bookingId: string, reason: string) => {
+  const response = await doctorAxios.put(`/bookings/${bookingId}/cancel`,{reason});
   return response.data;
 };
 
@@ -139,7 +146,7 @@ export const getAllDepartments = async () => {
   }
 };
 
-// Wallet Summary with Pagination
+
 export const getWalletSummary = async (page: number, limit: number) => {
   try {
     const response = await doctorAxios.get("/wallet-summary", {
@@ -170,6 +177,11 @@ export const completeDoctorProfile = async (
   }
 };
 
+
+export const getDoctorBookingDetails = async (bookingId: string) => {
+  const response = await doctorAxios.get(`/bookings/${bookingId}`);
+  return response.data;
+};
 
 
 

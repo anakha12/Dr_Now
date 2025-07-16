@@ -1,6 +1,6 @@
-// src/services/adminService.ts
-import adminAxios from "./adminAxiosInstance"; 
 
+import adminAxios from "./adminAxiosInstance"; 
+import type { DepartmentResponse } from "../types/department";
 
 export const adminLogin = async (email: string, password: string) => {
   try {
@@ -17,15 +17,16 @@ export const adminLogin = async (email: string, password: string) => {
 };
 
 
-export const getUnverifiedDoctors = async () => {
+export const getUnverifiedDoctors = async (page = 1, limit = 5) => {
   try {
-    const response = await adminAxios.get("/unverified-doctors");
+    const response = await adminAxios.get(`/unverified-doctors?page=${page}&limit=${limit}`);
     return response.data;
   } catch (error: any) {
     const message = error.response?.data?.message || "Failed to fetch unverified doctors";
     throw new Error(message);
   }
 };
+
 
 export const verifyDoctorById = async (doctorId: string) => {
   try {
@@ -47,15 +48,18 @@ export const rejectDoctorById = async (doctorId: string) => {
   }
 };
 
-export const getAllDoctors = async () => {
+export const getAllDoctors = async (page: number = 1, limit: number = 5) => {
   try {
-    const response = await adminAxios.get("/doctors");
-    return response.data;
+    const response = await adminAxios.get("/doctors", {
+      params: { page, limit },
+    });
+    return response.data; 
   } catch (error: any) {
     const message = error.response?.data?.message || "Failed to fetch doctors";
     throw new Error(message);
   }
 };
+
 
 export const toggleDoctorBlockStatus = async (doctorId: string, action: "block" | "unblock") => {
   try {
@@ -67,15 +71,16 @@ export const toggleDoctorBlockStatus = async (doctorId: string, action: "block" 
   }
 };
 
-export const getAllUsers = async () => {
+export const getAllUsers = async (page: number, limit: number = 5) => {
   try {
-    const response = await adminAxios.get("/users");
-    return response.data;
+    const response = await adminAxios.get(`/users?page=${page}&limit=${limit}`);
+    return response.data; 
   } catch (error: any) {
     const message = error.response?.data?.message || "Failed to fetch users";
     throw new Error(message);
   }
 };
+
 
 export const toggleUserBlockStatus = async (userId: string, action: "block" | "unblock") => {
   try {
@@ -87,7 +92,7 @@ export const toggleUserBlockStatus = async (userId: string, action: "block" | "u
   }
 };
 
-export const getAllDepartments = async (page: number, limit: number = 5) => {
+export const getAllDepartments = async (page: number, limit: number = 5):Promise<DepartmentResponse> => {
   try {
     const response = await adminAxios.get(`/departments?page=${page}&limit=${limit}`);
     return response.data; 
