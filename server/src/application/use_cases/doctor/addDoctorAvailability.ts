@@ -1,4 +1,5 @@
 import { IDoctorRepository } from "../../../domain/repositories/doctorRepository";
+import { IAddDoctorAvailability } from "../interfaces/doctor/IAddDoctorAvailability";
 
 interface Slot {
   from: string;
@@ -11,7 +12,7 @@ interface AvailabilityPayload {
   to: string;
 }
 
-export class AddDoctorAvailability {
+export class AddDoctorAvailability implements IAddDoctorAvailability{
   constructor(private _doctorRepo: IDoctorRepository) {}
 
   private generateTimeSlots(from: string, to: string, interval: number = 30): Slot[] {

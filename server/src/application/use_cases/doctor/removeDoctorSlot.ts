@@ -1,11 +1,12 @@
 import { IDoctorRepository } from "../../../domain/repositories/doctorRepository";
+import { IRemoveDoctorSlot } from "../interfaces/doctor/IRemoveDoctorSlot";
 
 interface Slot {
   from: string;
   to: string;
 }
 
-export class RemoveDoctorSlot {
+export class RemoveDoctorSlot implements IRemoveDoctorSlot{
   constructor(private _doctorRepo: IDoctorRepository) {}
 
   async execute(doctorId: string, date: string, slot: Slot): Promise<void> {

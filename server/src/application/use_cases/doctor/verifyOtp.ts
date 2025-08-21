@@ -1,6 +1,7 @@
 import { IDoctorRepository } from "../../../domain/repositories/doctorRepository";
+import { IVerifyDoctorOtp } from "../interfaces/doctor/IVerifyDoctorOtp";
 
-export class VerifyDoctorOtp {
+export class VerifyDoctorOtp implements IVerifyDoctorOtp{
   constructor(private _doctorRepository: IDoctorRepository) {}
 
   async execute(email: string, otp: string): Promise<string > {

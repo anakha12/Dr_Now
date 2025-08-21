@@ -1,8 +1,9 @@
 import { IDoctorRepository } from "../../../domain/repositories/doctorRepository";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import { IDoctorLogin } from "../interfaces/doctor/IDoctorLogin";
 
-export class DoctorLogin {
+export class DoctorLogin implements IDoctorLogin{
   constructor(private _doctorRepo: IDoctorRepository) {}
 
   async execute(email: string, password: string): Promise<

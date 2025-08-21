@@ -1,7 +1,8 @@
 import { IDoctorRepository } from "../../../domain/repositories/doctorRepository";
 import { IBookingRepository } from "../../../domain/repositories/bookingRepository";
+import { IUpdateDoctorProfile } from "../interfaces/doctor/IUpdateDoctorProfile";
 
-export class UpdateDoctorProfile {
+export class UpdateDoctorProfile implements IUpdateDoctorProfile{
   constructor(
     private _doctorRepository: IDoctorRepository,
     private _bookingRepository: IBookingRepository

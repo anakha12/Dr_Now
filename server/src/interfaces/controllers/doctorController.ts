@@ -2,28 +2,23 @@ import { Request, Response } from "express";
 import { Messages } from "../../utils/Messages";
 import { HttpStatus } from "../../utils/HttpStatus";
 import { DoctorRegisterDTO } from "../../application/dto/doctorRegister.dto";
-import { SendDoctorOtp } from "../../application/use_cases/doctor/sendDoctorOtp";
-import { VerifyDoctorOtp } from "../../application/use_cases/doctor/verifyOtp";
-import { DoctorLogin } from "../../application/use_cases/doctor/doctorLogin";
-import { GetDoctorProfile } from "../../application/use_cases/doctor/getDoctorProfile";
-import { UpdateDoctorProfile } from "../../application/use_cases/doctor/updateDoctorProfile";
-import { cookieAuth, AuthRequest } from "../../interfaces/middleware/cookieAuth";
-import {AddDoctorAvailability} from "../../application/use_cases/doctor/addDoctorAvailability";
-import { GetDoctorAvailability } from "../../application/use_cases/doctor/getDoctorAvailability";
-import { GetDoctorBookings } from "../../application/use_cases/doctor/getDoctorBookings"; 
-import { EditDoctorAvailability } from "../../application/use_cases/doctor/editDoctorAvailability";
-import { RemoveDoctorSlot } from "../../application/use_cases/doctor/removeDoctorSlot";
-import { CancelDoctorBooking } from "../../application/use_cases/doctor/cancelDoctorBooking";
-import { GetAllDepartments } from "../../application/use_cases/doctor/getAllDepartments";
-import { GetDoctorWalletSummary } from "../../application/use_cases/doctor/getDoctorWalletSummary";
-import { CompleteDoctorProfile } from "../../application/use_cases/doctor/completeDoctorProfile";
-import { GetBookingDetailsDoctor } from "../../application/use_cases/doctor/getBookingDetailsDoctor";
+import { AuthRequest } from "../middleware/authMiddleware";
 
-import { IUserRepository } from "../../domain/repositories/userRepository";
-import { IDoctorRepository } from "../../domain/repositories/doctorRepository";
-import { IDepartmentRepository } from "../../domain/repositories/departmentRepository";
-import { IBookingRepository } from "../../domain/repositories/bookingRepository";
-import { IAdminWalletRepository } from "../../domain/repositories/adminWalletRepository";
+import { ISendDoctorOtp } from "../../application/use_cases/interfaces/doctor/ISendDoctorOtp";
+import { IVerifyDoctorOtp } from "../../application/use_cases/interfaces/doctor/IVerifyDoctorOtp";
+import { IGetDoctorProfile } from "../../application/use_cases/interfaces/doctor/IGetDoctorProfile";
+import { IUpdateDoctorProfile } from "../../application/use_cases/interfaces/doctor/IUpdateDoctorProfile";
+import { IAddDoctorAvailability } from "../../application/use_cases/interfaces/doctor/IAddDoctorAvailability";
+import { IGetDoctorAvailability } from "../../application/use_cases/interfaces/doctor/IGetDoctorAvailability";
+import { IGetDoctorBookings } from "../../application/use_cases/interfaces/doctor/IGetDoctorBookings";
+import { IEditDoctorAvailability } from "../../application/use_cases/interfaces/doctor/IEditDoctorAvailability";
+import { IRemoveDoctorSlot } from "../../application/use_cases/interfaces/doctor/IRemoveDoctorSlot";
+import { ICancelDoctorBooking } from "../../application/use_cases/interfaces/doctor/ICancelDoctorBooking";
+import { IGetAllDepartmentsUseCase } from "../../application/use_cases/interfaces/doctor/IGetAllDepartmentsUseCase";
+import { IGetDoctorWalletSummary } from "../../application/use_cases/interfaces/doctor/IGetDoctorWalletSummary";
+import { ICompleteDoctorProfile } from "../../application/use_cases/interfaces/doctor/ICompleteDoctorProfile";
+import { IGetBookingDetails } from "../../application/use_cases/interfaces/user/IGetBookingDetails";
+import { IDoctorLogin } from "../../application/use_cases/interfaces/doctor/IDoctorLogin";
 
 
 interface MulterFiles {
@@ -38,53 +33,27 @@ interface MulterFiles {
   };
 }
 
-interface DoctorControllerDependencies {
-  doctorRepository: IDoctorRepository;
-  bookingRepository: IBookingRepository;
-  userRepository: IUserRepository;
-  adminWalletRepository: IAdminWalletRepository;
-  departmentRepository: IDepartmentRepository;
-}
-
 
 export class DoctorController {
-  private _sendDoctorOtp: SendDoctorOtp;
-  private _verifyDoctorOtp: VerifyDoctorOtp; 
-  private _loginUseCase: DoctorLogin;
-  private _getDoctorProfileUseCase: GetDoctorProfile;
-  private _updateDoctorProfileUseCase: UpdateDoctorProfile;
-  private _addAvailabilityUseCase: AddDoctorAvailability;
-  private _getAvailabilityUseCase: GetDoctorAvailability;
-  private _getDoctorBookingsUseCase: GetDoctorBookings;
-  private _editAvailabilityUseCase:EditDoctorAvailability;
-  private _removeDoctorSlotUseCase:RemoveDoctorSlot;
-  private _cancelDoctorBookingUseCase: CancelDoctorBooking;
-  private _getAllDepartmentsUseCase: GetAllDepartments;
-  private _getDoctorWalletSummaryUseCase: GetDoctorWalletSummary;
-  private _completeProfileUseCase: CompleteDoctorProfile;
-  private _getBookingDetailsDoctorUseCase: GetBookingDetailsDoctor;
 
-  constructor(deps:DoctorControllerDependencies) {
-    this._sendDoctorOtp = new SendDoctorOtp(deps.doctorRepository);
-    this._verifyDoctorOtp = new VerifyDoctorOtp(deps.doctorRepository);
-    this._loginUseCase = new DoctorLogin(deps.doctorRepository);
-    this._getDoctorProfileUseCase = new GetDoctorProfile(deps.doctorRepository);
-    this._updateDoctorProfileUseCase = new UpdateDoctorProfile(deps.doctorRepository, deps.bookingRepository);
-    this._addAvailabilityUseCase = new AddDoctorAvailability(deps.doctorRepository);
-    this._getAvailabilityUseCase = new GetDoctorAvailability(deps.doctorRepository);
-    this._getDoctorBookingsUseCase = new GetDoctorBookings(deps.bookingRepository);
-    this._editAvailabilityUseCase = new EditDoctorAvailability(deps.doctorRepository);
-    this._removeDoctorSlotUseCase = new RemoveDoctorSlot(deps.doctorRepository);
-    this._cancelDoctorBookingUseCase = new CancelDoctorBooking(
-      deps.bookingRepository,
-      deps.userRepository,
-      deps.adminWalletRepository
-    );
-    this._getAllDepartmentsUseCase = new GetAllDepartments(deps.departmentRepository);
-    this._getDoctorWalletSummaryUseCase = new GetDoctorWalletSummary(deps.doctorRepository);
-    this._completeProfileUseCase = new CompleteDoctorProfile(deps.doctorRepository);
-    this._getBookingDetailsDoctorUseCase = new GetBookingDetailsDoctor(deps.bookingRepository);
-  }
+
+  constructor(
+      private _sendDoctorOtp: ISendDoctorOtp,
+      private _verifyDoctorOtp: IVerifyDoctorOtp, 
+      private _loginUseCase: IDoctorLogin,
+      private _getDoctorProfileUseCase: IGetDoctorProfile,
+      private _updateDoctorProfileUseCase: IUpdateDoctorProfile,
+      private _addAvailabilityUseCase: IAddDoctorAvailability,
+      private _getAvailabilityUseCase: IGetDoctorAvailability,
+      private _getDoctorBookingsUseCase: IGetDoctorBookings,
+      private _editAvailabilityUseCase:IEditDoctorAvailability,
+      private _removeDoctorSlotUseCase:IRemoveDoctorSlot,
+      private _cancelDoctorBookingUseCase: ICancelDoctorBooking,
+      private _getAllDepartmentsUseCase: IGetAllDepartmentsUseCase,
+      private _getDoctorWalletSummaryUseCase: IGetDoctorWalletSummary,
+      private _completeProfileUseCase: ICompleteDoctorProfile,
+      private _getBookingDetailsDoctorUseCase: IGetBookingDetails,
+  ) {}
 
   async sendOtp(req: MulterRequest, res: Response): Promise<void> {
     try {

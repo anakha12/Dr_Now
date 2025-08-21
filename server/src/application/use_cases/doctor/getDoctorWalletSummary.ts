@@ -1,6 +1,7 @@
 import { IDoctorRepository } from "../../../domain/repositories/doctorRepository";
+import { IGetDoctorWalletSummary } from "../interfaces/doctor/IGetDoctorWalletSummary";
 
-export class GetDoctorWalletSummary {
+export class GetDoctorWalletSummary implements IGetDoctorWalletSummary{
   constructor(private _doctorRepository: IDoctorRepository) {}
 
   async execute(doctorId: string, page: number, limit: number) {

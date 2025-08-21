@@ -1,4 +1,5 @@
 import { IDoctorRepository } from "../../../domain/repositories/doctorRepository";
+import { ICompleteDoctorProfile } from "../interfaces/doctor/ICompleteDoctorProfile";
 
 interface Education {
   degree: string;
@@ -20,7 +21,7 @@ interface CompleteProfileDTO {
   affiliatedHospitals: string[];
 }
  
-export class CompleteDoctorProfile {
+export class CompleteDoctorProfile implements ICompleteDoctorProfile{
   constructor(private readonly _doctorRepo: IDoctorRepository) {}
 
   async execute(doctorId: string, profileData: CompleteProfileDTO) {

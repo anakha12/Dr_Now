@@ -1,6 +1,7 @@
 import { IDoctorRepository } from "../../../domain/repositories/doctorRepository";
+import { IGetDoctorProfile } from "../interfaces/doctor/IGetDoctorProfile";
 
-export class GetDoctorProfile {
+export class GetDoctorProfile implements IGetDoctorProfile{
   constructor(private _doctorRepository: IDoctorRepository) {}
 
   async execute(id: string) {

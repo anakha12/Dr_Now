@@ -3,8 +3,9 @@ import { DoctorEntity } from "../../../domain/entities/doctorEntity";
 import { DoctorRegisterDTO } from "../../dto/doctorRegister.dto";
 import crypto from "crypto";
 import bcrypt from "bcrypt";
+import { ISendDoctorOtp } from "../interfaces/doctor/ISendDoctorOtp";
 
-export class SendDoctorOtp {
+export class SendDoctorOtp implements ISendDoctorOtp{
   constructor(private _doctorRepository: IDoctorRepository) {}
 
   async execute(dto: DoctorRegisterDTO): Promise<void> {
