@@ -2,7 +2,7 @@ import { IDepartmentRepository } from "../../../domain/repositories/departmentRe
 import { DepartmentEntity } from "../../../domain/entities/department.entity";
 
 
-export class GetDepartmentsUser {
+export class GetDepartmentsUser implements GetDepartmentsUser{
   constructor(private _departmentRepo: IDepartmentRepository) {}
 
   async execute(page: number, limit: number): Promise<DepartmentEntity[]> {

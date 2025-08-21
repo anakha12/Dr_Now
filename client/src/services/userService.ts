@@ -114,6 +114,11 @@ export const getUserBookings = async (page = 1, limit = 4) => {
   return response.data; 
 };
 
+export const logoutUser = async () => {
+  const response = await userAxios.post("/logout", {}, { withCredentials: true });
+  return response.data;
+};
+
 
 export const cancelUserBooking = async (bookingId: string, reason: string) => {
   const response = await userAxios.post(`/user/bookings/${bookingId}/cancel`,{ reason });

@@ -2,8 +2,9 @@ import { IUserRepository } from "../../../domain/repositories/userRepository";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { UserEntity } from "../../../domain/entities/userEntity";
+import { ILoginUser } from "../interfaces/user/ILoginUser";
 
-export class LoginUser {
+export class LoginUser implements ILoginUser{
   constructor(private _userRepository: IUserRepository) {}
 
   async execute(email: string, password: string): Promise<{ token: string; user: UserEntity }> {

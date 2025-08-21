@@ -1,7 +1,8 @@
 
 import { IDoctorRepository } from "../../../domain/repositories/doctorRepository";
+import { IToggleBlockDoctor } from "../interfaces/admin/IToggleBlockDoctor";
 
-export class ToggleBlockDoctor {
+export class ToggleBlockDoctor implements IToggleBlockDoctor{
   constructor(private _doctorRepo: IDoctorRepository) {}
 
   async execute(doctorId: string, action: "block" | "unblock"): Promise<void> {

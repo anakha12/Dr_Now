@@ -5,13 +5,23 @@ import BookingModel from "../../database/models/bookingModel";
 
 export class DoctorRepositoryImpl implements IDoctorRepository {
 
-  async getPaginatedDoctors(skip: number, limit: number): Promise<DoctorEntity[]> {
-    const doctors = await DoctorModel.find({})
-      .skip(skip)
-      .limit(limit)
-      .sort({ createdAt: -1 }); 
-    return doctors.map(this._toDomain);
+async getPaginatedDoctors(skip: number, limit: number, search: string = ""): Promise<DoctorEntity[]> {
+  const query: any = {};
+
+  if (search) {
+    query.name = { $regex: search, $options: "i" };
   }
+
+  const doctors = await DoctorModel.find(query)
+    .skip(skip)
+    .limit(limit)
+    .sort({ createdAt: -1 });
+
+  return doctors.map(this._toDomain);
+}
+
+
+
 
 
 async getUnverifiedDoctorsPaginated(skip: number, limit: number): Promise<DoctorEntity[]> {
@@ -288,6 +298,7 @@ async countFilteredDoctors(filters: {
       awards: doc.awards,
       experience: doc.experience,
       affiliatedHospitals: doc.affiliatedHospitals,
+      role: doc.role
     };
   }
 }

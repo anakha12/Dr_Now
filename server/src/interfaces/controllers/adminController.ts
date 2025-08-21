@@ -2,77 +2,42 @@
   import { Messages } from "../../utils/Messages";
   import { HttpStatus } from "../../utils/HttpStatus";
 
-  import { LoginAdmin } from "../../application/use_cases/admin/loginAdmin";
-  import { GetUnverifiedDoctors } from "../../application/use_cases/admin/getUnverifiedDoctors";
-  import { VerifyDoctor } from "../../application/use_cases/admin/verifyDoctor";
-  import { RejectDoctor } from "../../application/use_cases/admin/rejectDoctor";
-  import { GetAllDoctors } from "../../application/use_cases/admin/getAllDoctors";
-  import { ToggleBlockDoctor } from "../../application/use_cases/admin/toggleBlockDoctor";
-  import { GetAllUsersUseCase } from "../../application/use_cases/admin/getAllUsers";
-  import { ToggleUserBlockStatusUseCase } from "../../application/use_cases/admin/toggleUserBlockStatus";
-  import { CreateDepartmentUseCase } from "../../application/use_cases/admin/createDepartment";
-  import { GetDepartmentsUseCase } from "../../application/use_cases/admin/getDepartments";
-  import { ToggleDepartmentStatusUseCase } from "../../application/use_cases/admin/toggleDepartmentStatus";
-  import { GetPendingDoctorPayouts } from "../../application/use_cases/admin/getPendingDoctorPayouts";
-  import { GetWalletSummary } from "../../application/use_cases/admin/getWalletSummary";
-  import { PayoutDoctorUseCase } from "../../application/use_cases/admin/payoutDoctor";
+import { ILoginAdmin } from "../../application/use_cases/interfaces/admin/ILoginAdmin";
+import { IGetUnverifiedDoctors } from "../../application/use_cases/interfaces/admin/IGetUnverifiedDoctors";
+import { IVerifyDoctorUseCase } from "../../application/use_cases/interfaces/admin/IVerifyDoctorUseCase";
+import { IRejectDoctorUseCase } from "../../application/use_cases/interfaces/admin/IRejectDoctorUseCase";
+import { IToggleBlockDoctor } from "../../application/use_cases/interfaces/admin/IToggleBlockDoctor";
+import { IGetAllUsersUseCase } from "../../application/use_cases/interfaces/admin/IGetAllUsers";
+import { IToggleUserBlockStatusUseCase } from "../../application/use_cases/interfaces/admin/IToggleUserBlockStatusUseCase";
+import { ICreateDepartmentUseCase } from "../../application/use_cases/interfaces/admin/ICreateDepartmentUseCase";
+import { IGetDepartmentsUseCase } from "../../application/use_cases/interfaces/admin/IGetDepartmentsUseCase";
+import { IToggleDepartmentStatusUseCase } from "../../application/use_cases/interfaces/admin/IToggleDepartmentStatusUseCase";
+import { IGetPendingDoctorPayoutsUseCase } from "../../application/use_cases/interfaces/admin/IGetPendingDoctorPayoutsUseCase";
+import { IGetWalletSummaryUseCase } from "../../application/use_cases/interfaces/admin/IGetWalletSummaryUseCase";
+import { IPayoutDoctorUseCase } from "../../application/use_cases/interfaces/admin/IPayoutDoctorUseCase";
+import { IGetAllDoctorsUseCase } from "../../application/use_cases/interfaces/admin/IGetAllDoctors";
 
-  import { IUserRepository } from "../../domain/repositories/userRepository";
-  import { IDoctorRepository } from "../../domain/repositories/doctorRepository";
-  import { IDepartmentRepository } from "../../domain/repositories/departmentRepository";
-  import { IBookingRepository } from "../../domain/repositories/bookingRepository";
-  import { IAdminWalletRepository } from "../../domain/repositories/adminWalletRepository";
-
-  interface AdminControllerDependencies {
-    userRepository: IUserRepository;
-    doctorRepository: IDoctorRepository;
-    departmentRepository: IDepartmentRepository;
-    bookingRepository: IBookingRepository;
-    adminWalletRepository: IAdminWalletRepository;
-  }
 
   export class AdminController {
-    private _loginAdmin: LoginAdmin;
-    private _getUnverifiedDoctorsUseCase: GetUnverifiedDoctors; 
-    private _verifyDoctorUseCase: VerifyDoctor;
-    private _rejectDoctorUseCase: RejectDoctor;
-    private _getAllDoctorsUseCase: GetAllDoctors;
-    private _toggleBlockDoctorUseCase: ToggleBlockDoctor;
-    private _getAllUsersUseCase:GetAllUsersUseCase;
-    private _toggleUserBlockStatusUseCase:ToggleUserBlockStatusUseCase;
-    private _createDepartmentUseCase: CreateDepartmentUseCase;
-    private _getDepartmentsUseCase: GetDepartmentsUseCase;
-    private _toggleDepartmentStatusUseCase: ToggleDepartmentStatusUseCase;
-    private _getPendingDoctorPayoutsUseCase: GetPendingDoctorPayouts;
-    private _getWalletSummaryUseCase: GetWalletSummary;
-    private _payoutDoctorUseCase: PayoutDoctorUseCase;
+    
+    constructor(
+      private _loginAdmin: ILoginAdmin,
+      private _getUnverifiedDoctorsUseCase: IGetUnverifiedDoctors,
+      private _verifyDoctorUseCase: IVerifyDoctorUseCase,
+      private _rejectDoctorUseCase: IRejectDoctorUseCase,
+      private _getAllDoctorsUseCase: IGetAllDoctorsUseCase,
+      private _toggleBlockDoctorUseCase: IToggleBlockDoctor,
+      private _getAllUsersUseCase:IGetAllUsersUseCase,
+      private _toggleUserBlockStatusUseCase:IToggleUserBlockStatusUseCase,
+      private _createDepartmentUseCase: ICreateDepartmentUseCase,
+      private _getDepartmentsUseCase: IGetDepartmentsUseCase,
+      private _toggleDepartmentStatusUseCase: IToggleDepartmentStatusUseCase,
+      private _getPendingDoctorPayoutsUseCase: IGetPendingDoctorPayoutsUseCase,
+      private _getWalletSummaryUseCase: IGetWalletSummaryUseCase,
+      private _payoutDoctorUseCase: IPayoutDoctorUseCase,
 
-    constructor(deps:AdminControllerDependencies) {
-      this._loginAdmin = new LoginAdmin(deps.userRepository);
-      this._getUnverifiedDoctorsUseCase = new GetUnverifiedDoctors(deps.doctorRepository);
-      this._verifyDoctorUseCase = new VerifyDoctor(deps.doctorRepository)
-      this._rejectDoctorUseCase = new RejectDoctor(deps.doctorRepository);
-      this._getAllDoctorsUseCase = new GetAllDoctors(deps.doctorRepository);
-      this._toggleBlockDoctorUseCase = new ToggleBlockDoctor(deps.doctorRepository);
-      this._getAllUsersUseCase = new GetAllUsersUseCase(deps.userRepository);
-      this._toggleUserBlockStatusUseCase = new ToggleUserBlockStatusUseCase(deps.userRepository);
-      this._createDepartmentUseCase = new CreateDepartmentUseCase(deps.departmentRepository);
-      this._getDepartmentsUseCase = new GetDepartmentsUseCase(deps.departmentRepository);
-      this._toggleDepartmentStatusUseCase = new ToggleDepartmentStatusUseCase(deps.departmentRepository);
-      this._getPendingDoctorPayoutsUseCase = new GetPendingDoctorPayouts(
-        deps.bookingRepository,
-        deps.doctorRepository
-      );
-      this._getWalletSummaryUseCase = new GetWalletSummary(
-        deps.adminWalletRepository,
-        deps.bookingRepository
-      );
-      this._payoutDoctorUseCase = new PayoutDoctorUseCase(
-        deps.bookingRepository,
-        deps.doctorRepository,
-        deps.adminWalletRepository
-      );
-
+    ) {
+    
     }
 
     async adminLogin(req: Request, res: Response): Promise<void> {
@@ -146,8 +111,8 @@
       try {
         const page = parseInt(req.query.page as string) || 1;
         const limit = parseInt(req.query.limit as string) || 5;
-
-        const { doctors, totalDoctors } = await this._getAllDoctorsUseCase.execute(page, limit);
+        const search= (req.query.search as string)|| "";
+        const { doctors, totalDoctors } = await this._getAllDoctorsUseCase.execute(page, limit, search);
 
         res.status(200).json({
           doctors,
@@ -183,8 +148,9 @@
       try {
         const page = parseInt(req.query.page as string) || 1;
        const limit = parseInt(req.query.limit as string) || 5;
+       const search=(req.query.search as string)|| "";
 
-        const users = await this._getAllUsersUseCase.execute(page, limit);
+        const users = await this._getAllUsersUseCase.execute(page, limit, search);
         res.status(HttpStatus.OK).json(users);
       } catch (err: any) {
         res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: err.message });
@@ -228,7 +194,8 @@
     try {
       const page = parseInt(req.query.page as string) || 1;
       const limit = parseInt(req.query.limit as string) || 10;
-       const { departments, totalPages } = await this._getDepartmentsUseCase.execute(page, limit);
+      const search=(req.query.search as string)|| "";
+       const { departments, totalPages } = await this._getDepartmentsUseCase.execute(page, limit, search);
       res.status(HttpStatus.OK).json({ departments, totalPages });
     } catch (err: any) {
       res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: err.message });
@@ -245,14 +212,20 @@
       res.status(HttpStatus.BAD_REQUEST).json({ message: err.message });
     }
   }
+
   async getPendingDoctors(req: Request, res: Response) {
     try {
-      const list = await this._getPendingDoctorPayoutsUseCase.execute();
-      res.status(HttpStatus.OK).json(list);
+      const page = parseInt(req.query.page as string) || 1;
+      const limit = parseInt(req.query.limit as string) || 5;
+
+      const result = await this._getPendingDoctorPayoutsUseCase.execute(page, limit);
+
+      return res.status(HttpStatus.OK).json(result);
     } catch (err: any) {
-      res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: err.message });
+      return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: err.message });
     }
   }
+
 
   async getWalletSummary(req: Request, res: Response) {
     try {

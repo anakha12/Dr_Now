@@ -5,13 +5,23 @@ import { WalletTransactionUser } from "../../../domain/entities/walletTransactio
 
 export class UserRepositoryImpl implements IUserRepository {
 
-  async getPaginatedUsers(page: number, limit: number): Promise<{
+  async getPaginatedUsers(page: number, limit: number, search: string= ""): Promise<{
     users: UserEntity[];
     totalPages: number;
   }> {
     const skip = (page - 1) * limit;
-    const totalUsers = await UserModel.countDocuments({ role: "user" });
-    const users = await UserModel.find({ role: "user" })
+    const searchFilter = search
+    ? {
+        role: "user",
+        $or: [
+          { name: { $regex: search, $options: "i" } },
+          { email: { $regex: search, $options: "i" } },
+          { phone: { $regex: search, $options: "i" } },
+        ],
+      }
+    : { role: "user" };
+    const totalUsers = await UserModel.countDocuments(searchFilter);
+    const users = await UserModel.find(searchFilter)
       .skip(skip)
       .limit(limit)
       .sort({ createdAt: -1 });

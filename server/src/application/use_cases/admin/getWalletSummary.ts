@@ -1,7 +1,8 @@
 import { IAdminWalletRepository } from "../../../domain/repositories/adminWalletRepository";
 import { IBookingRepository } from "../../../domain/repositories/bookingRepository";
+import { IGetWalletSummaryUseCase } from "../interfaces/admin/IGetWalletSummaryUseCase";
 
-export class GetWalletSummary {
+export class GetWalletSummary implements IGetWalletSummaryUseCase{
   constructor(
     private _walletRepo: IAdminWalletRepository,
     private _bookingRepo: IBookingRepository

@@ -1,7 +1,8 @@
 import { IDepartmentRepository } from "../../../domain/repositories/departmentRepository";
 import { DepartmentEntity } from "../../../domain/entities/department.entity";
+import { ICreateDepartmentUseCase } from "../interfaces/admin/ICreateDepartmentUseCase";
 
-export class CreateDepartmentUseCase {
+export class CreateDepartmentUseCase implements ICreateDepartmentUseCase{
   constructor(private _departmentRepo: IDepartmentRepository) {}
 
   async execute(data: DepartmentEntity): Promise<DepartmentEntity> {

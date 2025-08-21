@@ -1,7 +1,8 @@
 // src/application/use_cases/user/getUserProfile.ts
 import { IUserRepository } from "../../../domain/repositories/userRepository";
+import { IGetUserProfile } from "../interfaces/user/IGetUserProfile";
 
-export class GetUserProfile {
+export class GetUserProfile implements IGetUserProfile{
   private _userRepository: IUserRepository;
 
   constructor(userRepository: IUserRepository) {

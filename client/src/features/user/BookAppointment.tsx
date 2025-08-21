@@ -168,7 +168,7 @@ console.log("doctor._id:", doctor?.id);
       <div className="bg-white shadow-md rounded-lg p-6 space-y-4 border border-teal-100">
         <div className="flex items-center gap-4">
           <img
-            src={`${import.meta.env.VITE_BACKEND_URL}/${doctor.profileImage}`}
+            src={doctor.profileImage}
             alt={doctor.name}
             className="w-20 h-20 rounded-full object-cover border-2 border-teal-500"
           />

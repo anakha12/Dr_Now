@@ -9,6 +9,85 @@ import userModel from "../models/userModel";
 export class BookingRepositoryImpl implements IBookingRepository {
 
 
+async getDoctorsWithPendingEarnings(
+  page: number,
+  limit: number
+): Promise<{
+  doctors: { doctorId: string; doctorName: string; totalPendingEarnings: number }[];
+  totalPages: number;
+}> {
+  const skip = (page - 1) * limit;
+
+ 
+  const totalDoctorsResult = await BookingModel.aggregate([
+    {
+      $match: {
+        paymentStatus: "paid",
+        payoutStatus: "Pending",
+        doctorEarning: { $gt: 0 },
+        status: { $in: ["Completed", "Upcoming"] },
+      },
+    },
+    {
+      $group: {
+        _id: "$doctorId",
+      },
+    },
+    {
+      $count: "total",
+    },
+  ]);
+
+  const totalDoctors = totalDoctorsResult[0]?.total || 0;
+  const totalPages = Math.ceil(totalDoctors / limit);
+
+  // Step 2: Get paginated doctor data with earnings
+  const doctors = await BookingModel.aggregate([
+    {
+      $match: {
+        paymentStatus: "paid",
+        payoutStatus: "Pending",
+        doctorEarning: { $gt: 0 },
+        status: { $in: ["Completed", "Upcoming"] },
+      },
+    },
+    {
+      $group: {
+        _id: "$doctorId",
+        totalPendingEarnings: { $sum: "$doctorEarning" },
+      },
+    },
+    {
+      $sort: { totalPendingEarnings: -1 },
+    },
+    { $skip: skip },
+    { $limit: limit },
+    {
+      $lookup: {
+        from: "doctors",
+        localField: "_id",
+        foreignField: "_id",
+        as: "doctor",
+      },
+    },
+    { $unwind: "$doctor" },
+    {
+      $project: {
+        doctorId: { $toString: "$_id" },
+        doctorName: "$doctor.name",
+        totalPendingEarnings: 1,
+      },
+    },
+  ]);
+
+  return {
+    doctors,
+    totalPages,
+  };
+}
+
+
+
   async findBookingByIdAndDoctor(bookingId: string, doctorId: string): Promise<EnrichedBooking | null> {
   const found = await BookingModel.findOne({
     _id: new Types.ObjectId(bookingId),

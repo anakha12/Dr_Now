@@ -2,8 +2,9 @@ import { IBookingRepository } from "../../../domain/repositories/bookingReposito
 import { IAdminWalletRepository } from "../../../domain/repositories/adminWalletRepository";
 import { IDoctorRepository } from "../../../domain/repositories/doctorRepository";
 import { AdminWalletTransaction } from "../../../domain/entities/adminWalletEntity";
+import { IPayoutDoctorUseCase } from "../interfaces/admin/IPayoutDoctorUseCase";
 
-export class PayoutDoctorUseCase {
+export class PayoutDoctorUseCase implements IPayoutDoctorUseCase{
   constructor(
     private _bookingRepo: IBookingRepository,
     private _doctorRepo: IDoctorRepository,

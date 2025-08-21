@@ -35,7 +35,8 @@ export class SendDoctorOtp {
       isBlocked: false,
       isActive: false,
       otp,
-      otpExpiresAt
+      otpExpiresAt,
+      role: "doctor"
     };
 
     await this._doctorRepository.createDoctor(doctorToSave);

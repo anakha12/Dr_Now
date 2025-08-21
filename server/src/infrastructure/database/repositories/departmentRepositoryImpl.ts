@@ -16,12 +16,16 @@ export class DepartmentRepositoryImpl implements IDepartmentRepository {
     };
   }
 
-  async getPaginatedDepartments(page: number, limit: number): Promise<{ departments: DepartmentEntity[], totalPages: number }> {
+  async getPaginatedDepartments(page: number, limit: number, search: string): Promise<{ departments: DepartmentEntity[], totalPages: number }> {
     const skip = (page - 1) * limit;
-    const totalDepartments = await DepartmentModel.countDocuments();
+    const searchFilter= search
+      ? {
+        Departmentname:{$regex: search, $options:'i'},
+      }:{};
+    const totalDepartments = await DepartmentModel.countDocuments(searchFilter);
     const totalPages = Math.ceil(totalDepartments / limit);
 
-    const departments = await DepartmentModel.find()
+    const departments = await DepartmentModel.find(searchFilter)
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit);

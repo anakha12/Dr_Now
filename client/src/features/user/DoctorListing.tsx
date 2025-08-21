@@ -146,8 +146,8 @@ const DoctorListing = () => {
                 transition={{ delay: 0.1 * i }}
               >
                 <img
-                  src={`${import.meta.env.VITE_BACKEND_URL}/${doc.profileImage}`}
-                  alt={doc.name}
+                  src= {doc.profileImage}
+                  alt={`${import.meta.env.VITE_BACKEND_URL}/${doc.profileImage}`}
                   className="w-20 h-20 rounded-full mx-auto mb-4 border-4 border-teal-500 object-cover"
                 />
                 <h3 className="text-lg font-bold text-teal-800 capitalize">{doc.name}</h3>

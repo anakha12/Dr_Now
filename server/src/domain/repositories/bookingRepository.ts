@@ -16,6 +16,10 @@ export interface IBookingRepository {
   hasActiveBookingsForDoctor(doctorId: string): Promise<boolean>;
   findBookingByIdAndUser(bookingId: string, userId: string): Promise< Booking | null>;
   findBookingByIdAndDoctor(bookingId: string, doctorId: string): Promise< EnrichedBooking | null >;
+  getDoctorsWithPendingEarnings(page: number, limit: number): Promise<{
+    doctors: { doctorId: string; doctorName: string; totalPendingEarnings: number }[];
+    totalPages: number;
+  }>;
 
 }
 

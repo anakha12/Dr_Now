@@ -1,6 +1,7 @@
 import { IBookingRepository } from "../../../domain/repositories/bookingRepository";
+import { IGetUserBookings } from "../interfaces/user/IGetUserBookings";
 
-export class GetUserBookings {
+export class GetUserBookings implements IGetUserBookings{
   constructor(private readonly _bookingRepository: IBookingRepository) {}
 
  async execute(userId: string, page: number, limit: number) {

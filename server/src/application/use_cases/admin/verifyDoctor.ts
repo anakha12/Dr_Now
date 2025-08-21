@@ -1,7 +1,8 @@
 import { IDoctorRepository } from "../../../domain/repositories/doctorRepository";
 import { sendMail } from "../../../services/mailService";
+import { IVerifyDoctorUseCase } from "../interfaces/admin/IVerifyDoctorUseCase";
 
-export class VerifyDoctor {
+export class VerifyDoctor implements IVerifyDoctorUseCase{
   constructor(private _doctorRepo: IDoctorRepository) {}
 
   async execute(doctorId: string): Promise<void> {

@@ -15,11 +15,12 @@ const Patients = () => {
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [searchQuery, setSearchQuery] = useState(""); 
   const patientsPerPage = 5;
 
   const fetchPatients = async () => {
     try {
-      const data = await getAllUsers(currentPage, patientsPerPage);
+      const data = await getAllUsers(currentPage, patientsPerPage, searchQuery); 
       setPatients(data.users); 
       setTotalPages(data.totalPages);
     } catch (error) {
@@ -31,8 +32,12 @@ const Patients = () => {
   };
 
   useEffect(() => {
-    fetchPatients();
-  }, [currentPage]);
+    const delayDebounce= setTimeout(()=>{
+      fetchPatients();
+    },400);
+
+    return ()=>clearTimeout(delayDebounce)
+  }, [currentPage, searchQuery]);
 
   const handleToggleBlock = async (id: string, isBlocked: boolean) => {
     try {
@@ -44,6 +49,11 @@ const Patients = () => {
     }
   };
 
+  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
+    setCurrentPage(1);
+  };
+
   const handlePrev = () => setCurrentPage((prev) => Math.max(1, prev - 1));
   const handleNext = () => setCurrentPage((prev) => Math.min(totalPages, prev + 1));
 
@@ -52,6 +62,14 @@ const Patients = () => {
       {/* Header */}
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-2xl font-bold text-teal-700">All Patients</h2>
+        {/* 🆕 Search input */}
+        <input
+          type="text"
+          placeholder="Search"
+          value={searchQuery}
+          onChange={handleSearch}
+          className="border rounded px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-teal-400"
+        />
       </div>
 
       {/* Table */}
@@ -69,7 +87,7 @@ const Patients = () => {
             {patients.length === 0 ? (
               <tr>
                 <td colSpan={4} className="text-center p-6 text-gray-500">
-                  No patients available.
+                  No patients found.
                 </td>
               </tr>
             ) : (

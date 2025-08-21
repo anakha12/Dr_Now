@@ -1,6 +1,7 @@
 import { IUserRepository } from "../../../domain/repositories/userRepository";
+import { IGetUserWallet } from "../interfaces/user/IGetUserWallet";
 
-export class GetUserWalletUseCase {
+export class GetUserWalletUseCase implements IGetUserWallet{
   constructor(private _userRepository: IUserRepository) {}
 
   async execute(userId: string, page: number, limit: number) {

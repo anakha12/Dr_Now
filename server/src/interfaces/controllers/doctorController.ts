@@ -88,21 +88,25 @@ export class DoctorController {
 
   async sendOtp(req: MulterRequest, res: Response): Promise<void> {
     try {
+      const profileImage = req.files?.profileImage?.[0];
+      const medicalLicense = req.files?.medicalLicense?.[0];
+      const idProof = req.files?.idProof?.[0];
 
       const dto = new DoctorRegisterDTO({
         ...req.body,
-        profileImage: req.files?.profileImage?.[0]?.filename ? `uploads/${req.files.profileImage[0].filename}` : "",
-        medicalLicense: req.files?.medicalLicense?.[0]?.filename ? `uploads/${req.files.medicalLicense[0].filename}` : "",
-        idProof: req.files?.idProof?.[0]?.filename ? `uploads/${req.files.idProof[0].filename}` : "",
-        availability: req.body.availability || "", 
+        profileImage: profileImage ? (profileImage as any).path : "",
+        medicalLicense: medicalLicense ? (medicalLicense as any).path : "",
+        idProof: idProof ? (idProof as any).path : "",
+        availability: req.body.availability || "",
       });
 
       await this._sendDoctorOtp.execute(dto);
-      res.status(HttpStatus.OK).json({ message: Messages.OTP_SENT(dto.email)});
+      res.status(HttpStatus.OK).json({ message: Messages.OTP_SENT(dto.email) });
     } catch (err: any) {
       res.status(HttpStatus.BAD_REQUEST).json({ error: err.message });
     }
   }
+
 
    async verifyOtp(req: Request, res: Response): Promise<void> {
     try {

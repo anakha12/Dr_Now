@@ -25,29 +25,33 @@ const DoctorPaymentPage = () => {
     }[]
   >([]);
   const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+
+  const { addNotification, confirmMessage } = useNotifications();
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [currentPage]);
 
   const fetchData = async () => {
     try {
       const [walletData, doctorsData] = await Promise.all([
         getWalletSummary(),
-        getPendingDoctors(),
+        getPendingDoctors(currentPage, ITEMS_PER_PAGE),
       ]);
       setWalletSummary(walletData);
-      setPendingDoctors(doctorsData);
+      setPendingDoctors(doctorsData.doctors);
+      setTotalPages(doctorsData.totalPages);
     } catch (error: any) {
       toast.error(error.message || "Failed to load data.");
     }
   };
 
-  const { addNotification, confirmMessage } = useNotifications();
-
   const handlePayout = async (doctorId: string) => {
     const doctor = pendingDoctors.find((d) => d.doctorId === doctorId);
-    const confirmed = await confirmMessage(`Are you sure you want to pay ₹${doctor?.totalPendingEarnings} to Dr. ${doctor?.doctorName}?`);
+    const confirmed = await confirmMessage(
+      `Are you sure you want to pay ₹${doctor?.totalPendingEarnings} to Dr. ${doctor?.doctorName}?`
+    );
     if (!confirmed) {
       addNotification("Payout cancelled.", "info");
       return;
@@ -61,11 +65,6 @@ const DoctorPaymentPage = () => {
       addNotification(error.message || "Payout failed.", "error");
     }
   };
-
-
-  const totalPages = Math.ceil(pendingDoctors.length / ITEMS_PER_PAGE);
-  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-  const paginatedDoctors = pendingDoctors.slice(startIndex, startIndex + ITEMS_PER_PAGE);
 
   const handlePrev = () => setCurrentPage((p) => Math.max(1, p - 1));
   const handleNext = () => setCurrentPage((p) => Math.min(totalPages, p + 1));
@@ -106,14 +105,14 @@ const DoctorPaymentPage = () => {
             </tr>
           </thead>
           <tbody>
-            {paginatedDoctors.length === 0 ? (
+            {pendingDoctors.length === 0 ? (
               <tr>
                 <td colSpan={3} className="text-center py-6 text-gray-500">
-                  No pending payouts 
+                  No pending payouts
                 </td>
               </tr>
             ) : (
-              paginatedDoctors.map((doc) => (
+              pendingDoctors.map((doc) => (
                 <tr key={doc.doctorId} className="border-b hover:bg-teal-50">
                   <td className="px-6 py-4">{doc.doctorName}</td>
                   <td className="px-6 py-4">₹{doc.totalPendingEarnings}</td>

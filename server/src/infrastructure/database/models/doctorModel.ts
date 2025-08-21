@@ -1,7 +1,7 @@
 
 
 import mongoose, { Schema, Document } from 'mongoose';
-
+import {Role} from "../../../utils/Constance"
 export interface Slot {
   from: string;
   to: string;
@@ -53,7 +53,7 @@ export interface IDoctor extends Document {
     years: String ;
   }[];
   affiliatedHospitals?: string[];
-
+  role: Role;
 }
 
 const slotSchema = new Schema<Slot>({
@@ -69,6 +69,7 @@ const availabilitySchema = new Schema<Availability>({
 const DoctorSchema: Schema = new Schema<IDoctor>(
   {
     name: { type: String, required: true },
+    role: {type: String,enum:Object.values(Role),default: Role.DOCTOR,required: true},
     email: { type: String, required: true, unique: true },
     phone: { type: String, required: true },
     yearsOfExperience: { type: Number, required: true },

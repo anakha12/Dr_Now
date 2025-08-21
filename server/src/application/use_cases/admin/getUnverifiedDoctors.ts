@@ -1,6 +1,7 @@
 import { IDoctorRepository } from "../../../domain/repositories/doctorRepository";
+import { IGetUnverifiedDoctors } from "../interfaces/admin/IGetUnverifiedDoctors";
 
-export class GetUnverifiedDoctors {
+export class GetUnverifiedDoctors implements IGetUnverifiedDoctors{
   constructor(private _doctorRepo: IDoctorRepository) {}
 
   async execute(page: number, limit: number) {

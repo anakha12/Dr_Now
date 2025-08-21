@@ -1,6 +1,7 @@
 import { IDoctorRepository } from "../../../domain/repositories/doctorRepository";
 import { IDepartmentRepository } from "../../../domain/repositories/departmentRepository";
-export class GetFilteredDoctorsUseCase {
+import { IGetFilteredDoctors } from "../interfaces/user/IGetFilteredDoctors";
+export class GetFilteredDoctorsUseCase implements IGetFilteredDoctors{
   constructor(
     private doctorRepository: IDoctorRepository,
     private departmentRepository: IDepartmentRepository

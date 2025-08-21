@@ -3,8 +3,9 @@ import { IBookingRepository } from "../../../domain/repositories/bookingReposito
 import { IDoctorRepository } from "../../../domain/repositories/doctorRepository";
 import { IAdminWalletRepository } from "../../../domain/repositories/adminWalletRepository";
 import { WalletTransactionUser } from "../../../domain/entities/walletTransactionUserEntity";
+import { IBookWithWallet } from "../interfaces/user/IBookWithWallet";
 
-export class BookWithWalletUseCase {
+export class BookWithWalletUseCase implements IBookWithWallet {
   constructor(
     private _userRepository: IUserRepository,
     private _doctorRepository: IDoctorRepository,

@@ -1,6 +1,7 @@
 import { IUserRepository } from "../../../domain/repositories/userRepository";
+import { ISendResetOtp } from "../interfaces/user/ISendResetOtp";
 
-export class SendResetOtp {
+export class SendResetOtp implements ISendResetOtp{
   constructor(private readonly _userRepository: IUserRepository) {}
 
   async execute(email: string): Promise<void> {

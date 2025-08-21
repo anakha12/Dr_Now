@@ -1,8 +1,9 @@
 import { IBookingRepository } from "../../../domain/repositories/bookingRepository";
 import { IUserRepository } from "../../../domain/repositories/userRepository";
 import { IAdminWalletRepository } from "../../../domain/repositories/adminWalletRepository";
+import { ICancelUserBooking } from "../interfaces/user/ICancelUserBooking";
 
-export class CancelUserBookingUseCase {
+export class CancelUserBookingUseCase implements ICancelUserBooking{
   constructor(
     private _bookingRepository: IBookingRepository,
     private _userRepository: IUserRepository,

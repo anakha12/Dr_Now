@@ -1,6 +1,7 @@
 import { IUserRepository } from "../../../domain/repositories/userRepository";
+import { IVerifyUserOtp } from "../interfaces/user/IVerifyUserOtp";
 
-export class VerifyUserOtp {
+export class VerifyUserOtp implements IVerifyUserOtp{
   constructor(private _userRepository: IUserRepository) {}
 
   async execute(email: string, otp: string): Promise<string> {

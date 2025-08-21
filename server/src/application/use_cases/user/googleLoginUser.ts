@@ -1,6 +1,7 @@
 import { IUserRepository } from "../../../domain/repositories/userRepository";
 import jwt from "jsonwebtoken";
 import { UserEntity } from "../../../domain/entities/userEntity";
+import { IGoogleLoginUser } from "../interfaces/user/IGoogleLoginUser";
 
 
 interface GoogleUserPayload {
@@ -9,7 +10,7 @@ interface GoogleUserPayload {
   uid: string;
 }
 
-export class GoogleLoginUser {
+export class GoogleLoginUser implements IGoogleLoginUser{
   constructor(private _userRepository: IUserRepository) {}
 
   async execute(googleUser: GoogleUserPayload): Promise<{ token: string; user: any }> {

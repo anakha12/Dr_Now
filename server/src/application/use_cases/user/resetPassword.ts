@@ -1,7 +1,8 @@
 import { IUserRepository } from "../../../domain/repositories/userRepository";
 import bcrypt from "bcrypt";
+import { IResetPassword } from "../interfaces/user/IResetPassword";
 
-export class ResetPassword {
+export class ResetPassword implements IResetPassword{
   constructor(private readonly _userRepository: IUserRepository) {}
 
   async execute(email: string, otp: string, newPassword: string): Promise<void> {

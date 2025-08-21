@@ -2,8 +2,9 @@ import { IUserRepository } from "../../../domain/repositories/userRepository";
 import { sendMail } from "../../../services/mailService";
 import { UserRegisterDTO } from "../../dto/userRegister.dto";
 import { UserEntity } from "../../../domain/entities/userEntity";
+import { ISendUserOtp } from "../interfaces/user/ISendUserOtp";
 
-export class SendUserOtp {
+export class SendUserOtp implements ISendUserOtp{
   constructor(private _userRepository: IUserRepository) {}
 
   async execute(dto: UserRegisterDTO): Promise<void> {

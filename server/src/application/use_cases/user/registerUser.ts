@@ -1,8 +1,9 @@
 import { IUserRepository } from "../../../domain/repositories/userRepository";
 import { UserEntity } from "../../../domain/entities/userEntity";
 import bcrypt from "bcrypt";
+import { IRegisterUser } from "../interfaces/user/IRegisterUser";
 
-export class RegisterUser {
+export class RegisterUser implements IRegisterUser{
   constructor(private _userRepository: IUserRepository) {}
 
   async execute(userData: UserEntity): Promise<UserEntity> {

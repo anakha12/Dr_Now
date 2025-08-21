@@ -78,7 +78,7 @@ const DoctorDetail = () => {
           transition={{ delay: 0.2, duration: 0.5 }}
         >
           <motion.img
-            src={`${import.meta.env.VITE_BACKEND_URL}/${doctor.profileImage}`}
+            src={doctor.profileImage}
             alt={doctor.name}
             className="w-44 h-44 rounded-full object-cover border-4 border-teal-500 shadow-md"
             whileHover={{ scale: 1.05 }}

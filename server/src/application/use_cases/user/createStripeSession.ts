@@ -1,12 +1,13 @@
 import Stripe from "stripe";
 import { IDoctorRepository } from "../../../domain/repositories/doctorRepository";
+import { ICreateStripeSession } from "../interfaces/user/ICreateStripeSession";
 
 interface Slot {
   from: string;
   to: string;
 }
 
-export class CreateStripeSession {
+export class CreateStripeSession implements ICreateStripeSession{
   private _doctorRepo:IDoctorRepository;
   private _stripe: Stripe;
 

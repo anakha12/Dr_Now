@@ -1,41 +1,29 @@
 import { Request, Response } from "express";
-import { RegisterUser } from "../../application/use_cases/user/registerUser";
-import { SendUserOtp } from "../../application/use_cases/user/sendUserOtp";
-import { LoginUser } from "../../application/use_cases/user/loginUser";
-import { UserRegisterDTO } from "../../application/dto/userRegister.dto";
-import { VerifyUserOtp } from "../../application/use_cases/user/verifyUserOtp";
-import { GoogleLoginUser } from "../../application/use_cases/user/googleLoginUser";
-import { SendResetOtp } from "../../application/use_cases/user/sendResetOtp";
-import { ResetPassword } from "../../application/use_cases/user/resetPassword";
-import { GetAllDoctorsForUser } from "../../application/use_cases/user/getAllDoctorsForUser";
-import { GetDoctorById } from "../../application/use_cases/user/getDoctorById";
-import { CreateStripeSession } from "../../application/use_cases/user/createStripeSession";
-import { stripe } from "../../config/stripe"; 
-import { GetBookedSlots } from "../../application/use_cases/user/getBookedSlots";
-import { GetUserProfile } from "../../application/use_cases/user/getUserProfile";
-import { GetUserBookings } from "../../application/use_cases/user/getUserBookings";
-import { CancelUserBookingUseCase } from "../../application/use_cases/user/cancelUserBooking";
-import { GetDepartmentsUser } from "../../application/use_cases/user/getDepartmentsUser";
-import { GetUserWalletUseCase } from "../../application/use_cases/user/getUserWallet";
-import { BookWithWalletUseCase } from "../../application/use_cases/user/bookWithWallet";
-import { GetFilteredDoctorsUseCase } from "../../application/use_cases/user/getFilteredDoctors";
-import { GetBookingDetails } from "../../application/use_cases/user/getBookingDetails";
 
-import { IUserRepository } from "../../domain/repositories/userRepository";
-import { IDoctorRepository } from "../../domain/repositories/doctorRepository";
-import { IDepartmentRepository } from "../../domain/repositories/departmentRepository";
-import { IBookingRepository } from "../../domain/repositories/bookingRepository";
-import { IAdminWalletRepository } from "../../domain/repositories/adminWalletRepository";
+import { UserRegisterDTO } from "../../application/dto/userRegister.dto";
 import { HttpStatus } from "../../utils/HttpStatus";
 import { Messages } from "../../utils/Messages";
+import { ILoginUser } from "../../application/use_cases/interfaces/user/ILoginUser";
+import { IBookWithWallet } from "../../application/use_cases/interfaces/user/IBookWithWallet";
+import { IRegisterUser } from "../../application/use_cases/interfaces/user/IRegisterUser";
+import { IVerifyUserOtp } from "../../application/use_cases/interfaces/user/IVerifyUserOtp";
+import { ISendResetOtp } from "../../application/use_cases/interfaces/user/ISendResetOtp";
+import { ISendUserOtp } from "../../application/use_cases/interfaces/user/ISendUserOtp";
+import { IUserLogout } from "../../application/use_cases/interfaces/user/IUserLogout";
+import { IGoogleLoginUser } from "../../application/use_cases/interfaces/user/IGoogleLoginUser";
+import { IResetPassword } from "../../application/use_cases/interfaces/user/IResetPassword";
+import { IGetAllDoctorsForUser } from "../../application/use_cases/interfaces/user/IGetAllDoctorsForUser";
+import { IGetDoctorById } from "../../application/use_cases/interfaces/user/IGetDoctorById";
+import { ICreateStripeSession } from "../../application/use_cases/interfaces/user/ICreateStripeSession";
+import { IGetBookedSlots } from "../../application/use_cases/interfaces/user/IGetBookedSlots";
+import { IGetUserProfile } from "../../application/use_cases/interfaces/user/IGetUserProfile";
+import { IGetUserBookings } from "../../application/use_cases/interfaces/user/IGetUserBookings";
+import { ICancelUserBooking } from "../../application/use_cases/interfaces/user/ICancelUserBooking";
+import { IGetBookingDetails } from "../../application/use_cases/interfaces/user/IGetBookingDetails";
+import { IGetDepartmentsUser } from "../../application/use_cases/interfaces/user/IGetDepartmentsUser";
+import { IGetUserWallet } from "../../application/use_cases/interfaces/user/IGetUserWallet";
+import { IGetFilteredDoctors } from "../../application/use_cases/interfaces/user/IGetFilteredDoctors";
 
-interface UserControllerDependencies {
-  userRepository: IUserRepository;
-  doctorRepository: IDoctorRepository;
-  departmentRepository: IDepartmentRepository;
-  bookingRepository: IBookingRepository;
-  adminWalletRepository: IAdminWalletRepository;
-}
 
 interface AuthenticatedRequest extends Request {
   user?: {
@@ -45,65 +33,28 @@ interface AuthenticatedRequest extends Request {
   };
 }
 export class UserController {
-  private _registerUser: RegisterUser;
-  private _sendUserOtp: SendUserOtp;
-  private _verifyUserOtp: VerifyUserOtp;
-  private _loginUser: LoginUser;
-  private _googleLoginUser: GoogleLoginUser;
-  private _sendResetOtp: SendResetOtp;
-  private _resetPassword: ResetPassword;
-  private _getAllDoctorsForUserUseCase: GetAllDoctorsForUser;
-  private _getDoctorByIdUseCase: GetDoctorById;
-  private _createStripeSessionUseCase: CreateStripeSession;
-  private _getBookedSlotsUseCase: GetBookedSlots;
-  private _getUserProfileUseCase: GetUserProfile;
-  private _getUserBookingsUseCase: GetUserBookings;
-  private _cancelUserBookingUseCase: CancelUserBookingUseCase;
-  private _getDepartmentsUseCase: GetDepartmentsUser;
-  private _getUserWalletUseCase: GetUserWalletUseCase;
-  private _bookWithWalletUseCase: BookWithWalletUseCase;
-  private _getFilteredDoctorsUseCase: GetFilteredDoctorsUseCase;
-  private _getBookingDetailsUseCase: GetBookingDetails;
-
-
-  constructor(deps:UserControllerDependencies) {
-    this._registerUser = new RegisterUser(deps.userRepository);
-    this._sendUserOtp = new SendUserOtp(deps.userRepository);
-    this._verifyUserOtp = new VerifyUserOtp(deps.userRepository);
-    this._loginUser = new LoginUser(deps.userRepository);
-    this._googleLoginUser = new GoogleLoginUser(deps.userRepository);
-    this._sendResetOtp = new SendResetOtp(deps.userRepository);
-    this._resetPassword = new ResetPassword(deps.userRepository);
-    this._getAllDoctorsForUserUseCase = new GetAllDoctorsForUser(deps.doctorRepository);
-    this._getDoctorByIdUseCase = new GetDoctorById(deps.doctorRepository);
-    this._getBookedSlotsUseCase = new GetBookedSlots(deps.bookingRepository);
-    this._createStripeSessionUseCase = new CreateStripeSession(
-      deps.doctorRepository,
-      stripe
-    );
-    this._getUserProfileUseCase = new GetUserProfile(deps.userRepository);
-    this._getUserBookingsUseCase = new GetUserBookings(deps.bookingRepository);
-    this._cancelUserBookingUseCase = new CancelUserBookingUseCase(
-      deps.bookingRepository,
-      deps.userRepository,
-      deps.adminWalletRepository
-    );
-    this._getDepartmentsUseCase = new GetDepartmentsUser(deps.departmentRepository);
-    this._getUserWalletUseCase = new GetUserWalletUseCase(deps.userRepository);
-    this._getFilteredDoctorsUseCase = new GetFilteredDoctorsUseCase(
-      deps.doctorRepository,
-      deps.departmentRepository
-    );
-    this._bookWithWalletUseCase = new BookWithWalletUseCase(
-      deps.userRepository,
-      deps.doctorRepository,
-      deps.bookingRepository,
-      deps.adminWalletRepository
-    );
-    this._getBookingDetailsUseCase = new GetBookingDetails(deps.bookingRepository);
-
-  }
-
+  constructor(
+      private _userLogin: ILoginUser,
+      private _bookWithWalletUseCase: IBookWithWallet,
+      private _registerUser: IRegisterUser,
+      private _verifyUserOtp: IVerifyUserOtp,
+      private _sendUserOtp: ISendUserOtp,
+      private _logoutUserUseCase: IUserLogout,
+      private _googleLoginUser: IGoogleLoginUser,
+      private _sendResetOtp: ISendResetOtp,
+      private _resetPassword: IResetPassword,
+      private _getAllDoctorsForUserUseCase: IGetAllDoctorsForUser,
+      private _getDoctorByIdUseCase: IGetDoctorById,
+      private _createStripeSessionUseCase: ICreateStripeSession,
+      private _getBookedSlotsUseCase: IGetBookedSlots,
+      private _getUserProfileUseCase: IGetUserProfile,
+      private _getUserBookingsUseCase: IGetUserBookings,
+      private _cancelUserBookingUseCase: ICancelUserBooking,
+      private _getBookingDetailsUseCase: IGetBookingDetails,
+      private _getDepartmentsUseCase: IGetDepartmentsUser,
+      private _getUserWalletUseCase: IGetUserWallet,
+      private _getFilteredDoctorsUseCase: IGetFilteredDoctors,
+  ) {}
   
   async register(req: Request, res: Response): Promise<void> {
     try {
@@ -131,7 +82,7 @@ export class UserController {
  async login(req: Request, res: Response): Promise<void> {
   try {
     const { email, password } = req.body;
-    const { token, user } = await this._loginUser.execute(email, password);
+    const { token, user } = await this._userLogin.execute(email,password)
 
     res.cookie("userAccessToken", token, {
       httpOnly: true,
@@ -144,6 +95,22 @@ export class UserController {
     res.status(HttpStatus.BAD_REQUEST).json({ error: err.message });
   }
 }
+
+ async logoutUserController(req: Request, res: Response): Promise<void> {
+  try {
+    res.clearCookie("userAccessToken", {
+      httpOnly: true,
+      sameSite: "lax",
+      secure: process.env.NODE_ENV === "production",
+    });
+
+    const result = await this._logoutUserUseCase.execute();
+    res.status(HttpStatus.OK).json(result);
+  } catch (error: any) {
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ error: error.message });
+  }
+}
+
 
   async googleLogin(req: Request, res: Response): Promise<void> {
     try {

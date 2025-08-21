@@ -1,13 +1,14 @@
 import { IDoctorRepository } from "../../../domain/repositories/doctorRepository";
 import { DoctorEntity } from "../../../domain/entities/doctorEntity";
+import { IGetAllDoctorsUseCase } from "../interfaces/admin/IGetAllDoctors";
 
-export class GetAllDoctors {
+export class GetAllDoctors implements IGetAllDoctorsUseCase{
   constructor(private _doctorRepo: IDoctorRepository) {}
 
-  async execute(page: number, limit: number): Promise<{ doctors: DoctorEntity[]; totalDoctors: number }> {
+  async execute(page: number, limit: number, search: string): Promise<{ doctors: DoctorEntity[]; totalDoctors: number }> {
     const skip = (page - 1) * limit;
 
-    const doctors = await this._doctorRepo.getPaginatedDoctors(skip, limit);
+    const doctors = await this._doctorRepo.getPaginatedDoctors(skip, limit, search);
     const totalDoctors = await this._doctorRepo.countDoctors(); 
 
     return { doctors, totalDoctors };

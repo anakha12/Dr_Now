@@ -1,7 +1,8 @@
 import { IDoctorRepository } from "../../../domain/repositories/doctorRepository";
 import { sendMail } from "../../../services/mailService";
+import { IRejectDoctorUseCase } from "../interfaces/admin/IRejectDoctorUseCase";
 
-export class RejectDoctor {
+export class RejectDoctor implements IRejectDoctorUseCase{
   constructor(private _doctorRepo: IDoctorRepository) {}
 
   async execute(doctorId: string): Promise<void> {

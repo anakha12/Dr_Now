@@ -1,8 +1,9 @@
 import jwt from "jsonwebtoken";
 import { IUserRepository } from "../../../domain/repositories/userRepository";
 import bcrypt from "bcrypt";
+import { ILoginAdmin } from "../interfaces/admin/ILoginAdmin";
 
-export class LoginAdmin {
+export class LoginAdmin implements ILoginAdmin{
   constructor(private _userRepository: IUserRepository) {}
 
   async execute(email: string, password: string): Promise<{ accessToken: string;refreshToken:string;  user: any }> {
@@ -16,7 +17,6 @@ export class LoginAdmin {
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) throw new Error("Invalid credentials");
 
-    console.log("User role:", user.role); 
  
     if (user.role !== "admin") throw new Error("Not an admin");
 

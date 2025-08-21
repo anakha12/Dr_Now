@@ -1,6 +1,6 @@
 import { IBookingRepository } from "../../../domain/repositories/bookingRepository";
 
-export class GetBookingDetails {
+export class GetBookingDetails implements GetBookingDetails{
   constructor(private bookingRepo: IBookingRepository) {}
 
   async execute(bookingId: string, userId: string) {

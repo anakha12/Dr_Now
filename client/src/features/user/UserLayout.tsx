@@ -1,9 +1,37 @@
-import { Link, Outlet } from "react-router-dom";
+import { Link, Outlet, useNavigate } from "react-router-dom";
 import { FaStethoscope } from "react-icons/fa";
-import NotificationBell from "../notifications/NotificationBell";
-
+// import NotificationBell from "../notifications/NotificationBell";
+import { useEffect, useState } from "react";
+import { getUserProfile } from "../../services/userService"; 
+import userAxios from "../../services/userAxiosInstance"; 
 
 const UserLayout = () => {
+  const [user, setUser] = useState<{ name: string } | null>(null);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const profile = await getUserProfile();
+        console.log(profile)
+        setUser(profile); 
+      } catch (err) {
+        setUser(null);
+      }
+    };
+    fetchUser();
+  }, []);
+
+  const handleLogout = async () => {
+    try {
+      await userAxios.post("/logout", {}, { withCredentials: true }); 
+      setUser(null);
+      navigate("/user/login");
+    } catch (err) {
+      console.error("Logout failed", err);
+    }
+  };
+
   return (
     <div className="font-sans text-gray-800 bg-white">
       {/* Header */}
@@ -19,8 +47,26 @@ const UserLayout = () => {
             <Link to="/about" className="hover:text-teal-600">About</Link>
             <Link to="/contact" className="hover:text-teal-600">Contact</Link>
             <Link to="/user/profile" className="hover:text-teal-600">Profile</Link>
-            <Link to="/user/notifications" className="relative"><NotificationBell /></Link>
-            <Link to="/user/login" className="bg-teal-600 text-white px-4 py-2 rounded-full hover:bg-teal-700">Login</Link>
+            {/* <Link to="/user/notifications" className="relative"><NotificationBell /></Link> */}
+
+            {user ? (
+              <div className="flex items-center gap-4">
+                <span className="text-teal-600 font-semibold">{user.name}</span>
+                <button
+                  onClick={handleLogout}
+                  className="bg-red-500 text-white px-4 py-2 rounded-full hover:bg-red-600"
+                >
+                  Logout
+                </button>
+              </div>
+            ) : (
+              <Link
+                to="/user/login"
+                className="bg-teal-600 text-white px-4 py-2 rounded-full hover:bg-teal-700"
+              >
+                Login
+              </Link>
+            )}
           </nav>
         </div>
       </header>

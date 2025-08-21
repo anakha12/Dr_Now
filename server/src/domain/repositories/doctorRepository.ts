@@ -44,7 +44,7 @@ countFilteredDoctors(filters: {
   maxFee?: number;
   gender?: string;
 }): Promise<number>;
-getPaginatedDoctors(skip: number, limit: number): Promise<DoctorEntity[]>;
+getPaginatedDoctors(skip: number, limit: number, search?: string): Promise<DoctorEntity[]>;
 countDoctors(): Promise<number>;
 
 getUnverifiedDoctorsPaginated(skip: number, limit: number): Promise<DoctorEntity[]>;

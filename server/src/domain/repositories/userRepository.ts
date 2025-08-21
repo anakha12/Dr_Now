@@ -9,7 +9,7 @@ export interface IUserRepository {
   updateUser(id: string, updates: UpdateQuery<UserEntity>): Promise<UserEntity>;
   updateUserByEmail(email: string, user: Partial<UserEntity>): Promise<UserEntity>; 
   getAllUsers(): Promise<UserEntity[]>;
-  getPaginatedUsers(page: number, limit: number): Promise<{
+  getPaginatedUsers(page: number, limit: number, search?: string): Promise<{
     users: UserEntity[];
     totalPages: number;
   }>;
