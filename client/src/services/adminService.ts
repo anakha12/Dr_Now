@@ -127,7 +127,12 @@ export const addDepartment = async (data: {
     const response = await adminAxios.post("/departments", data);
     return response.data;
   } catch (error: any) {
-    const message = error.response?.data?.message || "Failed to add department";
+    
+    if (error.response?.data?.errors) {
+      console.log("Validation errors:", error.response.data.errors);
+      throw error.response.data.errors; 
+    }
+    const message = error.response?.data?.message;
     throw new Error(message);
   }
 };

@@ -1,5 +1,6 @@
 import { DepartmentEntity } from "../../../../domain/entities/department.entity";
+import { DepartmentRegisterDTO } from "../../../../interfaces/dto/request/DepartmentRegisterDTO ";
 
 export interface ICreateDepartmentUseCase {
-  execute(data: DepartmentEntity): Promise<DepartmentEntity>;
+  execute(dto: DepartmentRegisterDTO): Promise<DepartmentEntity>;
 }
