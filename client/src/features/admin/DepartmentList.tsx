@@ -67,7 +67,13 @@ const DepartmentList = () => {
       setShowAddForm(false);
       fetchDepartments();
     } catch (err: any) {
-      addNotification(err.message || "Failed to add department", "error");
+      console.log('error',err)
+      if (err.Departmentname || err.Description) {
+        const message=Object.values(err).join(', ')
+        addNotification(message, "error");
+      } else {
+        addNotification(err.message || "Failed to add department", "error");
+      }
     }
   };
 

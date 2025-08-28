@@ -16,6 +16,10 @@ import { IGetPendingDoctorPayoutsUseCase } from "../../application/use_cases/int
 import { IGetWalletSummaryUseCase } from "../../application/use_cases/interfaces/admin/IGetWalletSummaryUseCase";
 import { IPayoutDoctorUseCase } from "../../application/use_cases/interfaces/admin/IPayoutDoctorUseCase";
 import { IGetAllDoctorsUseCase } from "../../application/use_cases/interfaces/admin/IGetAllDoctors";
+import { plainToInstance } from "class-transformer";
+import { DepartmentRegisterDTO } from "../dto/request/DepartmentRegisterDTO ";
+import { validate } from "class-validator";
+import { AdminLoginDTO } from "../dto/request/AdminLoginDTO";
 
 
   export class AdminController {
@@ -42,9 +46,10 @@ import { IGetAllDoctorsUseCase } from "../../application/use_cases/interfaces/ad
 
     async adminLogin(req: Request, res: Response): Promise<void> {
       try {
-        const { email, password } = req.body;
+        const dto=plainToInstance(AdminLoginDTO, req.body);
+       
+        const { accessToken,refreshToken, user } = await this._loginAdmin.execute(dto);
         
-        const { accessToken,refreshToken, user } = await this._loginAdmin.execute(email, password);
         if (user.role !== "admin") {
           res.status(HttpStatus.UNAUTHORIZED).json({ message: Messages.UNAUTHORIZED });
           return;
@@ -183,7 +188,24 @@ import { IGetAllDoctorsUseCase } from "../../application/use_cases/interfaces/ad
 
     async createDepartment(req: Request, res: Response) {
     try {
-      const dept = await this._createDepartmentUseCase.execute(req.body);
+      const dto= plainToInstance(DepartmentRegisterDTO,req.body);
+
+      const errors = await validate(dto);
+
+      console.log("error",errors);
+
+      if (errors.length > 0) {
+        const formattedErrors = errors.reduce((acc, err) => {
+          if (err.constraints) {
+            acc[err.property] = Object.values(err.constraints)[0]; 
+          }
+         
+          return acc;
+        }, {} as Record<string, string>);
+
+         return res.status(400).json({ errors:formattedErrors });
+      }
+      const dept = await this._createDepartmentUseCase.execute(dto);
       res.status(HttpStatus.CREATED).json(dept);
     } catch (err: any) {
       res.status(HttpStatus.BAD_REQUEST).json({ message: err.message });
