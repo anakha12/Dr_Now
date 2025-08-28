@@ -266,6 +266,7 @@ async countFilteredDoctors(filters: {
       otp: entity.otp,
       otpExpiresAt: entity.otpExpiresAt,
       availability: entity.availability,
+      age: entity.age,
     };
   }
 
@@ -275,6 +276,7 @@ async countFilteredDoctors(filters: {
       name: doc.name,
       email: doc.email,
       phone: doc.phone,
+      age: doc.age,
       yearsOfExperience: doc.yearsOfExperience,
       specialization: doc.specialization,
       password: doc.password,

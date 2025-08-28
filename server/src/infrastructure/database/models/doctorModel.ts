@@ -16,6 +16,7 @@ export interface IDoctor extends Document {
   name: string;
   email: string;
   phone: string;
+  age: string;
   yearsOfExperience: number;
   specialization: string;
   password: string;
@@ -71,6 +72,7 @@ const DoctorSchema: Schema = new Schema<IDoctor>(
     name: { type: String, required: true },
     role: {type: String,enum:Object.values(Role),default: Role.DOCTOR,required: true},
     email: { type: String, required: true, unique: true },
+    age: { type: String, required: true},
     phone: { type: String, required: true },
     yearsOfExperience: { type: Number, required: true },
     specialization: { type: String, required: true },

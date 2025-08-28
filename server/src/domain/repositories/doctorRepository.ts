@@ -4,7 +4,7 @@ import { Slot } from "../entities/doctorEntity";
 
 export interface IDoctorRepository {
   findByEmail(email: string): Promise<DoctorEntity | null>;
-  createDoctor(doctor: DoctorEntity): Promise<DoctorEntity>;
+  createDoctor(doctor: Partial< DoctorEntity>): Promise<DoctorEntity>;
   updateDoctor(id: string, updates: Partial<DoctorEntity>): Promise<DoctorEntity>;
   findUnverifiedDoctors(): Promise<DoctorEntity[]>;
   findById(id: string): Promise<DoctorEntity | null>;

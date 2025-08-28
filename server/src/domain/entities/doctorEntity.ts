@@ -51,4 +51,5 @@ export interface DoctorEntity {
   }[];
   affiliatedHospitals?: string[];
   role: "doctor"; 
+  age: string;
 }

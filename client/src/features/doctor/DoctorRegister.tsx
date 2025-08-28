@@ -77,7 +77,7 @@ const DoctorRegister = () => {
     formData.append("email", email);
     formData.append("phone", phone);
     formData.append("language", language);
-    formData.append("specialisation", specialization);
+    formData.append("specialization", specialization);
     formData.append("yearsOfExperience", yearsOfExperience);
     formData.append("consultFee", consultFee);
     formData.append("password", password);

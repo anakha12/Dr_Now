@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { Messages } from "../../utils/Messages";
 import { HttpStatus } from "../../utils/HttpStatus";
-import { DoctorRegisterDTO } from "../../application/dto/doctorRegister.dto";
+import { DoctorRegisterDTO } from "../../interfaces/dto/request/DoctorRegisterDTO"
 import { AuthRequest } from "../middleware/authMiddleware";
 
 import { ISendDoctorOtp } from "../../application/use_cases/interfaces/doctor/ISendDoctorOtp";
@@ -20,6 +20,8 @@ import { ICompleteDoctorProfile } from "../../application/use_cases/interfaces/d
 import { IGetBookingDetails } from "../../application/use_cases/interfaces/user/IGetBookingDetails";
 import { IDoctorLogin } from "../../application/use_cases/interfaces/doctor/IDoctorLogin";
 
+import { plainToInstance } from "class-transformer";
+import { validate } from "class-validator";
 
 interface MulterFiles {
   profileImage?: Express.Multer.File[];
@@ -61,14 +63,24 @@ export class DoctorController {
       const medicalLicense = req.files?.medicalLicense?.[0];
       const idProof = req.files?.idProof?.[0];
 
-      const dto = new DoctorRegisterDTO({
+      const dto = plainToInstance(DoctorRegisterDTO,{
         ...req.body,
         profileImage: profileImage ? (profileImage as any).path : "",
         medicalLicense: medicalLicense ? (medicalLicense as any).path : "",
-        idProof: idProof ? (idProof as any).path : "",
-        availability: req.body.availability || "",
+        idProof: idProof ? (idProof as any).path : ""
       });
 
+      const errors = await validate(dto);
+       console.log("error",errors)
+      if (errors.length > 0) {
+        const formattedErrors = errors
+          .map(err => Object.values(err.constraints || {}))
+          .flat();
+
+         res.status(HttpStatus.BAD_REQUEST).json({
+          error: formattedErrors,
+        });
+      }
       await this._sendDoctorOtp.execute(dto);
       res.status(HttpStatus.OK).json({ message: Messages.OTP_SENT(dto.email) });
     } catch (err: any) {
@@ -296,8 +308,6 @@ async completeProfile(req: Request, res: Response): Promise<void> {
       res.status(HttpStatus.UNAUTHORIZED).json({ error: Messages.UNAUTHORIZED });
       return;
     }
-
-
     const profileData = req.body;
     const updatedProfile = await this._completeProfileUseCase.execute(doctorId, profileData);
 
