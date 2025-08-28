@@ -1,6 +1,8 @@
 import { Request, Response } from "express";
+import { plainToInstance } from "class-transformer";
+import { validate } from "class-validator";
 
-import { UserRegisterDTO } from "../../application/dto/userRegister.dto";
+// import { UserRegisterDTO } from "../../application/dto/userRegister.dto";
 import { HttpStatus } from "../../utils/HttpStatus";
 import { Messages } from "../../utils/Messages";
 import { ILoginUser } from "../../application/use_cases/interfaces/user/ILoginUser";
@@ -23,6 +25,9 @@ import { IGetBookingDetails } from "../../application/use_cases/interfaces/user/
 import { IGetDepartmentsUser } from "../../application/use_cases/interfaces/user/IGetDepartmentsUser";
 import { IGetUserWallet } from "../../application/use_cases/interfaces/user/IGetUserWallet";
 import { IGetFilteredDoctors } from "../../application/use_cases/interfaces/user/IGetFilteredDoctors";
+
+import { UserRegisterDTO } from "../dto/request/UserRegisterDTO";
+import { UserLoginDTO } from "../dto/request/UserLoginDTO";
 
 
 interface AuthenticatedRequest extends Request {
@@ -70,7 +75,21 @@ export class UserController {
 
   async sendOtp(req: Request, res: Response): Promise<void> {
     try {
-      const dto = new UserRegisterDTO(req.body);
+  
+      const dto = plainToInstance(UserRegisterDTO, req.body);
+     
+      const errors = await validate(dto);
+       console.log("error",errors)
+      if (errors.length > 0) {
+        const formattedErrors = errors
+          .map(err => Object.values(err.constraints || {}))
+          .flat();
+
+         res.status(HttpStatus.BAD_REQUEST).json({
+          error: formattedErrors,
+        });
+      }
+
       await this._sendUserOtp.execute(dto);
       res.status(HttpStatus.OK).json({ message: `OTP sent to ${dto.email}` });
     } catch (err: any) {
@@ -81,8 +100,10 @@ export class UserController {
 
  async login(req: Request, res: Response): Promise<void> {
   try {
-    const { email, password } = req.body;
-    const { token, user } = await this._userLogin.execute(email,password)
+    // const { email, password } = req.body;
+
+    const  dto = plainToInstance( UserLoginDTO, req.body)
+    const { token, user } = await this._userLogin.execute(dto)
 
     res.cookie("userAccessToken", token, {
       httpOnly: true,

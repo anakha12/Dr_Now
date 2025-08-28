@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { getAllDoctors, toggleDoctorBlockStatus } from "../../services/adminService";
 import toast from "react-hot-toast";
+import Table, { type Column } from "../../components/Table"; 
 
 interface Doctor {
   id: string;
@@ -13,7 +14,7 @@ const Doctors = () => {
   const [doctors, setDoctors] = useState<Doctor[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [searchQuery, setSearchQuery]=useState('');
+  const [searchQuery, setSearchQuery] = useState("");
   const doctorsPerPage = 5;
 
   const fetchDoctors = async () => {
@@ -27,11 +28,11 @@ const Doctors = () => {
   };
 
   useEffect(() => {
-    const delayDebounce= setTimeout(()=>{
+    const delayDebounce = setTimeout(() => {
       fetchDoctors();
-    },400);
+    }, 400);
 
-    return ()=>clearTimeout(delayDebounce);
+    return () => clearTimeout(delayDebounce);
   }, [currentPage, searchQuery]);
 
   const handleBlockToggle = async (id: string, currentStatus: boolean) => {
@@ -48,13 +49,46 @@ const Doctors = () => {
     alert(`View details for doctor ID: ${id}`);
   };
 
-  const handleSearch=(e: React.ChangeEvent<HTMLInputElement>)=>{
+  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
-    setCurrentPage(1)
-  }
+    setCurrentPage(1);
+  };
 
   const handlePrev = () => setCurrentPage((p) => Math.max(1, p - 1));
   const handleNext = () => setCurrentPage((p) => Math.min(totalPages, p + 1));
+
+  
+  const columns: Column<Doctor>[] = [
+    { header: "Name", accessor: "name" },
+    { header: "Email", accessor: "email" },
+    {
+      header: "Status",
+      accessor: (doctor) => (
+        <span
+          className={`font-semibold ${
+            doctor.isBlocked ? "text-red-600" : "text-green-600"
+          }`}
+        >
+          {doctor.isBlocked ? "Blocked" : "Active"}
+        </span>
+      ),
+    },
+    {
+      header: "Action",
+      accessor: (doctor) => (
+        <button
+          onClick={() => handleBlockToggle(doctor.id, doctor.isBlocked)}
+          className={`px-4 py-2 rounded text-white font-medium shadow transition ${
+            doctor.isBlocked
+              ? "bg-green-500 hover:bg-green-600"
+              : "bg-red-500 hover:bg-red-600"
+          }`}
+        >
+          {doctor.isBlocked ? "Unblock" : "Block"}
+        </button>
+      ),
+    },
+  ];
 
   return (
     <div className="max-w-4xl mx-auto p-4">
@@ -70,65 +104,13 @@ const Doctors = () => {
         />
       </div>
 
-      {/* Table */}
-      <div className="overflow-x-auto bg-white rounded-lg shadow">
-        <table className="min-w-full divide-y divide-gray-200 text-sm">
-          <thead className="bg-teal-100">
-            <tr>
-              <th className="px-6 py-3 text-left font-medium text-teal-800">Name</th>
-              <th className="px-6 py-3 text-left font-medium text-teal-800">Email</th>
-              <th className="px-6 py-3 text-left font-medium text-teal-800">Status</th>
-              <th className="px-6 py-3 text-left font-medium text-teal-800">Action</th>
-              <th className="px-6 py-3 text-left font-medium text-teal-800">View</th>
-            </tr>
-          </thead>
-          <tbody>
-            {doctors.length === 0 ? (
-              <tr>
-                <td colSpan={5} className="text-center py-6 text-gray-500">
-                  No doctors available.
-                </td>
-              </tr>
-            ) : (
-              doctors.map((doctor) => (
-                <tr key={doctor.id} className="border-b hover:bg-teal-50">
-                  <td className="px-6 py-4">{doctor.name}</td>
-                  <td className="px-6 py-4">{doctor.email}</td>
-                  <td className="px-6 py-4">
-                    <span
-                      className={`font-semibold ${
-                        doctor.isBlocked ? "text-red-600" : "text-green-600"
-                      }`}
-                    >
-                      {doctor.isBlocked ? "Blocked" : "Active"}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4">
-                    <button
-                      onClick={() => handleBlockToggle(doctor.id, doctor.isBlocked)}
-                      className={`px-4 py-2 rounded text-white font-medium shadow transition ${
-                        doctor.isBlocked
-                          ? "bg-green-500 hover:bg-green-600"
-                          : "bg-red-500 hover:bg-red-600"
-                      }`}
-                    >
-                      {doctor.isBlocked ? "Unblock" : "Block"}
-                    </button>
-                  </td>
-                  <td className="px-6 py-4">
-                    <button
-                      onClick={() => handleViewDetails(doctor.id)}
-                      className="px-4 py-2 rounded bg-teal-600 hover:bg-teal-700 text-white font-medium shadow"
-                    >
-                      View Details
-                    </button>
-                  </td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-      </div>
+      {/* ✅ Use Reusable Table */}
+      <Table
+        data={doctors}
+        columns={columns}
+        onViewDetails={handleViewDetails}
+        emptyMessage="No doctors available."
+      />
 
       {/* Pagination */}
       {totalPages > 1 && (
@@ -149,7 +131,7 @@ const Doctors = () => {
             className="px-3 py-1 bg-gray-200 hover:bg-gray-300 rounded disabled:opacity-50"
           >
             Next
-          </button> 
+          </button>
         </div>
       )}
     </div>

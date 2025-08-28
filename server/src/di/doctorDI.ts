@@ -12,7 +12,7 @@ import { VerifyDoctorOtp } from "../application/use_cases/doctor/verifyOtp";
 import { DoctorLogin } from "../application/use_cases/doctor/doctorLogin";
 import { GetDoctorProfile } from "../application/use_cases/doctor/getDoctorProfile";
 import { UpdateDoctorProfile } from "../application/use_cases/doctor/updateDoctorProfile";
-import {AddDoctorAvailability} from "../application/use_cases/doctor/addDoctorAvailability";
+import { AddDoctorAvailability } from "../application/use_cases/doctor/addDoctorAvailability";
 import { GetDoctorAvailability } from "../application/use_cases/doctor/getDoctorAvailability";
 import { GetDoctorBookings } from "../application/use_cases/doctor/getDoctorBookings"; 
 import { EditDoctorAvailability } from "../application/use_cases/doctor/editDoctorAvailability";

@@ -5,7 +5,7 @@ import { UserEntity } from "../entities/userEntity";
 
 export interface IUserRepository {
   findByEmail(email: string): Promise<UserEntity | null>;
-  createUser(user: UserEntity): Promise<UserEntity>;
+  createUser(user: Partial<UserEntity>): Promise<UserEntity>;
   updateUser(id: string, updates: UpdateQuery<UserEntity>): Promise<UserEntity>;
   updateUserByEmail(email: string, user: Partial<UserEntity>): Promise<UserEntity>; 
   getAllUsers(): Promise<UserEntity[]>;
