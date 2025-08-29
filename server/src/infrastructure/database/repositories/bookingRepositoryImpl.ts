@@ -353,17 +353,19 @@ async findUserBookings(userId: string, page: number, limit: number): Promise<{ b
       .populate("doctorId", "name specialization")
       .sort({ createdAt: -1 })
       .skip(skip)
-      .limit(limit),
+      .limit(limit)
+      .lean(),
 
     BookingModel.countDocuments({ userId: new Types.ObjectId(userId) }),
   ]);
 
-  const transformed = bookings.map((doc) => {
-    const booking = doc as IBooking;
-    const doctor = booking.doctorId as any;
-    const user = booking.userId as any;
+  const transformed: EnrichedBooking[] = bookings.map((booking) => {
+    const doctor = booking.doctorId as unknown as { name: string; specialization: string };
+    const user = booking.userId as unknown as { name: string };
+
+
     return {
-      id: booking.id,
+      id: booking._id.toString(),     
       doctorId: booking.doctorId.toString(),
       doctorName: doctor.name,
       department: doctor.specialization,
@@ -377,7 +379,7 @@ async findUserBookings(userId: string, page: number, limit: number): Promise<{ b
       updatedAt: booking.updatedAt,
       status: booking.status,
       doctorEarning: booking.doctorEarning ?? 0,
-      commissionAmount: booking.commissionAmount ?? 0
+      commissionAmount: booking.commissionAmount ?? 0,
     };
   });
 

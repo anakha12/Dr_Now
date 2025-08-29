@@ -1,5 +1,5 @@
 import { UserEntity } from "../../../../domain/entities/userEntity";
-import { AdminLoginDTO } from "../../../../interfaces/dto/request/AdminLoginDTO";
+import { AdminLoginDTO } from "../../../../interfaces/dto/request/admin-login.dto";
 
 export interface ILoginAdmin {
   execute( dto: AdminLoginDTO): Promise<{

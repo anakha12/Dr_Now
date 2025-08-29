@@ -1,5 +1,5 @@
 import { IDoctorRepository } from "../../../domain/repositories/doctorRepository";
-import { DoctorRegisterDTO } from "../../../interfaces/dto/request/DoctorRegisterDTO"
+import { DoctorRegisterDTO } from "../../../interfaces/dto/request/doctor-register.dto."
 import bcrypt from "bcrypt";
 import { ISendDoctorOtp } from "../interfaces/doctor/ISendDoctorOtp";
 import { redisClient } from "../../../config/redis";

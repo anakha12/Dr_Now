@@ -22,11 +22,21 @@ const DoctorListing = () => {
   const [feeFilter, setFeeFilter] = useState(1000);
   const [genderFilter, setGenderFilter] = useState("");
   const [specializations, setSpecializations] = useState<{ id: string; Departmentname: string }[]>([]);
+  const [debouncedSearch, setDebouncedSeach] = useState(search)
 
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
 
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const handler = setTimeout(()=>{
+      setDebouncedSeach(search);
+      setPage(1);
+    },500);
+
+    return ()=> clearTimeout(handler)
+  },[search])
 
   const fetchDoctors = async () => {
     try {
@@ -48,7 +58,7 @@ const DoctorListing = () => {
 
   useEffect(() => {
     fetchDoctors();
-  }, [search, specializationFilter, feeFilter, genderFilter, page]);
+  }, [debouncedSearch, specializationFilter, feeFilter, genderFilter, page]);
 
   const handlePageChange = (newPage: number) => {
     if (newPage >= 1 && newPage <= totalPages) {

@@ -26,8 +26,8 @@ import { IGetDepartmentsUser } from "../../application/use_cases/interfaces/user
 import { IGetUserWallet } from "../../application/use_cases/interfaces/user/IGetUserWallet";
 import { IGetFilteredDoctors } from "../../application/use_cases/interfaces/user/IGetFilteredDoctors";
 
-import { UserRegisterDTO } from "../dto/request/UserRegisterDTO";
-import { UserLoginDTO } from "../dto/request/UserLoginDTO";
+import { UserRegisterDTO } from "../dto/request/user-register.dto";
+import { UserLoginDTO } from "../dto/request/user-login.dto";
 
 
 interface AuthenticatedRequest extends Request {
@@ -78,7 +78,7 @@ export class UserController {
   
       const dto = plainToInstance(UserRegisterDTO, req.body);
      
-      const errors = await validate(dto);
+      const errors = await validate(dto); 
        console.log("error",errors)
       if (errors.length > 0) {
         const formattedErrors = errors
@@ -174,10 +174,19 @@ export class UserController {
     try {
       const doctors = await this._getAllDoctorsForUserUseCase.execute();
       res.status(HttpStatus.OK).json(doctors);
-    } catch (err: any) {
-      res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: err.message });
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        res
+          .status(HttpStatus.INTERNAL_SERVER_ERROR)
+          .json({ success: false, message: err.message });
+      } else {
+        res
+          .status(HttpStatus.INTERNAL_SERVER_ERROR)
+          .json({ success: false, message: "Unexpected error" });
+      }
     }
   }
+
 
   async getDoctorById(req: Request, res: Response): Promise<void> {
     try {
@@ -363,6 +372,7 @@ export class UserController {
       };
 
       const result = await this._getFilteredDoctorsUseCase.execute(filters);
+          
       res.status(HttpStatus.OK).json(result);
     } catch (err: any) {
       res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: err.message });

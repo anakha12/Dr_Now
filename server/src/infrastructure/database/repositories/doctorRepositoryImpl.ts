@@ -105,7 +105,7 @@ async countFilteredDoctors(filters: {
     query.gender = filters.gender;
   }
 
-  const doctors = await DoctorModel.find(query).skip(skip).limit(limit);
+  const doctors = await DoctorModel.find(query).skip(skip).limit(limit).lean();
   return doctors.map(this._toDomain);
 }
 
@@ -193,7 +193,7 @@ async countFilteredDoctors(filters: {
   }
 
   async findById(id: string): Promise<DoctorEntity | null> {
-    const doctor = await DoctorModel.findById(id);
+    const doctor = await DoctorModel.findById(id).lean();
     return doctor ? this._toDomain(doctor) : null;
   }
 

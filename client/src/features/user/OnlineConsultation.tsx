@@ -13,10 +13,8 @@ interface Doctor {
   name: string;
   specialization: string;
   profileImage: string;
-  yearsOfExperience: number;
+  yearsOfExperience: string;
   consultFee: number;
-  isVerified: boolean;
-  isBlocked: boolean;
 }
 
 interface Department {
@@ -39,6 +37,7 @@ const OnlineConsultation = () => {
     const fetchDoctors = async () => {
       try {
         const data = await getAllDoctors();
+        console.log("data", data)
         setDoctors(data);
       } catch (error) {
         console.error("Error fetching doctors:", error);
@@ -169,7 +168,6 @@ const OnlineConsultation = () => {
           className="flex gap-6 overflow-x-auto px-2 scroll-smooth"
         >
           {doctors
-            .filter((doc) => doc.isVerified && !doc.isBlocked)
             .map((doc) => (
               <div
                 key={doc.id}
@@ -178,7 +176,7 @@ const OnlineConsultation = () => {
                 data-aos="flip-left"
               >
                 <img
-                  src={`${import.meta.env.VITE_BACKEND_URL}/${doc.profileImage}`}
+                  src={doc.profileImage}
                   alt={doc.name}
                   className="w-24 h-24 rounded-full object-cover mx-auto mb-4 shadow"
                 />

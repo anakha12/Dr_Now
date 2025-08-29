@@ -1,5 +1,6 @@
-import { DoctorEntity } from "../../../../domain/entities/doctorEntity";
+
 import { DepartmentEntity } from "../../../../domain/entities/department.entity";
+import { DoctorListResponseDTO } from "../../../../interfaces/dto/response/user/doctor-details.dto";
 
 export interface IGetFilteredDoctors {
   execute(filters: {
@@ -10,7 +11,7 @@ export interface IGetFilteredDoctors {
     page: number;
     limit: number;
   }): Promise<{
-    doctors: DoctorEntity[];
+    doctors: DoctorListResponseDTO[];
     specializations: DepartmentEntity[];
     pagination: {
       currentPage: number;

@@ -1,6 +1,6 @@
 import { IUserRepository } from "../../../domain/repositories/userRepository";
 import { sendMail } from "../../../services/mailService";
-import { UserRegisterDTO } from "../../../interfaces/dto/request/UserRegisterDTO";
+import { UserRegisterDTO } from "../../../interfaces/dto/request/user-register.dto";
 import { ISendUserOtp } from "../interfaces/user/ISendUserOtp";
 import { redisClient } from "../../../config/redis";
 

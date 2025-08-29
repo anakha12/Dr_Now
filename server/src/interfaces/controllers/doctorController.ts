@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { Messages } from "../../utils/Messages";
 import { HttpStatus } from "../../utils/HttpStatus";
-import { DoctorRegisterDTO } from "../../interfaces/dto/request/DoctorRegisterDTO"
+import { DoctorRegisterDTO } from "../dto/request/doctor-register.dto."
 import { AuthRequest } from "../middleware/authMiddleware";
 
 import { ISendDoctorOtp } from "../../application/use_cases/interfaces/doctor/ISendDoctorOtp";

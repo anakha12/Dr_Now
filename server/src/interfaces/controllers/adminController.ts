@@ -17,9 +17,9 @@ import { IGetWalletSummaryUseCase } from "../../application/use_cases/interfaces
 import { IPayoutDoctorUseCase } from "../../application/use_cases/interfaces/admin/IPayoutDoctorUseCase";
 import { IGetAllDoctorsUseCase } from "../../application/use_cases/interfaces/admin/IGetAllDoctors";
 import { plainToInstance } from "class-transformer";
-import { DepartmentRegisterDTO } from "../dto/request/DepartmentRegisterDTO ";
+import { DepartmentRegisterDTO } from "../dto/request/department-register.dto";
 import { validate } from "class-validator";
-import { AdminLoginDTO } from "../dto/request/AdminLoginDTO";
+import { AdminLoginDTO } from "../dto/request/admin-login.dto";
 
 
   export class AdminController {

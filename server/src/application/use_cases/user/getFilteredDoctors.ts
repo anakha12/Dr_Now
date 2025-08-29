@@ -1,6 +1,8 @@
 import { IDoctorRepository } from "../../../domain/repositories/doctorRepository";
 import { IDepartmentRepository } from "../../../domain/repositories/departmentRepository";
 import { IGetFilteredDoctors } from "../interfaces/user/IGetFilteredDoctors";
+import { plainToInstance } from "class-transformer";
+import { DoctorListResponseDTO } from "../../../interfaces/dto/response/user/doctor-list.dto";
 export class GetFilteredDoctorsUseCase implements IGetFilteredDoctors{
   constructor(
     private doctorRepository: IDoctorRepository,
@@ -26,9 +28,11 @@ export class GetFilteredDoctorsUseCase implements IGetFilteredDoctors{
     ]);
 
     const totalPages = Math.ceil(totalCount / limit);
-
+   
+    const doctorDTOs=plainToInstance(DoctorListResponseDTO, doctors)
+   
     return {
-      doctors,
+      doctors : doctorDTOs,
       specializations,
       pagination: {
         currentPage: page,

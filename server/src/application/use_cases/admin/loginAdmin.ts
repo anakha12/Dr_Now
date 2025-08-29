@@ -2,7 +2,7 @@ import jwt from "jsonwebtoken";
 import { IUserRepository } from "../../../domain/repositories/userRepository";
 import bcrypt from "bcrypt";
 import { ILoginAdmin } from "../interfaces/admin/ILoginAdmin";
-import { AdminLoginDTO } from "../../../interfaces/dto/request/AdminLoginDTO";
+import { AdminLoginDTO } from "../../../interfaces/dto/request/admin-login.dto";
 
 export class LoginAdmin implements ILoginAdmin{
   constructor(private _userRepository: IUserRepository) {}

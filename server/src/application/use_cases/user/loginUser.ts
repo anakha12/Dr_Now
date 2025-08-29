@@ -3,7 +3,7 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { UserEntity } from "../../../domain/entities/userEntity";
 import { ILoginUser } from "../interfaces/user/ILoginUser";
-import { UserLoginDTO } from "../../../interfaces/dto/request/UserLoginDTO";
+import { UserLoginDTO } from "../../../interfaces/dto/request/user-login.dto";
 
 export class LoginUser implements ILoginUser{
   
