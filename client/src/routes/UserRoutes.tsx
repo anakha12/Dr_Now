@@ -6,8 +6,6 @@ import OnlineConsultation from "../features/user/OnlineConsultation";
 import VerifyOtp from "../features/user/VerifyOtp";
 import ForgotPassword from "../features/user/ForgotPassword";
 import UserLayout from "../features/user/UserLayout";
-import { useEffect, useState } from "react";
-import userAxios from "../services/userAxiosInstance";
 import DoctorDetail from "../features/user/DoctorDetail";
 import BookAppointment from "../features/user/BookAppointment";
 import Success from "../features/user/success";
@@ -18,34 +16,12 @@ import UserNotifications from "../features/user/UserNotifications";
 import UserWallet from "../features/user/UserWallet";
 import DoctorListing from "../features/user/DoctorListing";
 import BookingDetails from "../features/user/BookingDetails";
+import { useSelector } from "react-redux";
+import type { RootState } from "../redux/store";
 
 const UserRoutes = () => {
   const location = useLocation();
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    const publicPaths = [
-      "/user/login",
-      "/user/register",
-      "/user/verify-otp",
-      "/user/forgot-password",
-    ];
-
-    if (publicPaths.includes(location.pathname)) {
-      setIsLoading(false);
-      return;
-    }
-
-    userAxios
-      .get("/protected", { withCredentials: true })
-      .then(() => setIsAuthenticated(true))
-      .catch(() => setIsAuthenticated(false))
-      .finally(() => setIsLoading(false));
-  }, [location.pathname]);
-
-
-  if (isLoading) return <div>Loading...</div>;
+  const isAuthenticated = useSelector((state: RootState) => state.userAuth.isAuthenticated);
 
   return (
     <Routes>
@@ -56,7 +32,7 @@ const UserRoutes = () => {
       <Route
         path="/user"
         element={
-          isAuthenticated ? <UserLayout /> : <Navigate to="/user/login" />
+          isAuthenticated ? <UserLayout /> : <Navigate to="/user/login" state={{ from: location}}/>
         }
       >
         <Route path="dashboard" element={<Dashboard />} />
@@ -73,8 +49,6 @@ const UserRoutes = () => {
           <Route path="bookings" element={<UserBookings />} />
           <Route path="wallet" element={<UserWallet />} />
         </Route>
-
-       
       </Route>
     </Routes>
   );

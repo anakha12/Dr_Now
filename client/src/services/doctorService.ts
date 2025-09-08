@@ -1,5 +1,5 @@
 
-import doctorAxios from "./doctorAxiosInstance";
+import { doctorAxios } from "./axiosInstances";
 
 interface Slot {
   from: string;

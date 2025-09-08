@@ -4,6 +4,8 @@ import { loginUser } from "../../services/userService";
 import toast, { Toaster } from "react-hot-toast";
 import { FaStethoscope } from "react-icons/fa";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
+import { useDispatch } from "react-redux";
+import { setUserAuth } from "../../redux/slices/authSlice";
 
 
 const UserLogin = () => {
@@ -12,14 +14,18 @@ const UserLogin = () => {
   const [showPassword, setShowPassword] = useState(false);
 
   const navigate = useNavigate();
+  const dispatch = useDispatch()
 
   const handleLogin = async () => {
     try {
-      await loginUser(email, password);
+      const res = await loginUser(email, password);
+      dispatch(setUserAuth({isAuthenticated: true, user:res.user}))
       toast.success("Login successful! Redirecting...");
+
       setTimeout(() => {
-        window.location.href = "/user/dashboard";
+        navigate("/user/dashboard") ;
       }, 1200);
+
     } catch (err: any) {
       if (err.isVerificationRequired) {
         navigate("/user/verify-otp", {

@@ -1,16 +1,11 @@
-// src/services/userService.ts
-import userAxios from "./userAxiosInstance";
+
+import { userAxios } from "./axiosInstances";
 
 interface Slot {
   from: string;
   to: string;
 }
 
-// Protected route
-export const getProtectedData = async () => {
-  const response = await userAxios.get("/protected");
-  return response.data;
-};
 
 // Send OTP
 export const sendOtp = async (data: {

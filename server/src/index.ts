@@ -1,7 +1,8 @@
 import "reflect-metadata";
+import dotenv from "dotenv";
 import express from "express";
 import mongoose from "mongoose";
-import dotenv from "dotenv";
+
 import userRoutes from "./interfaces/routes/userRoutes";
 import adminRoutes from "./interfaces/routes/adminRoutes";
 import doctorRoutes from "./interfaces/routes/doctorRoutes";  
@@ -12,11 +13,11 @@ import { fileURLToPath } from "url";
 import cookieParser from "cookie-parser";
 
 
-
+dotenv.config(); 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-dotenv.config();
+
 const app = express();  
 
 
@@ -33,6 +34,8 @@ app.use(cookieParser());
 app.use(express.json()); 
 app.use('/uploads', express.static(path.join(__dirname, '..', 'uploads')));
 
+console.log("JWT_SECRET:", process.env.JWT_SECRET);
+console.log("JWT_REFRESH_SECRET:", process.env.JWT_REFRESH_SECRET);
 
 mongoose.connect(process.env.MONGO_URI || "mongodb://127.0.0.1:27017/drnow")
   .then(() => console.log("MongoDB Connected"))

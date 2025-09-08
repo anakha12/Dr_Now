@@ -3,19 +3,26 @@ import { adminLogin } from "../../services/adminService";
 import toast, { Toaster } from "react-hot-toast";
 import { FaStethoscope } from "react-icons/fa";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
+import { useDispatch } from "react-redux";
+import { setAdminAuth } from "../../redux/slices/authSlice";
+import { useNavigate } from "react-router-dom";
 
 const AdminLogin = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
 
+  const dispatch = useDispatch()
+  const navigate = useNavigate()
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await adminLogin(email, password);
+      const res = await adminLogin(email, password);
       toast.success("Login successful! Redirecting...");
+      dispatch(setAdminAuth({ isAuthenticated: true, user: res.user}));
       setTimeout(() => {
-        window.location.href = "/admin/dashboard";
+        navigate("/admin/dashboard");
       }, 1200);
     } catch (err: any) {
       if (err.message === "Not an admin") {

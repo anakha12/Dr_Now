@@ -3,9 +3,10 @@ import { useNavigate } from "react-router-dom";
 import { doctorLogin } from "../../services/doctorService";
 import toast, { Toaster } from "react-hot-toast";
 import Cookies from "js-cookie";
-import { useAuth } from "../../context/AuthContext";
 import { FaStethoscope } from "react-icons/fa";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
+import { useDispatch } from "react-redux";
+import { setDoctorAuth } from "../../redux/slices/authSlice";
 
 const DoctorLogin = () => {
   const [email, setEmail] = useState("");
@@ -13,7 +14,7 @@ const DoctorLogin = () => {
   const [showPassword, setShowPassword] = useState(false);
 
   const navigate = useNavigate();
-  const { setIsDoctorLoggedIn } = useAuth();
+  const dispatch =useDispatch();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -36,7 +37,7 @@ const DoctorLogin = () => {
         secure: false,
         sameSite: "Strict",
       });
-      setIsDoctorLoggedIn(true);
+      dispatch(setDoctorAuth({isAuthenticated: true, user: res.user}));
 
       setTimeout(() => navigate("/doctor/dashboard"), 1500);
     } catch (err: any) {

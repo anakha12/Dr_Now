@@ -1,5 +1,5 @@
 
-import adminAxios from "./adminAxiosInstance"; 
+import { adminAxios } from "./axiosInstances"; 
 import type { DepartmentResponse } from "../types/department";
 
 export const adminLogin = async (email: string, password: string) => {

@@ -46,7 +46,7 @@ const bookWithWalletUseCase= new BookWithWalletUseCase(
 
 const registerUser = new RegisterUser(userRepository);
 const verifyUserOtp = new VerifyUserOtp(userRepository);
-const sendUserOtp = new SendUserOtp(userRepository);
+const sendUserOtp = new SendUserOtp(userRepository, doctorRepository);
 const logoutUser = new LogoutUserUseCase(userRepository);
 const googleLoginUser = new GoogleLoginUser(userRepository);
 const sendResetOtp = new SendResetOtp(userRepository);

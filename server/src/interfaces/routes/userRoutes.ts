@@ -6,10 +6,6 @@ import { userController } from "../../di/userDI";
 
 const router = express.Router();
 
-router.get("/protected", verifyToken("user"), (req, res) => {
-  res.status(200).json({ message: "User authenticated" });
-});
-
 router.post("/register", (req: Request, res: Response) => userController.register(req, res));
 router.post("/send-otp", (req: Request, res: Response) => userController.sendOtp(req, res));
 router.post("/login", (req: Request, res: Response) => userController.login(req, res));

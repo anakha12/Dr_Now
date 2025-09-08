@@ -47,25 +47,29 @@ import { AdminLoginDTO } from "../dto/request/admin-login.dto";
     async adminLogin(req: Request, res: Response): Promise<void> {
       try {
         const dto=plainToInstance(AdminLoginDTO, req.body);
-       
+
         const { accessToken,refreshToken, user } = await this._loginAdmin.execute(dto);
         
         if (user.role !== "admin") {
           res.status(HttpStatus.UNAUTHORIZED).json({ message: Messages.UNAUTHORIZED });
           return;
         }
+
+        const accessTokenMaxAge = Number(process.env.ACCESS_TOKEN_COOKIE_MAXAGE);
+        const refreshTokenMaxAge = Number(process.env.REFRESH_TOKEN_COOKIE_MAXAGE);
+
         res.cookie("userAccessToken", accessToken, {
           httpOnly: true,
           secure: false, 
           sameSite: "lax",
-          maxAge: 24 * 60 * 60 * 1000,
+          maxAge: accessTokenMaxAge,
         });
 
         res.cookie("refreshToken", refreshToken, {
           httpOnly: true,
           secure: false,
           sameSite: "lax",
-          maxAge: 7 * 24 * 60 * 60 * 1000, 
+          maxAge: refreshTokenMaxAge, 
         });
         res.status(HttpStatus.OK).json({ message: Messages.LOGIN_SUCCESSFUL, user });
       } catch (err: any) {

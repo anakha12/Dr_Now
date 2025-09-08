@@ -6,16 +6,21 @@ import DoctorRejected from "../features/doctor/DoctorRejected";
 import DoctorLayout from "../features/doctor/DoctorLayout";
 import Dashboard from "../features/doctor/DoctorDashboard";
 import DoctorProfile from "../features/doctor/DoctorProfile";
-import { useAuth } from "../context/AuthContext";
 import CurrentSchedules from "../features/doctor/CurrentSchedules";
 import DoctorAppointments from "../features/doctor/DoctorAppointments";
 import DoctorWallet from "../features/doctor/DoctorWallet";
 import DoctorProfileComplete from "../features/doctor/DoctorProfileComplete";
 import DoctorBookingDetails from "../features/doctor/DoctorBookingDetails";
+import { useSelector } from "react-redux";
+import type { RootState } from "../redux/store";
 
 
 const DoctorRoutes = () => {
-  const { isDoctorLoggedIn } = useAuth();
+
+  const isDoctorLoggedIn  = useSelector(
+    (state: RootState) => state.doctorAuth.isAuthenticated
+  );
+
   return (
     <Routes>
       {/* Public routes */}

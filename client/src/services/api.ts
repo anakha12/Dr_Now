@@ -1,5 +1,4 @@
-import axios from "axios";
-import type { AxiosInstance } from "axios";
+import axios, { type AxiosInstance } from "axios";
 import toast from "react-hot-toast";
 
 interface CreateAxiosOptions {
@@ -21,16 +20,16 @@ export function createAxiosInstance(options: CreateAxiosOptions): AxiosInstance 
     (res) => res,
     async (err) => {
       const originalRequest = err.config;
+
       const skipUrls = [
         options.refreshEndpoint,
-        "/login", 
+        "/login",
         ...(options.skipInterceptorUrls || []),
       ];
 
       const shouldSkip = skipUrls.some((url) =>
         originalRequest.url?.includes(url)
       );
-
       if (shouldSkip) return Promise.reject(err);
 
       if (
@@ -46,15 +45,12 @@ export function createAxiosInstance(options: CreateAxiosOptions): AxiosInstance 
           isRefreshing = false;
 
           if (refreshResponse.status === 200) {
-            refreshResponse.data.userAccessToken;
-
             return instance(originalRequest); 
           } else {
             throw new Error("Refresh failed");
           }
         } catch (refreshError) {
           isRefreshing = false;
-          console.error("Refresh token failed:", refreshError);
           toast.error("Session expired. Please log in again.");
           window.location.href = options.redirectPath;
           return Promise.reject(refreshError);
@@ -67,4 +63,3 @@ export function createAxiosInstance(options: CreateAxiosOptions): AxiosInstance 
 
   return instance;
 }
-

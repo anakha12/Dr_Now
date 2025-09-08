@@ -1,5 +1,7 @@
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import { FaStethoscope } from "react-icons/fa";
+import { useDispatch } from "react-redux";
+import { doctorLogout } from "../../redux/slices/authSlice";
 
 const sidebarItems = [
   { label: "Dashboard", key: "dashboard" },
@@ -14,12 +16,13 @@ const sidebarItems = [
 const DoctorLayout = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const dispatch = useDispatch()
 
   const active = location.pathname.split("/")[2] || "dashboard";
 
   const handleSidebarClick = (key: string) => {
     if (key === "logout") {
-      localStorage.removeItem("token");
+      dispatch(doctorLogout())
       navigate("/doctor/login");
     } else {
       navigate(`/doctor/${key}`);

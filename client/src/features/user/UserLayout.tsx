@@ -1,19 +1,19 @@
 import { Link, Outlet, useNavigate } from "react-router-dom";
 import { FaStethoscope } from "react-icons/fa";
-// import NotificationBell from "../notifications/NotificationBell";
 import { useEffect, useState } from "react";
 import { getUserProfile } from "../../services/userService"; 
-import userAxios from "../../services/userAxiosInstance"; 
+import { useDispatch } from "react-redux";
+import { userLogout } from "../../redux/slices/authSlice";
 
 const UserLayout = () => {
   const [user, setUser] = useState<{ name: string } | null>(null);
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   useEffect(() => {
     const fetchUser = async () => {
       try {
         const profile = await getUserProfile();
-        console.log(profile)
         setUser(profile); 
       } catch (err) {
         setUser(null);
@@ -22,16 +22,12 @@ const UserLayout = () => {
     fetchUser();
   }, []);
 
-  const handleLogout = async () => {
-    try {
-      await userAxios.post("/logout", {}, { withCredentials: true }); 
-      setUser(null);
+  const handleLogout = () => {
+      console.log("Logout clicked");
+      dispatch(userLogout());
       navigate("/user/login");
-    } catch (err) {
-      console.error("Logout failed", err);
-    }
   };
-
+  
   return (
     <div className="font-sans text-gray-800 bg-white">
       {/* Header */}

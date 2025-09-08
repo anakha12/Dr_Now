@@ -1,6 +1,8 @@
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import { Toaster, toast } from "react-hot-toast";
 import { FaStethoscope } from "react-icons/fa";
+import { useDispatch } from "react-redux";
+import { adminLogout } from "../../redux/slices/authSlice";
 
 const sidebarItems = [
   { label: "Dashboard", key: "dashboard" },
@@ -16,11 +18,12 @@ const sidebarItems = [
 const AdminLayout = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const dispatch = useDispatch()
   const active = location.pathname.split("/")[2] || "dashboard";
 
   const handleSidebarClick = (key: string) => {
     if (key === "logout") {
-      localStorage.removeItem("adminToken");
+      dispatch(adminLogout())
       toast.success("Logged out successfully!");
       navigate("/admin/login");
     } else {

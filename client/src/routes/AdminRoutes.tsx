@@ -5,36 +5,14 @@ import AdminDashboard from "../features/admin/AdminDashboard";
 import DoctorVerification from "../features/admin/DoctorVerification";
 import Doctors from "../features/admin/Doctors";
 import Patients from "../features/admin/Patients";
-import { useEffect, useState } from "react";
-import adminAxios from "../services/adminAxiosInstance";
 import DepartmentList from "../features/admin/DepartmentList";
 import DoctorPaymentPage from "../features/admin/DoctorPaymentPage";
+import { useSelector } from "react-redux";
+import type { RootState } from "../redux/store";
 
 const AdminRoutes = () => {
   const location = useLocation();
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    
-    if (location.pathname === "/admin/login") {
-      setIsLoading(false);
-      return;
-    }
-
-    adminAxios
-      .get("/protected", { withCredentials: true })
-      .then(() => {
-        setIsAuthenticated(true);
-      })
-      .catch((error) => {
-        console.error("Admin not authenticated", error?.response?.data);
-        setIsAuthenticated(false);
-      })
-      .finally(() => setIsLoading(false));
-  }, [location.pathname]);
-
-  if (isLoading) return <div>Loading...</div>;
+  const isAuthenticated = useSelector((state: RootState) => state.adminAuth.isAuthenticated);
 
   return (
     <Routes>
@@ -42,7 +20,7 @@ const AdminRoutes = () => {
       <Route
         path="/"
         element={
-          isAuthenticated ? <AdminLayout /> : <Navigate to="/admin/login" />
+          isAuthenticated ? <AdminLayout /> : <Navigate to="/admin/login"  state={{ form: location}}/>
         }
       >
         <Route path="dashboard" element={<AdminDashboard />} />

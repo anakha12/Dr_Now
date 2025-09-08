@@ -3,9 +3,12 @@ import { sendMail } from "../../../services/mailService";
 import { UserRegisterDTO } from "../../../interfaces/dto/request/user-register.dto";
 import { ISendUserOtp } from "../interfaces/user/ISendUserOtp";
 import { redisClient } from "../../../config/redis";
+import { IDoctorRepository } from "../../../domain/repositories/doctorRepository";
 
 export class SendUserOtp implements ISendUserOtp{
-  constructor(private _userRepository: IUserRepository) {}
+  constructor(private _userRepository: IUserRepository,
+              private _doctorRepository : IDoctorRepository
+  ) {}
 
   async execute(dto: UserRegisterDTO): Promise<void> {
 
@@ -16,6 +19,8 @@ export class SendUserOtp implements ISendUserOtp{
     console.log(`Generated OTP: ${otp}, Expires At: ${expireSeconds}`);
 
     const existingUser = await this._userRepository.findByEmail(dto.email);
+    const existingDoctor= await this._doctorRepository.findByEmail(dto.email);
+    
 
     await redisClient.setEx(dto.email, expireSeconds, otp);
 
