@@ -30,7 +30,7 @@ export const registerDoctor = async (email: string, otp: string) => {
 };
 
 
-export const doctorLogin = async ({ email, password }: { email: string; password: string }) => {
+export const doctorLogin = async (email: string, password: string) => {
   try {
     const response = await doctorAxios.post("/login", { email, password });
     return response.data;

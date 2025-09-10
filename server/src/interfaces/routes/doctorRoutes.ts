@@ -4,7 +4,7 @@ import express from "express";
 import { MulterRequest } from "../controllers/doctorController";
 import { verifyToken } from "../middleware/authMiddleware";
 import upload from '../middleware/upload';
-import { doctorController } from "../../di/doctorDI"; 
+import { doctorAuthController, doctorController } from "../../di/doctorDI"; 
 
 const router = express.Router();
 
@@ -18,6 +18,7 @@ router.post(
   (req, res) => doctorController.sendOtp(req as MulterRequest, res)
 );
 
+router.get('/refresh-token', (req, res)=> doctorAuthController.refreshToken(req, res))
 router.post("/verify-otp", (req, res) => doctorController.verifyOtp(req, res));
 router.post("/login", (req, res) => doctorController.login(req, res));
 router.get("/departments", (req, res) => doctorController.getAllDepartments(req, res));

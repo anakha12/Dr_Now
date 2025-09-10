@@ -11,7 +11,7 @@ export class JwtService implements ITokenService {
   constructor() {
     this._accessSecret = process.env.JWT_SECRET as Secret;
     this._refreshSecret = process.env.JWT_REFRESH_SECRET as Secret;
-    this._accessExpiresIn = process.env.JWT_ACCESS_EXPIRES || "15m";
+    this._accessExpiresIn = process.env.JWT_ACCESS_EXPIRES || "1d";
     this._refreshExpiresIn = process.env.JWT_REFRESH_EXPIRES || "7d";
   }
 

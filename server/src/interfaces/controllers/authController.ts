@@ -17,7 +17,6 @@ async refreshToken(req: Request, res: Response): Promise<void> {
     const token = req.cookies?.[this._cookieName];
     if (!token) throw new Error(Messages.TOKEN_MISSING);
 
-    // Use new method
     const decoded = this._tokenService.verifyRefreshToken(token);
     if (!decoded) throw new Error(Messages.INVALID_OR_EXPIRED_TOKEN);
 
@@ -26,19 +25,25 @@ async refreshToken(req: Request, res: Response): Promise<void> {
     const refreshToken = this._tokenService.generateRefreshToken(payloadWithoutExp); 
     const accessToken = this._tokenService.generateAccessToken(payloadWithoutExp);
 
+     const accessTokenMaxAge = Number(process.env.ACCESS_TOKEN_COOKIE_MAXAGE);
+     const refreshTokenMaxAge = Number(process.env.REFRESH_TOKEN_COOKIE_MAXAGE);
+
     // Set cookies
     res.cookie(this._cookieName, refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "strict",
-      maxAge: 7 * 24 * 60 * 60 * 1000,
+      maxAge: refreshTokenMaxAge,
     });
 
-    res.cookie("userAccessToken", accessToken, {
+   res.cookie(
+    payloadWithoutExp.role === "doctor" ? "accessToken" : "userAccessToken",
+    accessToken,
+    {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "strict",
-      maxAge: 30 * 60 * 1000,
+      maxAge: accessTokenMaxAge,
     });
 
     res.status(HttpStatus.OK).json({

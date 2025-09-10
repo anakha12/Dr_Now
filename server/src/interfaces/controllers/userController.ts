@@ -32,7 +32,7 @@ import { UserLoginDTO } from "../dto/request/user-login.dto";
 
 interface AuthenticatedRequest extends Request {
   user?: {
-    userId: string;
+    id: string;
     email: string;
     role: string;
   };
@@ -75,23 +75,9 @@ export class UserController {
 
   async sendOtp(req: Request, res: Response): Promise<void> {
     try {
-  
-      const dto = plainToInstance(UserRegisterDTO, req.body);
-     
-      const errors = await validate(dto); 
-       console.log("error",errors)
-      if (errors.length > 0) {
-        const formattedErrors = errors
-          .map(err => Object.values(err.constraints || {}))
-          .flat();
 
-         res.status(HttpStatus.BAD_REQUEST).json({
-          error: formattedErrors,
-        });
-      }
-
-      await this._sendUserOtp.execute(dto);
-      res.status(HttpStatus.OK).json({ message: `OTP sent to ${dto.email}` });
+      const result = await this._sendUserOtp.execute(req.body);
+      res.status(HttpStatus.OK).json({ message: `OTP sent to ${result.email}` });
     } catch (err: any) {
       console.error("Send OTP error:", err);
       res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ error: Messages.FAILED_SENSD_OTP });
@@ -100,16 +86,24 @@ export class UserController {
 
  async login(req: Request, res: Response): Promise<void> {
   try {
-    // const { email, password } = req.body;
 
-    const  dto = plainToInstance( UserLoginDTO, req.body)
-    const { token, user } = await this._userLogin.execute(dto)
+    const { accessToken, refreshToken, user } = await this._userLogin.execute(req.body);
 
-    res.cookie("userAccessToken", token, {
+    const accessTokenMaxAge= Number(process.env.ACCESS_TOKEN_COOKIE_MAXAGE);
+    const refreshTokenMaxAge= Number(process.env.REFRESH_TOKEN_COOKIE_MAXAGE);
+
+    res.cookie("userAccessToken", accessToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production", 
-      sameSite: "strict",
-      maxAge: 24 * 60 * 60 * 1000, 
+      secure: false, 
+      sameSite: "lax",
+      maxAge:accessTokenMaxAge, 
+    });
+
+    res.cookie("refreshToken", refreshToken, {
+      httpOnly: true,
+      secure: false, 
+      sameSite: "lax",
+      maxAge:refreshTokenMaxAge, 
     });
     res.status(HttpStatus.OK).json({ message: Messages.LOGIN_SUCCESSFUL, user });
   } catch (err: any) {
@@ -243,7 +237,7 @@ export class UserController {
 
    async getUserProfile(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
-      const userId =  req.user?.userId;
+      const userId =  req.user?.id;
       if (!userId) {
         res.status(HttpStatus.UNAUTHORIZED).json({ error:Messages.UNAUTHORIZED });
         return;
@@ -257,7 +251,7 @@ export class UserController {
 
   async getUserBookings(req: AuthenticatedRequest, res: Response): Promise<void> {
   try {
-    const userId = req.user?.userId;
+    const userId = req.user?.id;
     if (!userId) {
       res.status(HttpStatus.UNAUTHORIZED).json({ error: Messages.UNAUTHORIZED });
       return;
@@ -278,7 +272,7 @@ export class UserController {
 
     async cancelBooking(req: AuthenticatedRequest, res: Response): Promise<void> {
       try {
-        const userId = req.user?.userId;
+        const userId = req.user?.id;
         const bookingId = req.params.id;
         const reason=req.body.reason;
 
@@ -319,7 +313,7 @@ export class UserController {
 
   async getWalletInfo(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
-      const userId = req.user?.userId;
+      const userId = req.user?.id;
       const page = parseInt(req.query.page as string)||0;
       const limit = parseInt(req.query.limit as string)||0;
 
@@ -339,7 +333,7 @@ export class UserController {
 
   async bookWithWallet(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
-      const userId = req.user?.userId;
+      const userId = req.user?.id;
       if (!userId) {
         res.status(HttpStatus.UNAUTHORIZED).json({ error: Messages.UNAUTHORIZED });
         return;
@@ -381,7 +375,7 @@ export class UserController {
 
   async getBookingDetails(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
-      const userId = req.user?.userId;
+      const userId = req.user?.id;
       const bookingId = req.params.id;
 
       if (!userId) {

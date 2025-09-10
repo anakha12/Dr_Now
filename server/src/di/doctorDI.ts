@@ -22,6 +22,9 @@ import { GetAllDepartments } from "../application/use_cases/doctor/getAllDepartm
 import { GetDoctorWalletSummary } from "../application/use_cases/doctor/getDoctorWalletSummary";
 import { CompleteDoctorProfile } from "../application/use_cases/doctor/completeDoctorProfile";
 import { GetBookingDetailsDoctor } from "../application/use_cases/doctor/getBookingDetailsDoctor";
+import { ITokenService } from "../interfaces/tokenServiceInterface";
+import { JwtService } from "../services/JwtService";
+import { AuthController } from "../interfaces/controllers/authController";
 
 
 const userRepository = new UserRepositoryImpl();
@@ -30,10 +33,12 @@ const  departmentRepository = new DepartmentRepositoryImpl();
 const  bookingRepository = new BookingRepositoryImpl();
 const  adminWalletRepository = new AdminWalletRepositoryImpl();
 
+const jwtService:ITokenService = new JwtService()
+
 
 const sendDoctorOtp= new SendDoctorOtp( doctorRepository);
 const verifyOtp = new VerifyDoctorOtp(doctorRepository);
-const doctorLogin = new DoctorLogin(doctorRepository);
+const doctorLogin = new DoctorLogin(doctorRepository, jwtService);
 const getDoctorProfile = new GetDoctorProfile(doctorRepository);
 const updateDoctorProfile = new UpdateDoctorProfile(doctorRepository, bookingRepository);
 const addDoctorAvailability = new AddDoctorAvailability(doctorRepository);
@@ -64,3 +69,6 @@ export const doctorController = new DoctorController(
   completeDoctorProfile,
   getBookingDetailsDoctor
 );
+
+
+export const doctorAuthController = new AuthController(jwtService,'refreshToken')

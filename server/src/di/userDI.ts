@@ -27,6 +27,9 @@ import { GetBookingDetails } from "../application/use_cases/user/getBookingDetai
 import { GetDepartmentsUser } from "../application/use_cases/user/getDepartmentsUser";
 import { GetUserWalletUseCase } from "../application/use_cases/user/getUserWallet";
 import { GetFilteredDoctorsUseCase } from "../application/use_cases/user/getFilteredDoctors";
+import { ITokenService } from "../interfaces/tokenServiceInterface";
+import { JwtService } from "../services/JwtService";
+import { AuthController } from "../interfaces/controllers/authController";
 
 
 const userRepository = new UserRepositoryImpl();
@@ -35,8 +38,10 @@ const departmentRepository = new DepartmentRepositoryImpl();
 const bookingRepository = new BookingRepositoryImpl();
 const adminWalletRepository = new AdminWalletRepositoryImpl();
 
+const jwtService: ITokenService = new JwtService();
 
-const loginUser = new LoginUser(userRepository);
+
+const loginUser = new LoginUser(userRepository, jwtService);
 const bookWithWalletUseCase= new BookWithWalletUseCase(
                                   userRepository,
                                   doctorRepository,
@@ -87,3 +92,4 @@ export const userController = new UserController(
   getFilteredDoctors,
 );
 
+export const userAuthController = new AuthController(jwtService, "refreshToken")

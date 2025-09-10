@@ -2,10 +2,11 @@
 
 import express, { Request, Response } from "express";
 import { verifyToken } from "../middleware/authMiddleware";
-import { userController } from "../../di/userDI"; 
+import { userController, userAuthController } from "../../di/userDI"; 
 
 const router = express.Router();
 
+router.get("/refresh-token", (req: Request, res: Response) => userAuthController.refreshToken(req, res));
 router.post("/register", (req: Request, res: Response) => userController.register(req, res));
 router.post("/send-otp", (req: Request, res: Response) => userController.sendOtp(req, res));
 router.post("/login", (req: Request, res: Response) => userController.login(req, res));

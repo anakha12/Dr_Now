@@ -1,10 +1,12 @@
+import { DoctorLoginDTO } from "../../../../interfaces/dto/request/doctor-login.dto";
+import { DoctorLoginResponseDTO } from "../../../../interfaces/dto/response/doctor/login-response.dto";
+
+
 export interface IDoctorLogin {
   execute(
-    email: string,
-    password: string
+    dto:DoctorLoginDTO
   ): Promise<
-    | { token: string; name: string }
-    | { notVerified: true; name: string; email: string }
-    | { isRejected: true; name: string; email: string }
+     { accessToken: string; refreshToken: string; user: DoctorLoginResponseDTO }
+   
   >;
 }

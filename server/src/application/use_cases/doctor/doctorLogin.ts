@@ -1,49 +1,60 @@
 import { IDoctorRepository } from "../../../domain/repositories/doctorRepository";
 import bcrypt from "bcrypt";
-import jwt from "jsonwebtoken";
 import { IDoctorLogin } from "../interfaces/doctor/IDoctorLogin";
+import { ITokenService } from "../../../interfaces/tokenServiceInterface";
+import { plainToInstance } from "class-transformer";
+import { DoctorLoginResponseDTO } from "../../../interfaces/dto/response/doctor/login-response.dto";
+import { DoctorLoginDTO } from "../../../interfaces/dto/request/doctor-login.dto";
+import { BaseUseCase } from "../base-usecase";
 
-export class DoctorLogin implements IDoctorLogin{
-  constructor(private _doctorRepo: IDoctorRepository) {}
+export class DoctorLogin
+  extends BaseUseCase<DoctorLoginDTO, { accessToken: string; refreshToken: string; user: DoctorLoginResponseDTO }>
+  implements IDoctorLogin
+{
+  constructor(
+    private _doctorRepo: IDoctorRepository,
+    private _tokenService: ITokenService) {
+       super(); 
+    }
 
-  async execute(email: string, password: string): Promise<
-    | { token: string; name: string }
-    | { notVerified: true; name: string; email: string }
-    | { isRejected: true; name: string; email: string }
+  async execute(data: DoctorLoginDTO): Promise<
+    { accessToken: string; refreshToken: string; user: DoctorLoginResponseDTO }
   > {
-    const doctor = await this._doctorRepo.findByEmail(email);
+
+    const dto= await this.validateDto(DoctorLoginDTO, data)
+
+    const doctor = await this._doctorRepo.findByEmail(dto.email);
+  
     if (!doctor) throw new Error("Doctor not found");
    
-    if(String(doctor.isRejected) === 'true'){
-      return{
-        isRejected: true,
-        name: doctor.name,
-        email: doctor.email,
+    if (doctor.isRejected) throw new Error("This doctor is rejected");
 
-      }
-    }
+    if (!doctor.isVerified) throw new Error(" not verified")
 
-    if (!doctor.isVerified) {
-    
-      return {
-        notVerified: true,
-        name: doctor.name,
-        email: doctor.email,
-      };
-    }
-
-    const isMatch = await bcrypt.compare(password, doctor.password);
+    const isMatch = await bcrypt.compare(dto.password, doctor.password);
     if (!isMatch) throw new Error("Incorrect password");
 
-    const token = jwt.sign(
-      { userId: doctor.id, email: doctor.email, role: "doctor" },
-      process.env.JWT_SECRET as string,
-      { expiresIn: "7d" }
+    const accessToken = this._tokenService.generateAccessToken(
+      { id: doctor.id!, email: doctor.email, role: doctor.role },
+      
     );
-
-    return {
-      token,
+     
+    const refreshToken = this._tokenService.generateRefreshToken(
+      { id: doctor.id!, email: doctor.email, role: doctor.role },
+      
+    );
+    
+    const user= plainToInstance( DoctorLoginResponseDTO,{
+      id: doctor.id,
       name: doctor.name,
+      email: doctor.email,
+      role: doctor.role,
+    })
+   
+    return {
+      accessToken,
+      refreshToken,
+      user,
     };
   }
 }

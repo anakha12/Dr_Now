@@ -2,7 +2,6 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { doctorLogin } from "../../services/doctorService";
 import toast, { Toaster } from "react-hot-toast";
-import Cookies from "js-cookie";
 import { FaStethoscope } from "react-icons/fa";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { useDispatch } from "react-redux";
@@ -19,24 +18,9 @@ const DoctorLogin = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const res = await doctorLogin({ email, password });
-
-      if (res.isRejected) {
-        navigate("/doctor/rejected");
-        return;
-      }
-      if (res.notVerified) {
-        navigate("/doctor/waiting-verification");
-        return;
-      }
+      const res = await doctorLogin( email, password );
 
       toast.success("Login successful! Redirecting...");
-
-      Cookies.set("accessToken", res.token, {
-        expires: 1,
-        secure: false,
-        sameSite: "Strict",
-      });
       dispatch(setDoctorAuth({isAuthenticated: true, user: res.user}));
 
       setTimeout(() => navigate("/doctor/dashboard"), 1500);

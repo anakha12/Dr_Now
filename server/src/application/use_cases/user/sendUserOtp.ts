@@ -4,13 +4,20 @@ import { UserRegisterDTO } from "../../../interfaces/dto/request/user-register.d
 import { ISendUserOtp } from "../interfaces/user/ISendUserOtp";
 import { redisClient } from "../../../config/redis";
 import { IDoctorRepository } from "../../../domain/repositories/doctorRepository";
+import { BaseUseCase } from "../base-usecase";
 
-export class SendUserOtp implements ISendUserOtp{
+export class SendUserOtp 
+  extends BaseUseCase<UserRegisterDTO, { email: string }> implements ISendUserOtp{
   constructor(private _userRepository: IUserRepository,
               private _doctorRepository : IDoctorRepository
-  ) {}
+  ) {
+    super();
+  }
 
-  async execute(dto: UserRegisterDTO): Promise<void> {
+  async execute(data: UserRegisterDTO): Promise<{ email: string}> {
+
+    const dto = await this.validateDto(UserRegisterDTO, data);
+    console.log(dto)
 
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
 
@@ -31,5 +38,7 @@ export class SendUserOtp implements ISendUserOtp{
     }
 
     await sendMail(dto.email, "Your OTP Code", `Your OTP is: ${otp}`);
+
+    return { email: dto.email}
   }
 }

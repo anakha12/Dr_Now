@@ -22,6 +22,7 @@ import { IDoctorLogin } from "../../application/use_cases/interfaces/doctor/IDoc
 
 import { plainToInstance } from "class-transformer";
 import { validate } from "class-validator";
+import { error } from "console";
 
 interface MulterFiles {
   profileImage?: Express.Multer.File[];
@@ -71,7 +72,6 @@ export class DoctorController {
       });
 
       const errors = await validate(dto);
-       console.log("error",errors)
       if (errors.length > 0) {
         const formattedErrors = errors
           .map(err => Object.values(err.constraints || {}))
@@ -107,40 +107,40 @@ export class DoctorController {
 async login(req: Request, res: Response): Promise<void> {
   try {
     const { email, password } = req.body;
+    
     if (!email || !password) {
       res.status(HttpStatus.BAD_REQUEST).json({ message: Messages.UNAUTHORIZED });
       return;
     }
 
-    const result = await this._loginUseCase.execute(email, password);
+    const { accessToken, refreshToken, user} = await this._loginUseCase.execute(req.body);
+    const accessTokenMaxAge= Number(process.env.ACCESS_TOKEN_COOKIE_MAXAGE);
+    const refreshTokenMaxAge= Number(process.env.REFRESH_TOKEN_COOKIE_MAXAGE);
 
-    if ("isRejected" in result && result.isRejected) {
-      res.status(HttpStatus.OK).json({ isRejected: true, name: result.name, email: result.email });
-      return;
-    }
-
-    if ("notVerified" in result && result.notVerified) {
-      res.status(HttpStatus.OK).json({ notVerified: true, name: result.name, email: result.email });
-      return;
-    }
-
-    
-    res.status(200).json({
-      token: (result as { token: string; name: string }).token,
-      name: result.name,
+    res.cookie("accessToken", accessToken, {
+      httpOnly: true,
+      secure: false, 
+      sameSite: "lax",
+      maxAge:accessTokenMaxAge, 
     });
 
-
+    res.cookie("refreshToken", refreshToken, {
+      httpOnly: true,
+      secure: false, 
+      sameSite: "lax",
+      maxAge:refreshTokenMaxAge, 
+    });
+    res.status(HttpStatus.OK).json({ message: Messages.LOGIN_SUCCESSFUL, user });
   } catch (err: any) {
-    res.status(HttpStatus.UNAUTHORIZED).json({ error: err.message });
+    res.status(HttpStatus.BAD_REQUEST).json({ error: err.message });
   }
 }
 
 
-
   async getProfile(req: AuthRequest, res: Response): Promise<void> {
     try {
-      const doctorId = req.user?.userId; 
+     
+      const doctorId = req.user?.id; 
       
      if (!doctorId) {
       res.status(HttpStatus.UNAUTHORIZED).json({ error: Messages.UNAUTHORIZED });
@@ -157,7 +157,13 @@ async login(req: Request, res: Response): Promise<void> {
 
   async updateProfile(req: AuthRequest, res: Response): Promise<void> {
     try {
-      const doctorId = req.user?.userId;
+      const doctorId = req.user?.id;
+
+      if(!doctorId){
+        res.status(HttpStatus.UNAUTHORIZED).json({ error: Messages.UNAUTHORIZED});
+        return
+      }
+
       const updatedProfile = await this._updateDoctorProfileUseCase.execute(doctorId, req.body);
       res.status(HttpStatus.OK).json(updatedProfile);
     } catch (error: any) {
@@ -206,7 +212,9 @@ async removeAvailabilitySlot(req: Request, res: Response): Promise<void> {
 
 async getBookings(req: AuthRequest, res: Response): Promise<void> {
   try {
-    const doctorId = req.user?.userId;
+    
+    const doctorId = req.user?.id;
+    
     if (!doctorId) {
       res.status(HttpStatus.UNAUTHORIZED).json({ error: Messages.UNAUTHORIZED });
       return;
@@ -248,7 +256,7 @@ async editAvailability(req: AuthRequest, res: Response): Promise<void> {
 
 async cancelBooking(req: AuthRequest, res: Response): Promise<void> {
   try {
-    const doctorId = req.user?.userId;
+    const doctorId = req.user?.id;
     if (!doctorId) {
       res.status(HttpStatus.UNAUTHORIZED).json({ error: Messages.UNAUTHORIZED });
       return;
@@ -282,7 +290,7 @@ async getAllDepartments(_: Request, res: Response): Promise<void> {
 
 async getWalletSummary(req: AuthRequest, res: Response): Promise<void> {
   try {
-    const doctorId = req.user?.userId;
+    const doctorId = req.user?.id;
     if (!doctorId) {
       res.status(HttpStatus.UNAUTHORIZED).json({ error: Messages.UNAUTHORIZED });
       return;
@@ -319,7 +327,7 @@ async completeProfile(req: Request, res: Response): Promise<void> {
 
 async getBookingDetails(req: AuthRequest, res: Response): Promise<void> {
   try {
-    const userId = req.user?.userId;
+    const userId = req.user?.id;
     const bookingId = req.params.bookingId;
 
     if (!userId) {

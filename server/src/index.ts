@@ -34,9 +34,6 @@ app.use(cookieParser());
 app.use(express.json()); 
 app.use('/uploads', express.static(path.join(__dirname, '..', 'uploads')));
 
-console.log("JWT_SECRET:", process.env.JWT_SECRET);
-console.log("JWT_REFRESH_SECRET:", process.env.JWT_REFRESH_SECRET);
-
 mongoose.connect(process.env.MONGO_URI || "mongodb://127.0.0.1:27017/drnow")
   .then(() => console.log("MongoDB Connected"))
   .catch(err => console.error("MongoDB Error", err));

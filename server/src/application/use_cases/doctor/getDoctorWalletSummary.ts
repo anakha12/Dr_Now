@@ -10,7 +10,7 @@ export class GetDoctorWalletSummary implements IGetDoctorWalletSummary{
     const walletBalance = doctor.walletBalance ?? 0;
     const allTransactions = doctor.walletTransactions ?? [];
 
-   console.log("walletBalance",walletBalance)
+   
     const sorted = allTransactions.sort(
       (a, b) => (b.date?.getTime() || 0) - (a.date?.getTime() || 0)
     );

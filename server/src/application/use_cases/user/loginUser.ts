@@ -1,15 +1,24 @@
 import { IUserRepository } from "../../../domain/repositories/userRepository";
 import bcrypt from "bcrypt";
-import jwt from "jsonwebtoken";
-import { UserEntity } from "../../../domain/entities/userEntity";
 import { ILoginUser } from "../interfaces/user/ILoginUser";
 import { UserLoginDTO } from "../../../interfaces/dto/request/user-login.dto";
+import { ITokenService } from "../../../interfaces/tokenServiceInterface";
+import { BaseUseCase } from "../base-usecase";
+import { UserLoginResponseDTO } from "../../../interfaces/dto/response/user/login-response.dto";
+import { plainToInstance } from "class-transformer";
 
-export class LoginUser implements ILoginUser{
+export class LoginUser extends 
+  BaseUseCase <UserLoginDTO, { accessToken: string; refreshToken: string; user: UserLoginResponseDTO }> implements ILoginUser{
   
-  constructor(private _userRepository: IUserRepository) {}
+  constructor(
+    private _userRepository: IUserRepository,
+    private _tokenService: ITokenService
+  ) {
+    super();
+  }
 
-  async execute(dto: UserLoginDTO): Promise<{ token: string; user: UserEntity }> {
+  async execute(data: UserLoginDTO): Promise<{ accessToken: string; refreshToken: string; user: UserLoginResponseDTO }> {
+    const dto= await this.validateDto(UserLoginDTO, data)
 
     const user = await this._userRepository.findByEmail(dto.email);
 
@@ -22,12 +31,23 @@ export class LoginUser implements ILoginUser{
     if (!isMatch) throw new Error("Invalid credentials");
 
   
-    const token = jwt.sign(
-      { userId: user.id, email: user.email, role: user.role },
-      process.env.JWT_SECRET as string,
-      { expiresIn: "1d" }
+    const accessToken = this._tokenService.generateAccessToken(
+      { id: user.id!, email: user.email, role: user.role },
+      
     );
 
-    return { token, user };
+    const refreshToken = this._tokenService.generateRefreshToken(
+      { id: user.id!, email: user.email, role: user.role },
+      
+    );
+
+     const userDto= plainToInstance( UserLoginResponseDTO,{
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          role: user.role,
+      })
+
+    return { accessToken, refreshToken, user:userDto };
   }
 }

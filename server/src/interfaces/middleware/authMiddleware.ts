@@ -17,7 +17,7 @@ export const verifyToken = (requiredRole: "admin" | "user" | "doctor") => {
       requiredRole === "doctor"
         ? req.cookies?.accessToken
         : req.cookies?.userAccessToken;
-
+        
     if (!token) return res.status(401).json({ message: "No token provided" });
 
     const jwtService = getJwtService();
@@ -26,7 +26,6 @@ export const verifyToken = (requiredRole: "admin" | "user" | "doctor") => {
     if (!decoded) return res.status(401).json({ message: "Invalid or expired token" });
 
     if (decoded.role !== requiredRole) return res.status(403).json({ message: "Forbidden" });
-
     req.user = decoded;
     next();
   };
