@@ -1,7 +1,7 @@
 import DoctorModel, { IDoctor, Slot } from "../../database/models/doctorModel";
 import { IDoctorRepository } from "../../../domain/repositories/doctorRepository";
 import { DoctorEntity } from "../../../domain/entities/doctorEntity";
-import BookingModel from "../../database/models/bookingModel";
+import BookingModel from "../models/booking.model";
 
 export class DoctorRepositoryImpl implements IDoctorRepository {
 

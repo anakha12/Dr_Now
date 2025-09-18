@@ -8,10 +8,9 @@ import { ISendDoctorOtp } from "../../application/use_cases/interfaces/doctor/IS
 import { IVerifyDoctorOtp } from "../../application/use_cases/interfaces/doctor/IVerifyDoctorOtp";
 import { IGetDoctorProfile } from "../../application/use_cases/interfaces/doctor/IGetDoctorProfile";
 import { IUpdateDoctorProfile } from "../../application/use_cases/interfaces/doctor/IUpdateDoctorProfile";
-import { IAddDoctorAvailability } from "../../application/use_cases/interfaces/doctor/IAddDoctorAvailability";
+import { IAddDoctorAvailabilityRule } from "../../application/use_cases/interfaces/doctor/IAddDoctorAvailability";
 import { IGetDoctorAvailability } from "../../application/use_cases/interfaces/doctor/IGetDoctorAvailability";
 import { IGetDoctorBookings } from "../../application/use_cases/interfaces/doctor/IGetDoctorBookings";
-import { IEditDoctorAvailability } from "../../application/use_cases/interfaces/doctor/IEditDoctorAvailability";
 import { IRemoveDoctorSlot } from "../../application/use_cases/interfaces/doctor/IRemoveDoctorSlot";
 import { ICancelDoctorBooking } from "../../application/use_cases/interfaces/doctor/ICancelDoctorBooking";
 import { IGetAllDepartmentsUseCase } from "../../application/use_cases/interfaces/doctor/IGetAllDepartmentsUseCase";
@@ -20,15 +19,15 @@ import { ICompleteDoctorProfile } from "../../application/use_cases/interfaces/d
 import { IGetBookingDetails } from "../../application/use_cases/interfaces/user/IGetBookingDetails";
 import { IDoctorLogin } from "../../application/use_cases/interfaces/doctor/IDoctorLogin";
 
+
 import { plainToInstance } from "class-transformer";
 import { validate } from "class-validator";
-import { error } from "console";
+import { IAddDoctorAvailabilityException } from "../../application/use_cases/interfaces/doctor/IAddDoctorAvailabilityException";
+import { IGetDoctorAvailabilityExceptions } from "../../application/use_cases/interfaces/doctor/IGetDoctorAvailabilityExceptions";
+import { IDeleteDoctorAvailabilityExceptionUseCase } from "../../application/use_cases/interfaces/doctor/IDeleteDoctorAvailabilityExceptionUseCase";
+import { IEditDoctorAvailabilityRule } from "../../application/use_cases/interfaces/doctor/IEditDoctorAvailabilityRuleUseCase";
+import { IDeleteDoctorAvailabilityRuleUseCase } from "../../application/use_cases/interfaces/doctor/IDeleteDoctorAvailabilityRuleUseCase";
 
-interface MulterFiles {
-  profileImage?: Express.Multer.File[];
-  medicalLicense?: Express.Multer.File[];
-  idProof?: Express.Multer.File[];
-}
 
  export interface MulterRequest extends Request {
   files?: {
@@ -46,16 +45,20 @@ export class DoctorController {
       private _loginUseCase: IDoctorLogin,
       private _getDoctorProfileUseCase: IGetDoctorProfile,
       private _updateDoctorProfileUseCase: IUpdateDoctorProfile,
-      private _addAvailabilityUseCase: IAddDoctorAvailability,
+      private _addAvailabilityUseCase: IAddDoctorAvailabilityRule,
       private _getAvailabilityUseCase: IGetDoctorAvailability,
       private _getDoctorBookingsUseCase: IGetDoctorBookings,
-      private _editAvailabilityUseCase:IEditDoctorAvailability,
       private _removeDoctorSlotUseCase:IRemoveDoctorSlot,
       private _cancelDoctorBookingUseCase: ICancelDoctorBooking,
       private _getAllDepartmentsUseCase: IGetAllDepartmentsUseCase,
       private _getDoctorWalletSummaryUseCase: IGetDoctorWalletSummary,
       private _completeProfileUseCase: ICompleteDoctorProfile,
       private _getBookingDetailsDoctorUseCase: IGetBookingDetails,
+      private _addDoctorAvailabilityExceptionUsecase: IAddDoctorAvailabilityException,
+      private _getDoctorAvailabilityExceptionsUseCase: IGetDoctorAvailabilityExceptions,
+      private _deleteDoctorAvailabilityExceptionUseCase: IDeleteDoctorAvailabilityExceptionUseCase,
+      private _editAvailabilityRuleUseCase: IEditDoctorAvailabilityRule,
+      private _deleteAvailabilityRuleUseCase: IDeleteDoctorAvailabilityRuleUseCase,
   ) {}
 
   async sendOtp(req: MulterRequest, res: Response): Promise<void> {
@@ -171,44 +174,110 @@ async login(req: Request, res: Response): Promise<void> {
     }
   }
 
-  async addAvailability(req: AuthRequest, res: Response): Promise<void> {
+  async addAvailabilityRule(req: AuthRequest, res: Response): Promise<void> {
     try {
-      const doctorId = req.params.doctorId;
-      const { date, from,to } = req.body;
-      const result = await this._addAvailabilityUseCase.execute(doctorId, { date, from,to });
+      const data= {...req.body, doctorId:req.user?.id }
+      const result = await this._addAvailabilityUseCase.execute(data);
       res.status(HttpStatus.OK).json(result);
     } catch (error: any) {
       res.status(HttpStatus.BAD_REQUEST).json({ error: error.message });
     }
   }
 
-  async fetchAvailability(req: Request, res: Response): Promise<void> {
-    try {
-      const doctorId = req.params.doctorId;
-      const availability = await this._getAvailabilityUseCase.execute(doctorId);
-      res.status(HttpStatus.OK).json(availability);
-    } catch (error: any) {
-      res.status(HttpStatus.BAD_REQUEST).json({ error: error.message });
-    }
-  }
-
-async removeAvailabilitySlot(req: Request, res: Response): Promise<void> {
+async fetchAvailabilityRule(req: AuthRequest, res: Response): Promise<void> {
   try {
-    const doctorId = req.params.doctorId;
-    const { date, from, to } = req.body;
-
-    if (!date || !from || !to) {
-       res.status(HttpStatus.BAD_REQUEST).json({ error:Messages.MISSING_BOOKING_DATA });
-       return
+    const doctorId = req.user?.id;
+    if (!doctorId) {
+      res.status(HttpStatus.UNAUTHORIZED).json({ error: "Unauthorized" });
+      return;
     }
 
-    await this._removeDoctorSlotUseCase.execute(doctorId, date, { from, to });
-
-    res.status(HttpStatus.OK).json({ message: Messages.SLOT_REMOVED});
+    const availability = await this._getAvailabilityUseCase.execute(doctorId);
+    res.status(HttpStatus.OK).json(availability);
   } catch (error: any) {
     res.status(HttpStatus.BAD_REQUEST).json({ error: error.message });
   }
 }
+
+async editAvailabilityRule(req: AuthRequest, res: Response) {
+  try {
+    const doctorId = req.user?.id;
+    const dayOfWeek = Number(req.params.dayOfWeek);
+    const dto = { ...req.body, dayOfWeek, doctorId };
+
+    const updatedRule = await this._editAvailabilityRuleUseCase.execute( dto);
+    res.status(HttpStatus.OK).json(updatedRule);
+  } catch (err: any) {
+    res.status(HttpStatus.BAD_REQUEST).json({ message: err.message });
+  }
+}
+
+
+  async deleteAvailabilityRule(req: AuthRequest, res: Response) {
+    try {
+      const doctorId = req.user?.id;
+      const dayOfWeek = Number(req.params.dayOfWeek);
+      if(!doctorId){
+        res.status(HttpStatus.UNAUTHORIZED).json({ error: "Unauthorized" });
+        return;
+      }
+      
+      const result = await this._deleteAvailabilityRuleUseCase.execute( { dayOfWeek, doctorId });
+      res.status(HttpStatus.OK).json(result);
+    } catch (err: any) {
+      res.status(HttpStatus.BAD_REQUEST).json({ message: err.message });
+    }
+  }
+
+async addAvailabilityException(req: AuthRequest, res: Response): Promise<void> {
+    try {
+      
+      const data = { ...req.body, doctorId: req.user?.id }; 
+
+      const result = await this._addDoctorAvailabilityExceptionUsecase.execute(data);
+      res.status(HttpStatus.CREATED).json(result);
+    } catch (err: any) {
+      res.status(HttpStatus.BAD_REQUEST).json({ message: err.message || "Internal Server Error" });
+    }
+}
+
+async fetchAvailabilityExceptions(req: AuthRequest, res: Response): Promise<void> {
+    try {
+      const doctorId = req.user?.id;
+      if (!doctorId) {
+        res.status(HttpStatus.BAD_REQUEST).json({ message: "Doctor ID is required" });
+        return;
+      }
+       const dto ={ doctorId}
+      const result = await this._getDoctorAvailabilityExceptionsUseCase.execute(dto);
+      res.status(HttpStatus.OK).json(result);
+    } catch (err: any) {
+      res.status(HttpStatus.BAD_REQUEST).json({ message: err.message || "Internal Server Error" });
+    }
+}
+
+async deleteAvailabilityException(req: AuthRequest, res: Response): Promise<void> {
+  try {
+    const doctorId  = req.user?.id; 
+    const { exceptionId } = req.params; 
+
+    if (!doctorId || !exceptionId) {
+      res.status(400).json({ message: "Doctor ID and Exception ID are required" });
+      return;
+    }
+
+    const dto = { doctorId, exceptionId }; 
+    const result = await this._deleteDoctorAvailabilityExceptionUseCase.execute(dto);
+
+    res.status(HttpStatus.OK).json(result);
+  } catch (err: any) {
+    res
+      .status(HttpStatus.BAD_REQUEST)
+      .json({ message: err.message || "Internal Server Error" });
+  }
+}
+
+
 
 async getBookings(req: AuthRequest, res: Response): Promise<void> {
   try {
@@ -228,29 +297,6 @@ async getBookings(req: AuthRequest, res: Response): Promise<void> {
     res.status(HttpStatus.OK).json(result); 
   } catch (err: any) {
     res.status(HttpStatus.BAD_REQUEST).json({ error: err.message });
-  }
-}
-
-
-async editAvailability(req: AuthRequest, res: Response): Promise<void> {
-  try {
-    const doctorId = req.params.doctorId;
-    const { date, from, to, oldFrom, oldTo, oldDate } = req.body;
-
-    if (!doctorId || !date || !from || !to || !oldFrom || !oldTo || !oldDate) {
-      res.status(HttpStatus.BAD_REQUEST).json({ error: Messages.MISSING_FIELDS });
-      return;
-    }
-
-    const result = await this._editAvailabilityUseCase.execute(
-      doctorId,
-      { date: oldDate, from: oldFrom, to: oldTo },
-      { date, from, to }
-    );
-
-    res.status(HttpStatus.OK).json(result);
-  } catch (error: any) {
-    res.status(HttpStatus.BAD_REQUEST).json({ error: error.message });
   }
 }
 

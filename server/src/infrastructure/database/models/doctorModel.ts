@@ -30,7 +30,6 @@ export interface IDoctor extends Document {
   isBlocked: boolean;
   otp?: string;
   otpExpiresAt?: Date;
-  availability: Availability[]; 
   isRejected?: boolean;
   walletBalance?: number;
   totalEarned?: number;
@@ -57,16 +56,6 @@ export interface IDoctor extends Document {
   role: Role;
 }
 
-const slotSchema = new Schema<Slot>({
-  from: { type: String, required: true },
-  to: { type: String, required: true },
-});
-
-const availabilitySchema = new Schema<Availability>({
-  date: { type: String, required: true },
-  slots: { type: [slotSchema], default: [] },
-});
-
 const DoctorSchema: Schema = new Schema<IDoctor>(
   {
     name: { type: String, required: true },
@@ -87,7 +76,6 @@ const DoctorSchema: Schema = new Schema<IDoctor>(
     isBlocked: { type: Boolean, default: false },
     otp: { type: String },
     otpExpiresAt: { type: Date },
-    availability: { type: [availabilitySchema], default: [] }, 
     isRejected: { type: Boolean, default: false },
     walletBalance: { type: Number, default: 0 },
     totalEarned: { type: Number, default: 0 },

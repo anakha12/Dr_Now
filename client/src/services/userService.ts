@@ -102,6 +102,18 @@ export const getUserProfile = async () => {
   return response.data;
 };
 
+
+export const getDoctorAvailabilityRules = async (doctorId: string) => {
+  const response = await userAxios.get(`/doctor/${doctorId}/availability-rules`);
+  return response.data; 
+};
+
+
+export const getDoctorAvailabilityExceptions = async (doctorId: string) => {
+  const response = await userAxios.get(`/doctor/${doctorId}/availability-exceptions`);
+  return response.data; 
+};
+
 export const getUserBookings = async (page = 1, limit = 4) => {
   const response = await userAxios.get("/user/bookings", {
     params: { page, limit },

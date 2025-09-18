@@ -1,79 +1,36 @@
-import { IDoctorRepository } from "../../../domain/repositories/doctorRepository";
-import { IAddDoctorAvailability } from "../interfaces/doctor/IAddDoctorAvailability";
+import { BaseUseCase } from "../base-usecase";
+import { AddDoctorAvailabilityRuleDTO } from "../../../interfaces/dto/request/add-doctor-availability-rule.dto";
+import { IAddDoctorAvailabilityRule } from "../interfaces/doctor/IAddDoctorAvailability";
+import { IAvailabilityRuleRepository } from "../../../domain/repositories/IAvailabilityRuleRepository";
+import { DoctorAvailabilityRule } from "../../../domain/entities/doctorAvailabilityRule.entity";
 
-interface Slot {
-  from: string;
-  to: string;
-}
-
-interface AvailabilityPayload {
-  date: string;
-  from: string;
-  to: string;
-}
-
-export class AddDoctorAvailability implements IAddDoctorAvailability{
-  constructor(private _doctorRepo: IDoctorRepository) {}
-
-  private generateTimeSlots(from: string, to: string, interval: number = 30): Slot[] {
-    const slots: Slot[] = [];
-    const start = new Date(`1970-01-01T${from}:00`);
-    const end = new Date(`1970-01-01T${to}:00`);
-    const cursor = new Date(start);
-
-    while (cursor < end) {
-      const slotStart = cursor.toTimeString().slice(0, 5);
-      cursor.setMinutes(cursor.getMinutes() + interval);
-      if (cursor > end) break;
-      const slotEnd = cursor.toTimeString().slice(0, 5);
-      slots.push({ from: slotStart, to: slotEnd });
-    }
-
-    return slots;
+export class AddDoctorAvailabilityRuleUseCase
+  extends BaseUseCase<AddDoctorAvailabilityRuleDTO, { message: string }>
+  implements IAddDoctorAvailabilityRule
+{
+  constructor(private readonly ruleRepo: IAvailabilityRuleRepository) {
+    super();
   }
 
-  private isOverlapping(slot1: Slot, slot2: Slot): boolean {
-    return slot1.from < slot2.to && slot1.to > slot2.from;
-  }
+  async execute(data: AddDoctorAvailabilityRuleDTO): Promise<{ message: string }> {
+    console.log(data)
 
-  async execute(doctorId: string, payload: AvailabilityPayload) {
-    const { date, from, to } = payload;
+    const dto = await this.validateDto(AddDoctorAvailabilityRuleDTO, data);
 
-    if (!date || !from || !to) {
-      throw new Error("Date, from, and to are required");
-    }
+    const existingRule = await this.ruleRepo.findByDoctorAndDay(dto.doctorId, dto.dayOfWeek);
+    if (existingRule) throw new Error(`Rule for day ${dto.dayOfWeek} already exists`);
+  
 
-    const newSlots = this.generateTimeSlots(from, to);
-    if (newSlots.length === 0) {
-      throw new Error("Invalid time range — no slots generated");
-    }
+    const ruleEntity = new DoctorAvailabilityRule(
+      dto.doctorId,
+      dto.dayOfWeek,
+      dto.startTime,
+      dto.endTime,
+      dto.slotDuration
+    );
 
-    const doctor = await this._doctorRepo.getDoctorById(doctorId);
-    if (!doctor) {
-      throw new Error("Doctor not found");
-    }
+    await this.ruleRepo.create(ruleEntity);
 
-    const existingDay = doctor.availability.find((entry) => entry.date === date);
-
-    if (existingDay) {
-
-      for (const newSlot of newSlots) {
-        const conflict = existingDay.slots.some(existingSlot =>
-          this.isOverlapping(existingSlot, newSlot)
-        );
-
-        if (conflict) {
-          throw new Error(`Slot ${newSlot.from}–${newSlot.to} overlaps with existing schedule`);
-        }
-      }
-
-      existingDay.slots.push(...newSlots);
-    } else {
-
-      doctor.availability.push({ date, slots: newSlots });
-    }
-    await this._doctorRepo.updateDoctor(doctorId, { availability: doctor.availability });
-
-    return { message: "Availability added successfully" };
+    return { message: "Availability rule added successfully" };
   }
 }

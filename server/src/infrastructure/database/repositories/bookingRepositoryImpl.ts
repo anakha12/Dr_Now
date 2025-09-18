@@ -1,8 +1,8 @@
 
 
-import BookingModel, { IBooking } from "../../database/models/bookingModel";
+import BookingModel, { IBooking } from "../models/booking.model";
 import { IBookingRepository } from "../../../domain/repositories/bookingRepository";
-import { Booking,EnrichedBooking, EnrichedDoctorBooking } from "../../../domain/entities/bookingEntity";
+import { Booking,EnrichedBooking, EnrichedDoctorBooking } from "../../../domain/entities/booking.entity";
 import { Types } from "mongoose";
 import userModel from "../models/userModel";
 

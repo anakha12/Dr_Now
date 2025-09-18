@@ -1,6 +1,6 @@
 import { Stripe } from "stripe";
 import { IBookingRepository } from "../../../domain/repositories/bookingRepository";
-import { Booking } from "../../../domain/entities/bookingEntity";
+import { Booking } from "../../../domain/entities/booking.entity";
 import { IAdminWalletRepository } from "../../../domain/repositories/adminWalletRepository";
 
 export class StripeWebhookUseCase {

@@ -1,5 +1,5 @@
 import { IBookingRepository } from "../../../domain/repositories/bookingRepository";
-import { Booking } from "../../../domain/entities/bookingEntity";
+import { Booking } from "../../../domain/entities/booking.entity";
 import { IGetDoctorBookings } from "../interfaces/doctor/IGetDoctorBookings";
 
 export class GetDoctorBookings implements IGetDoctorBookings{

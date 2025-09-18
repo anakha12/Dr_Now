@@ -1,8 +1,5 @@
 import { Request, Response } from "express";
-import { plainToInstance } from "class-transformer";
-import { validate } from "class-validator";
 
-// import { UserRegisterDTO } from "../../application/dto/userRegister.dto";
 import { HttpStatus } from "../../utils/HttpStatus";
 import { Messages } from "../../utils/Messages";
 import { ILoginUser } from "../../application/use_cases/interfaces/user/ILoginUser";
@@ -25,9 +22,9 @@ import { IGetBookingDetails } from "../../application/use_cases/interfaces/user/
 import { IGetDepartmentsUser } from "../../application/use_cases/interfaces/user/IGetDepartmentsUser";
 import { IGetUserWallet } from "../../application/use_cases/interfaces/user/IGetUserWallet";
 import { IGetFilteredDoctors } from "../../application/use_cases/interfaces/user/IGetFilteredDoctors";
-
-import { UserRegisterDTO } from "../dto/request/user-register.dto";
-import { UserLoginDTO } from "../dto/request/user-login.dto";
+import { IGetDoctorAvailabilityRules } from "../../application/use_cases/interfaces/user/IGetDoctorAvailabilityRules";
+import { IGetDoctorAvailability } from "../../application/use_cases/interfaces/doctor/IGetDoctorAvailability";
+import { IGetDoctorAvailabilityExceptions } from "../../application/use_cases/interfaces/user/IGetDoctorAvailabilityExceptions";
 
 
 interface AuthenticatedRequest extends Request {
@@ -59,6 +56,8 @@ export class UserController {
       private _getDepartmentsUseCase: IGetDepartmentsUser,
       private _getUserWalletUseCase: IGetUserWallet,
       private _getFilteredDoctorsUseCase: IGetFilteredDoctors,
+      private _getDoctorAvailabilityRulesUseCase: IGetDoctorAvailabilityRules,
+      private _getDoctorAvailabilityExceptionsUseCase: IGetDoctorAvailabilityExceptions,
   ) {}
   
   async register(req: Request, res: Response): Promise<void> {
@@ -86,7 +85,7 @@ export class UserController {
 
  async login(req: Request, res: Response): Promise<void> {
   try {
-
+     const { email, password } = req.body;
     const { accessToken, refreshToken, user } = await this._userLogin.execute(req.body);
 
     const accessTokenMaxAge= Number(process.env.ACCESS_TOKEN_COOKIE_MAXAGE);
@@ -391,8 +390,29 @@ export class UserController {
     }
   }
 
+async getDoctorAvailabilityRules(req: Request, res: Response) {
+  try {
+    const { doctorId } = req.params;
 
+    const rules = await this._getDoctorAvailabilityRulesUseCase.execute(doctorId);
 
+    res.status(200).json(rules);
+  } catch (err: any) {
+    res.status(400).json({ error: err.message });
+  }
+}
+
+async getDoctorAvailabilityExceptions(req: Request, res: Response) {
+  try {
+    const { doctorId } = req.params;
+    console.log("doctorId", doctorId)
+    const exceptions = await this._getDoctorAvailabilityExceptionsUseCase.execute({doctorId});
+    console.log(exceptions,"exceptions")
+    res.status(200).json(exceptions);
+  } catch (err: any) {
+    res.status(400).json({ error: err.message });
+  }
+}
 
   
 }

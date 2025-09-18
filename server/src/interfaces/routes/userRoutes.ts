@@ -16,6 +16,12 @@ router.post("/reset-password", (req: Request, res: Response) => userController.r
 router.get("/get-all-doctors", (req: Request, res: Response) => userController.getAllDoctors(req, res));
 router.get("/doctor/:id", (req: Request, res: Response) => userController.getDoctorById(req, res));
 router.post("/create-checkout-session", (req: Request, res: Response) => userController.createCheckoutSession(req, res));
+router.get("/doctor/:doctorId/availability-rules",(req: Request, res: Response) => userController.getDoctorAvailabilityRules(req, res));
+router.get(
+  "/doctor/:doctorId/availability-exceptions",
+  (req: Request, res: Response) => userController.getDoctorAvailabilityExceptions(req, res)
+);
+
 router.get("/booked-slots/:doctorId", (req: Request, res: Response) => userController.getBookedSlots(req, res));
 router.get("/user/profile", verifyToken("user"), (req, res) => userController.getUserProfile(req, res));
 router.get("/user/bookings", verifyToken("user"), (req: Request, res: Response) => userController.getUserBookings(req, res));

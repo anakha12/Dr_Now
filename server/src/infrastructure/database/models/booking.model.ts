@@ -1,22 +1,14 @@
-
-
 import mongoose, { Schema, Document } from 'mongoose';
-
-export interface Slot {
-  from: string;
-  to: string;
-}
 
 export interface IBooking extends Document {
   doctorId: mongoose.Types.ObjectId;
   userId: mongoose.Types.ObjectId;
   date: string; 
-  slot: Slot; 
+  startTime: string; 
+  endTime: string;
   paymentStatus: 'pending' | 'paid' | 'failed';
   transactionId?: string; 
   status: 'Upcoming' | 'Cancelled' | 'Completed';
-  createdAt?: Date;
-  updatedAt?: Date;
   doctorEarning?: number;
   commissionAmount?: number;
   payoutStatus?: 'Pending' | 'Paid';
@@ -24,17 +16,13 @@ export interface IBooking extends Document {
   cancellationReason?: string;
 }
 
-const slotSchema = new Schema<Slot>({
-  from: { type: String, required: true },
-  to: { type: String, required: true },
-});
-
 const BookingSchema: Schema = new Schema<IBooking>(
   {
     doctorId: { type: mongoose.Schema.Types.ObjectId, ref: 'Doctor', required: true },
-    userId: { type: mongoose.Schema.Types.ObjectId, ref: 'user', required: true },
+    userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
     date: { type: String, required: true },
-    slot: { type: slotSchema, required: true },
+    startTime: { type: String, required: true },
+    endTime: { type: String, required: true },
     paymentStatus: {
       type: String,
       enum: ['pending', 'paid', 'failed'],
@@ -45,7 +33,7 @@ const BookingSchema: Schema = new Schema<IBooking>(
       type: String,
       enum: ['Upcoming', 'Cancelled', 'Completed'],
       default: 'Upcoming',
-    }, 
+    },
     doctorEarning: { type: Number },
     commissionAmount: { type: Number },
     payoutStatus: {
@@ -58,15 +46,9 @@ const BookingSchema: Schema = new Schema<IBooking>(
       enum: ['NotRequired', 'Refunded'],
       default: 'NotRequired',
     },
-    cancellationReason: {
-      type: String,
-      default: ''
-    }
-
+    cancellationReason: { type: String, default: '' }
   },
-  {
-    timestamps: true,
-  }
+  { timestamps: true }
 );
 
 export default mongoose.model<IBooking>('Booking', BookingSchema);

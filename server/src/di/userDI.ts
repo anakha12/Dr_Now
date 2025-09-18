@@ -7,6 +7,7 @@ import { DoctorRepositoryImpl } from "../infrastructure/database/repositories/do
 import { DepartmentRepositoryImpl } from "../infrastructure/database/repositories/departmentRepositoryImpl";
 import { BookingRepositoryImpl } from "../infrastructure/database/repositories/bookingRepositoryImpl";
 import { AdminWalletRepositoryImpl } from "../infrastructure/database/repositories/adminWalletRepositoryImpl";
+import { DoctorAvailabilityExceptionRepositoryImpl } from "../infrastructure/database/repositories/doctorAvailabilityExceptionRepositoryImpl";
 import { LoginUser } from "../application/use_cases/user/loginUser";
 import { BookWithWalletUseCase } from "../application/use_cases/user/bookWithWallet";
 import { RegisterUser } from "../application/use_cases/user/registerUser";
@@ -31,12 +32,18 @@ import { ITokenService } from "../interfaces/tokenServiceInterface";
 import { JwtService } from "../services/JwtService";
 import { AuthController } from "../interfaces/controllers/authController";
 
+import { AvailabilityRuleRepositoryImpl } from "../infrastructure/database/repositories/availabilityRuleRepositoryImpl";
+import { GetDoctorAvailabilityRulesUseCase } from "../application/use_cases/user/getDoctorAvailabilityRules";
+import { GetDoctorAvailabilityExceptionsUseCase } from "../application/use_cases/user/getDoctorAvailabilityExceptions";
+
 
 const userRepository = new UserRepositoryImpl();
 const doctorRepository = new DoctorRepositoryImpl();
 const departmentRepository = new DepartmentRepositoryImpl();
 const bookingRepository = new BookingRepositoryImpl();
 const adminWalletRepository = new AdminWalletRepositoryImpl();
+const availabilityRuleRepository = new AvailabilityRuleRepositoryImpl();
+const doctorAvailabilityExceptionRepository = new DoctorAvailabilityExceptionRepositoryImpl();
 
 const jwtService: ITokenService = new JwtService();
 
@@ -66,7 +73,10 @@ const cancelBooking = new CancelUserBookingUseCase(bookingRepository,userReposit
 const getBookingDetails = new GetBookingDetails(bookingRepository)
 const getDepartments = new GetDepartmentsUser(departmentRepository);
 const getUserWallet = new GetUserWalletUseCase(userRepository)
-const getFilteredDoctors = new GetFilteredDoctorsUseCase(doctorRepository,departmentRepository)
+const getFilteredDoctors = new GetFilteredDoctorsUseCase(doctorRepository,departmentRepository);
+const getDoctorAvailabilityRules = new GetDoctorAvailabilityRulesUseCase(availabilityRuleRepository);
+const getDoctorAvailabilityExceptions = new GetDoctorAvailabilityExceptionsUseCase(doctorAvailabilityExceptionRepository);
+
 
 
 export const userController = new UserController(
@@ -90,6 +100,8 @@ export const userController = new UserController(
   getDepartments,
   getUserWallet,
   getFilteredDoctors,
+  getDoctorAvailabilityRules,
+  getDoctorAvailabilityExceptions,
 );
 
 export const userAuthController = new AuthController(jwtService, "refreshToken")

@@ -1,4 +1,4 @@
-import { Booking } from "../../../../domain/entities/bookingEntity";
+import { Booking } from "../../../../domain/entities/booking.entity";
 
 export interface IGetDoctorBookings {
   execute(
