@@ -1,6 +1,7 @@
 import Stripe from "stripe";
 import { IDoctorRepository } from "../../../domain/repositories/doctorRepository";
 import { ICreateStripeSession } from "../interfaces/user/ICreateStripeSession";
+import { ErrorMessages } from "../../../utils/Messages";
 
 interface Slot {
   from: string;
@@ -24,7 +25,7 @@ export class CreateStripeSession implements ICreateStripeSession{
     date: string
   ): Promise<{ sessionId: string }> {
     const doctor = await this._doctorRepo.findById(doctorId);
-    if (!doctor) throw new Error("Doctor not found");
+    if (!doctor) throw new Error( ErrorMessages.DOCTOR_NOT_FOUND);
 
     const session = await this._stripe.checkout.sessions.create({
     payment_method_types: ["card"],

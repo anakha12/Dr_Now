@@ -1,4 +1,4 @@
-// src/application/usecases/doctor/getDoctorAvailabilityExceptions.usecase.ts
+
 import { BaseUseCase } from "../base-usecase";
 import { IDoctorAvailabilityExceptionRepository } from "../../../domain/repositories/IDoctorAvailabilityExceptionRepository ";
 import { DoctorAvailabilityExceptionResponseDTO } from "../../../interfaces/dto/response/doctor/doctor-exception-response.dto";

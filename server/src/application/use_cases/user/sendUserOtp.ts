@@ -21,9 +21,7 @@ export class SendUserOtp
 
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
 
-    const expireSeconds = 10 * 60
-    
-    console.log(`Generated OTP: ${otp}, Expires At: ${expireSeconds}`);
+    const expireSeconds = 10 * 60;
 
     const existingUser = await this._userRepository.findByEmail(dto.email);
     const existingDoctor= await this._doctorRepository.findByEmail(dto.email);

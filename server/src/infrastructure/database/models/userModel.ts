@@ -17,7 +17,6 @@ export interface IUSER extends Document{
     otp?: string;
     otpExpiresAt?: Date;
     uid?: string;
-    // profileCompletion: string;
     isDonner: boolean;
     walletBalance?: number;
     walletTransactions?: {

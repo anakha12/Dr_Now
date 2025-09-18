@@ -6,7 +6,7 @@ export class AddDoctorAvailabilityExceptionDTO {
   doctorId!: string;
 
   @IsDateString()
-  date!: string; // "2025-09-15"
+  date!: string; 
 
   @IsBoolean()
   isAvailable!: boolean;

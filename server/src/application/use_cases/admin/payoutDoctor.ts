@@ -3,6 +3,7 @@ import { IAdminWalletRepository } from "../../../domain/repositories/adminWallet
 import { IDoctorRepository } from "../../../domain/repositories/doctorRepository";
 import { AdminWalletTransaction } from "../../../domain/entities/adminWalletEntity";
 import { IPayoutDoctorUseCase } from "../interfaces/admin/IPayoutDoctorUseCase";
+import { ErrorMessages } from "../../../utils/Messages";
 
 export class PayoutDoctorUseCase implements IPayoutDoctorUseCase{
   constructor(
@@ -19,7 +20,7 @@ export class PayoutDoctorUseCase implements IPayoutDoctorUseCase{
     );
 
     if (!pendingBookings.length) {
-      throw new Error("No completed bookings with pending payout for this doctor");
+      throw new Error( ErrorMessages.NO_PENDING_PAYOUTS);
     }
 
     const totalAmount = pendingBookings.reduce(

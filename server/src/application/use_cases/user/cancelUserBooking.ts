@@ -2,6 +2,7 @@ import { IBookingRepository } from "../../../domain/repositories/bookingReposito
 import { IUserRepository } from "../../../domain/repositories/userRepository";
 import { IAdminWalletRepository } from "../../../domain/repositories/adminWalletRepository";
 import { ICancelUserBooking } from "../interfaces/user/ICancelUserBooking";
+import { ErrorMessages, Messages } from "../../../utils/Messages";
 
 export class CancelUserBookingUseCase implements ICancelUserBooking{
   constructor(
@@ -12,20 +13,20 @@ export class CancelUserBookingUseCase implements ICancelUserBooking{
 
   async execute(bookingId: string, userId: string, reason?: string) {
     const booking = await this._bookingRepository.findById(bookingId);
-    if (!booking) return { success: false, message: "Booking not found" };
+    if (!booking) return { success: false, message: ErrorMessages.BOOKING_NOT_FOUND };
 
     if (booking.userId.toString() !== userId.toString()) {
-      return { success: false, message: "Unauthorized" };
+      return { success: false, message: Messages.UNAUTHORIZED };
     }
 
     if (booking.status !== "Upcoming") {
-      return { success: false, message: "Only upcoming bookings can be cancelled" };
+      return { success: false, message: ErrorMessages.NON_UPCOMING_BOOKING };
     }
 
     const appointmentDateTime = new Date(`${booking.date}T${booking.slot.from}`);
     const now = new Date();
     if (now > appointmentDateTime) {
-      return { success: false, message: "Cannot cancel past appointments" };
+      return { success: false, message: ErrorMessages.CANNOT_CANCEL_PAST };
     }
 
  
@@ -34,7 +35,7 @@ export class CancelUserBookingUseCase implements ICancelUserBooking{
     const refundAmount = (booking.doctorEarning || 0) + (booking.commissionAmount || 0);
 
     const user = await this._userRepository.findUserById(booking.userId);
-    if (!user) return { success: false, message: "User not found" };
+    if (!user) return { success: false, message: Messages.USER_NOT_FOUND };
 
 
     await this._userRepository.updateUser(user.id!, {
@@ -50,7 +51,7 @@ export class CancelUserBookingUseCase implements ICancelUserBooking{
       },
     });
 
-    // Deduct from admin wallet
+ 
     await this._adminWalletRepository.debitCommission(
       {
         type: "debit",

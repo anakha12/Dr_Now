@@ -6,6 +6,7 @@ import { plainToInstance } from "class-transformer";
 import { DoctorLoginResponseDTO } from "../../../interfaces/dto/response/doctor/login-response.dto";
 import { DoctorLoginDTO } from "../../../interfaces/dto/request/doctor-login.dto";
 import { BaseUseCase } from "../base-usecase";
+import { ErrorMessages } from "../../../utils/Messages";
 
 export class DoctorLogin
   extends BaseUseCase<DoctorLoginDTO, { accessToken: string; refreshToken: string; user: DoctorLoginResponseDTO }>
@@ -25,14 +26,14 @@ export class DoctorLogin
 
     const doctor = await this._doctorRepo.findByEmail(dto.email);
   
-    if (!doctor) throw new Error("Doctor not found");
+    if (!doctor) throw new Error( ErrorMessages.DOCTOR_NOT_FOUND);
    
-    if (doctor.isRejected) throw new Error("This doctor is rejected");
+    if (doctor.isRejected) throw new Error( ErrorMessages.DOCTOR_REJECTED);
 
-    if (!doctor.isVerified) throw new Error(" not verified")
+    if (!doctor.isVerified) throw new Error( ErrorMessages.DOCTOR_NOT_VERIFIED)
 
     const isMatch = await bcrypt.compare(dto.password, doctor.password);
-    if (!isMatch) throw new Error("Incorrect password");
+    if (!isMatch) throw new Error( ErrorMessages.INVALID_PASSWORD);
 
     const accessToken = this._tokenService.generateAccessToken(
       { id: doctor.id!, email: doctor.email, role: doctor.role },

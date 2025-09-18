@@ -1,4 +1,5 @@
 import { IDoctorRepository } from "../../../domain/repositories/doctorRepository";
+import { ErrorMessages } from "../../../utils/Messages";
 import { IRemoveDoctorSlot } from "../interfaces/doctor/IRemoveDoctorSlot";
 
 interface Slot {
@@ -11,15 +12,15 @@ export class RemoveDoctorSlot implements IRemoveDoctorSlot{
 
   async execute(doctorId: string, date: string, slot: Slot): Promise<void> {
     if (!date || !slot.from || !slot.to) {
-      throw new Error("Date and slot times are required.");
+      throw new Error( ErrorMessages.SLOT_TIME_REQUIRED );
     }
 
     const doctor = await this._doctorRepo.findById(doctorId);
-    if (!doctor) throw new Error("Doctor not found");
+    if (!doctor) throw new Error( ErrorMessages.DOCTOR_NOT_FOUND);
 
     const availabilityEntry = doctor.availability.find((entry) => entry.date === date);
     if (!availabilityEntry) {
-      throw new Error("No availability found for this date.");
+      throw new Error( ErrorMessages.NO_AVAILABILITY_FOR_DATE );
     }
 
     const slotExists = availabilityEntry.slots.some(
@@ -27,12 +28,12 @@ export class RemoveDoctorSlot implements IRemoveDoctorSlot{
     );
 
     if (!slotExists) {
-      throw new Error("Slot does not exist or has already been removed.");
+      throw new Error( ErrorMessages.SLOT_NOT_FOUND);
     }
 
     const isBooked = await this._doctorRepo.checkIfAnySlotBooked(doctorId, date, [slot]);
     if (isBooked) {
-      throw new Error("Cannot remove: slot is already booked.");
+      throw new Error( ErrorMessages.SLOT_ALREADY_BOOKED);
     }
 
     await this._doctorRepo.removeSlot(doctorId, date, slot);

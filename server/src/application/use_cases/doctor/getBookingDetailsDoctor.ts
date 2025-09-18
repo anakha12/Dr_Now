@@ -1,28 +1,28 @@
   import { IBookingRepository } from "../../../domain/repositories/bookingRepository";
+import { ErrorMessages } from "../../../utils/Messages";
 import { IGetBookingDetailsDoctor } from "../interfaces/doctor/IGetBookingDetailsDoctor";
 
   export class GetBookingDetailsDoctor implements IGetBookingDetailsDoctor{
     constructor(private bookingRepo: IBookingRepository) {}
 
     async execute(bookingId: string, doctorId: string) {
-      console.log("bookingId",bookingId);
-      console.log("doctorId",doctorId)
+
       if (!bookingId || !doctorId) {
-        const err: any = new Error("Booking ID and User ID are required");
+        const err: any = new Error( ErrorMessages.BOOKING_ID_AND_DOCTOR_ID_REQUIRED);
         err.statusCode = 400;
         throw err;
       }
 
       const booking = await this.bookingRepo.findBookingByIdAndDoctor(bookingId, doctorId);
-      console.log("Booking fetched:", booking);
+
 
       if (!booking) {
-        const err: any = new Error("Booking not found or unauthorized");
+        const err: any = new Error( ErrorMessages.BOOKING_NOT_FOUND_OR_UNAUTHORIZED);
         err.statusCode = 404;
         throw err;
       }
       const totalAmount = (booking.doctorEarning ?? 0) + (booking.commissionAmount ?? 0);
-      console.log(totalAmount)
+
       return {
         ...booking,
         totalAmount

@@ -3,6 +3,7 @@ import { DoctorRegisterDTO } from "../../../interfaces/dto/request/doctor-regist
 import bcrypt from "bcrypt";
 import { ISendDoctorOtp } from "../interfaces/doctor/ISendDoctorOtp";
 import { redisClient } from "../../../config/redis";
+import { ErrorMessages } from "../../../utils/Messages";
 
 export class SendDoctorOtp implements ISendDoctorOtp{
   constructor(private _doctorRepository: IDoctorRepository) {}
@@ -13,10 +14,9 @@ export class SendDoctorOtp implements ISendDoctorOtp{
 
     const expireSeconds = 10 * 60
     
-    console.log(`Generated OTP: ${otp}, Expires At: ${expireSeconds}`);
     const existingDoctor = await this._doctorRepository.findByEmail(dto.email);
     if (existingDoctor) {
-      throw new Error("Doctor already exists with this email");
+      throw new Error( ErrorMessages.DOCTOR_ALREADY_EXISTS);
     }
 
     const hashedPassword = await bcrypt.hash(dto.password, 10); 
@@ -29,9 +29,6 @@ export class SendDoctorOtp implements ISendDoctorOtp{
     }
 
     await this._doctorRepository.createDoctor(doctorSave);
-
-  
-    console.log(`OTP sent to ${dto.email}: ${otp}`);
   }
 
 }

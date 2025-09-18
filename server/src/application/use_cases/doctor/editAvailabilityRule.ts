@@ -1,9 +1,10 @@
-// src/application/usecases/doctor/editDoctorAvailabilityRule.usecase.ts
+
 import { BaseUseCase } from "../base-usecase";
 import { EditDoctorAvailabilityRuleDTO } from "../../../interfaces/dto/request/edit-doctor-availability-rule.dto";
 import { IEditDoctorAvailabilityRule } from "../interfaces/doctor/IEditDoctorAvailabilityRuleUseCase";
 import { IAvailabilityRuleRepository } from "../../../domain/repositories/IAvailabilityRuleRepository";
 import { DoctorAvailabilityRule } from "../../../domain/entities/doctorAvailabilityRule.entity";
+import { Messages } from "../../../utils/Messages";
 
 export class EditDoctorAvailabilityRuleUseCase
   extends BaseUseCase<EditDoctorAvailabilityRuleDTO, { message: string }>
@@ -30,7 +31,7 @@ export class EditDoctorAvailabilityRuleUseCase
         dto.slotDuration || 30
       );
       await this.ruleRepo.create(newRule);
-      return { message: "Availability rule created successfully" };
+      return { message: Messages.RULE_ADDED };
     }
 
 
@@ -40,6 +41,6 @@ export class EditDoctorAvailabilityRuleUseCase
 
     await this.ruleRepo.update(existingRule);
 
-    return { message: "Availability rule updated successfully" };
+    return { message: Messages.RULE_UPDATED };
   }
 }

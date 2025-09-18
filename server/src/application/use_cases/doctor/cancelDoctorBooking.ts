@@ -2,6 +2,7 @@ import { IBookingRepository } from "../../../domain/repositories/bookingReposito
 import { IUserRepository } from "../../../domain/repositories/userRepository";
 import { IAdminWalletRepository } from "../../../domain/repositories/adminWalletRepository";
 import { ICancelDoctorBooking } from "../interfaces/doctor/ICancelDoctorBooking";
+import { ErrorMessages, Messages } from "../../../utils/Messages";
 
 export class CancelDoctorBooking implements ICancelDoctorBooking{
   constructor(
@@ -14,21 +15,21 @@ export class CancelDoctorBooking implements ICancelDoctorBooking{
     const booking = await this._bookingRepository.findById(bookingId);
 
     if (!booking) {
-      return { success: false, message: "Booking not found" };
+      return { success: false, message: ErrorMessages.BOOKING_NOT_FOUND };
     }
 
     if (booking.doctorId.toString() !== doctorId.toString()) {
-      return { success: false, message: "You are not authorized to cancel this booking" };
+      return { success: false, message: ErrorMessages.UNAUTHORIZED_CANCELLATION };
     }
 
     if (booking.status !== "Upcoming") {
-      return { success: false, message: "Only upcoming bookings can be cancelled" };
+      return { success: false, message: ErrorMessages.NON_UPCOMING_BOOKING };
     }
 
     const appointmentDateTime = new Date(`${booking.date}T${booking.slot.from}`);
     const now = new Date();
     if (now > appointmentDateTime) {
-      return { success: false, message: "Cannot cancel past appointments" };
+      return { success: false, message: ErrorMessages.CANNOT_CANCEL_PAST};
     }
 
     
@@ -39,23 +40,23 @@ export class CancelDoctorBooking implements ICancelDoctorBooking{
 
     const user = await this._userRepository.findUserById(booking.userId);
     console.log(user)
-    if (!user) return { success: false, message: "User not found" };
+    if (!user) return { success: false, message: ErrorMessages.USER_NOT_FOUND };
 
-    // Credit user wallet
+  
     await this._userRepository.updateUser(user.id!, {
       $inc: { walletBalance: refundAmount },
       $push: {
         walletTransactions: {
           type: "credit",
           amount: refundAmount,
-          reason: "Doctor cancelled appointment",
+          reason: Messages.BOOKING_CANCELLED_BY_DOCTOR,
           bookingId,
           date: new Date(),
         },
       },
     });
 
-    // Debit admin wallet
+
     await this._adminWalletRepository.debitCommission(
       {
         type: "debit",
@@ -70,6 +71,6 @@ export class CancelDoctorBooking implements ICancelDoctorBooking{
  
     await this._bookingRepository.updateRefundStatus(bookingId, "Refunded");
 
-    return { success: true };
+    return { success: true, message: Messages.REFUND_PROCESSED};
   }
 }

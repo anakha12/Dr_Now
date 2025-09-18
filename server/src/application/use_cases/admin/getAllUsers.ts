@@ -1,4 +1,4 @@
-// application/usecases/admin/getAllUsers.ts
+
 
 import { IUserRepository } from "../../../domain/repositories/userRepository";
 import { UserEntity } from "../../../domain/entities/userEntity";

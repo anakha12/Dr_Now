@@ -4,6 +4,7 @@ import { IDoctorRepository } from "../../../domain/repositories/doctorRepository
 import { IAdminWalletRepository } from "../../../domain/repositories/adminWalletRepository";
 import { WalletTransactionUser } from "../../../domain/entities/walletTransactionUserEntity";
 import { IBookWithWallet } from "../interfaces/user/IBookWithWallet";
+import { ErrorMessages, Messages } from "../../../utils/Messages";
 
 export class BookWithWalletUseCase implements IBookWithWallet {
   constructor(
@@ -21,13 +22,11 @@ export class BookWithWalletUseCase implements IBookWithWallet {
     date: string
   ) {
     const user = await this._userRepository.findUserById(userId);
-    if (!user) throw new Error("User not found");
+    if (!user) throw new Error( Messages.USER_NOT_FOUND);
 
     if ((user.walletBalance || 0) < amount) {
-      throw new Error("Insufficient wallet balance");
+      throw new Error( ErrorMessages.INSUFFICIENT_WALLET_BALANCE);
     }
-
-    console.log("creditCommission amount =", amount);
 
     const transaction: WalletTransactionUser = {
       amount: -amount,
@@ -67,6 +66,6 @@ export class BookWithWalletUseCase implements IBookWithWallet {
       amountNum 
     );
 
-    return { message: "Appointment booked using wallet" };
+    return { message: Messages.WALLET_BOOKING_SUCCESS};
   }
 }

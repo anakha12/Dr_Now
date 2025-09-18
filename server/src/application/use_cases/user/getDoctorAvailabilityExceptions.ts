@@ -5,6 +5,7 @@ import { IDoctorAvailabilityExceptionRepository } from "../../../domain/reposito
 import { DoctorAvailabilityExceptionResponseDTO } from "../../../interfaces/dto/response/doctor/doctor-exception-response.dto";
 import { plainToInstance } from "class-transformer";
 import { GetDoctorBasicsDTO } from "../../../interfaces/dto/request/doctor-basic.dto";
+import { ErrorMessages } from "../../../utils/Messages";
 
 
 export class GetDoctorAvailabilityExceptionsUseCase
@@ -22,7 +23,7 @@ export class GetDoctorAvailabilityExceptionsUseCase
 
 
     if (!exceptions || exceptions.length === 0) {
-      throw new Error("No availability exceptions found for this doctor");
+      throw new Error( ErrorMessages.EXCEPTION_NOT_FOUND);
     }
 
     const plainExceptions = exceptions.map((ex) => ({

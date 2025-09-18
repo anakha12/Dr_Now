@@ -1,6 +1,7 @@
 import { IDoctorRepository } from "../../../domain/repositories/doctorRepository";
 import { IBookingRepository } from "../../../domain/repositories/bookingRepository";
 import { IUpdateDoctorProfile } from "../interfaces/doctor/IUpdateDoctorProfile";
+import { ErrorMessages, Messages } from "../../../utils/Messages";
 
 export class UpdateDoctorProfile implements IUpdateDoctorProfile{
   constructor(
@@ -12,12 +13,12 @@ export class UpdateDoctorProfile implements IUpdateDoctorProfile{
     const hasActiveBookings = await this._bookingRepository.hasActiveBookingsForDoctor(doctorId);
     
     if (hasActiveBookings) {
-      throw new Error("You cannot update your profile while bookings exist.");
+      throw new Error( ErrorMessages.PROFILE_UPDATE_BLOCKED);
     }
 
    
     if (!updates.confirm) {
-      return { message: "confirmation_required" };
+      return { message: Messages.PROFILE_CONFIRMATION_REQUIRED };
     }
 
     const updated = await this._doctorRepository.updateDoctor(doctorId, {
@@ -25,7 +26,7 @@ export class UpdateDoctorProfile implements IUpdateDoctorProfile{
       isVerified: false,
     });
 
-    if (!updated) throw new Error("Failed to update profile");
+    if (!updated) throw new Error( ErrorMessages.PROFILE_UPDATE_FAILED);
     return updated;
   }
 }

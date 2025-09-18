@@ -2,6 +2,7 @@ import { Stripe } from "stripe";
 import { IBookingRepository } from "../../../domain/repositories/bookingRepository";
 import { Booking } from "../../../domain/entities/booking.entity";
 import { IAdminWalletRepository } from "../../../domain/repositories/adminWalletRepository";
+import { ErrorMessages } from "../../../utils/Messages";
 
 export class StripeWebhookUseCase {
   constructor(
@@ -12,13 +13,13 @@ export class StripeWebhookUseCase {
   async handleCheckoutSession(session: Stripe.Checkout.Session) {
     const metadata = session.metadata;
     if (!metadata) {
-      throw new Error("Missing metadata in session");
+      throw new Error( ErrorMessages.METADATA_MISSING);
     }
 
     try {
 
       const fee = parseFloat(metadata.fee);
-      if (isNaN(fee)) throw new Error(" Fee is NaN. Metadata.fee: " + metadata.fee);
+      if (isNaN(fee)) throw new Error( ErrorMessages.FEE_INVALID + metadata.fee);
 
       const commissionRate = 0.1;
       const commissionAmount = parseFloat((fee * commissionRate).toFixed(2));
@@ -40,17 +41,6 @@ export class StripeWebhookUseCase {
       };
 
       const savedBooking = await this._bookingRepo.createBooking(booking);
-      console.log(" Booking saved with ID:", savedBooking.id);
-
-      console.log(" About to credit commission to admin wallet...");
-      console.log(" Transaction Details:", {
-        amount: commissionAmount,
-        doctorId: metadata.doctorId,
-        userId: metadata.userId,
-        bookingId: savedBooking.id,
-        description: "Commission from booking",
-        type: "credit",
-      });
 
       await this._adminWalletRepo.creditCommission(
         {
@@ -64,10 +54,7 @@ export class StripeWebhookUseCase {
         fee
       );
 
-      console.log(" Commission credited to admin wallet");
-
     } catch (error) {
-      console.error(" Error in handleCheckoutSession:", error);
       throw error; 
     }
   }

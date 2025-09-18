@@ -2,6 +2,7 @@ import { IAvailabilityRuleRepository } from "../../../domain/repositories/IAvail
 import DoctorAvailabilityRuleModel, { IDoctorAvailabilityRule } from "../../database/models/availabilityRule.model";
 import { DoctorAvailabilityRule } from "../../../domain/entities/doctorAvailabilityRule.entity";
 import mongoose from "mongoose";
+import { ErrorMessages } from "../../../utils/Messages";
 
 export class AvailabilityRuleRepositoryImpl implements IAvailabilityRuleRepository {
   async findByDoctorAndDay(
@@ -44,7 +45,7 @@ export class AvailabilityRuleRepositoryImpl implements IAvailabilityRuleReposito
   ).exec();
 
   if (!updated) {
-    throw new Error("Availability rule not found for update");
+    throw new Error( ErrorMessages.RULE_NOT_FOUND);
   }
 
   return this._toDomain(updated);

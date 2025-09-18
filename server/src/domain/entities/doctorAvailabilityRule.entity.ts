@@ -9,7 +9,6 @@ export class DoctorAvailabilityRule {
     public id?: string 
   ) {}
 
-  // Business rule: ensure slot rule is valid
   isValid(): boolean {
     return this.startTime < this.endTime && this.slotDuration > 0;
   }

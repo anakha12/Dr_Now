@@ -6,6 +6,7 @@ import { ITokenService } from "../../../interfaces/tokenServiceInterface";
 import { BaseUseCase } from "../base-usecase";
 import { UserLoginResponseDTO } from "../../../interfaces/dto/response/user/login-response.dto";
 import { plainToInstance } from "class-transformer";
+import { ErrorMessages } from "../../../utils/Messages";
 
 export class LoginUser extends 
   BaseUseCase <UserLoginDTO, { accessToken: string; refreshToken: string; user: UserLoginResponseDTO }> implements ILoginUser{
@@ -22,13 +23,13 @@ export class LoginUser extends
 
     const user = await this._userRepository.findByEmail(dto.email);
 
-    if (!user) throw new Error("User not found");
+    if (!user) throw new Error( ErrorMessages.USER_NOT_FOUND);
 
-    if (!user.isVerified) throw new Error("Please verify your email/OTP before logging in");
-    if(!user.password) throw new Error("Please verify your email/OTP before logging in");
+    if (!user.isVerified) throw new Error( ErrorMessages.EMAIL_NOT_VERIFIED);
+    if(!user.password) throw new Error(ErrorMessages.EMAIL_NOT_VERIFIED);
 
     const isMatch = await bcrypt.compare(dto.password, user.password);
-    if (!isMatch) throw new Error("Invalid credentials");
+    if (!isMatch) throw new Error( ErrorMessages.INVALID_CREDENTIALS);
 
   
     const accessToken = this._tokenService.generateAccessToken(

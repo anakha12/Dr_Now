@@ -41,7 +41,7 @@ async getDoctorsWithPendingEarnings(
   const totalDoctors = totalDoctorsResult[0]?.total || 0;
   const totalPages = Math.ceil(totalDoctors / limit);
 
-  // Step 2: Get paginated doctor data with earnings
+
   const doctors = await BookingModel.aggregate([
     {
       $match: {

@@ -1,8 +1,9 @@
-// src/interfaces/controllers/stripeWebhookController.ts
+
 import { Request, Response } from "express";
 import { StripeWebhookUseCase } from "../../application/use_cases/stripe/stripeWebhookUseCase";
 import { AdminWalletRepositoryImpl } from "../../infrastructure/database/repositories/adminWalletRepositoryImpl";
 import { stripe } from "../../config/stripe"; 
+import { StripeWebhookMessages } from "../../utils/Messages";
 
 export class StripeWebhookController {
   constructor(private stripeWebhookUseCase: StripeWebhookUseCase) {}
@@ -14,8 +15,7 @@ export class StripeWebhookController {
     try {
       event = stripe.webhooks.constructEvent(req.body, sig!, endpointSecret);
     } catch (err: any) {
-      console.error(" Webhook Error:", err.message);
-      return res.status(400).send(`Webhook Error: ${err.message}`);
+      return res.status(400).send( StripeWebhookMessages.WEBHOOK_ERROR(err));
     }
 
     if (event.type === "checkout.session.completed") {
@@ -25,13 +25,12 @@ export class StripeWebhookController {
       try {
         await this.stripeWebhookUseCase.handleCheckoutSession(session);
       } catch (err: any) {
-        console.error("Booking failed to save:", err.message);
-        return res.status(500).send("Failed to save booking");
+        return res.status(500).send( StripeWebhookMessages.FAILED_TO_SAVE_BOOKING);
       }
     } else {
-      console.log(` Received non-handled event type: ${event.type}`);
+      console.log(StripeWebhookMessages.RECEIVED_NON_HANDLED_EVENT(event.type));
     }
 
-    res.status(200).json({ received: true });
+    res.status(200).json(StripeWebhookMessages.WEBHOOK_RECEIVED);
   };
 }

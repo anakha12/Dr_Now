@@ -2,9 +2,9 @@ import mongoose, { Schema, Document } from 'mongoose';
 
 export interface IDoctorAvailabilityException extends Document {
   doctorId: mongoose.Types.ObjectId;
-  date: string;           // "2025-09-15"
-  isAvailable: boolean;   // false = leave, true = special availability
-  startTime?: string;     // only if isAvailable = true
+  date: string;           
+  isAvailable: boolean;   
+  startTime?: string;   
   endTime?: string;
   slotDuration?: number;
 }

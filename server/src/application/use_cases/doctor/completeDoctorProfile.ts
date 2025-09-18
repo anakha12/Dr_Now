@@ -1,4 +1,5 @@
 import { IDoctorRepository } from "../../../domain/repositories/doctorRepository";
+import { Messages } from "../../../utils/Messages";
 import { ICompleteDoctorProfile } from "../interfaces/doctor/ICompleteDoctorProfile";
 
 interface Education {
@@ -25,7 +26,7 @@ export class CompleteDoctorProfile implements ICompleteDoctorProfile{
   constructor(private readonly _doctorRepo: IDoctorRepository) {}
 
   async execute(doctorId: string, profileData: CompleteProfileDTO) {
-    if (!doctorId) throw new Error("Doctor ID is required");
+    if (!doctorId) throw new Error( Messages.DOCTOR_ID_REQUIRED);
 
     return await this._doctorRepo.completeProfile(doctorId, profileData);
   }

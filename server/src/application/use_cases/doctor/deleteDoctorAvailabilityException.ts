@@ -4,6 +4,7 @@ import { DeleteDoctorAvailabilityExceptionDTO  } from "../../../interfaces/dto/r
 import { IDoctorAvailabilityExceptionRepository } from "../../../domain/repositories/IDoctorAvailabilityExceptionRepository ";
 import { validateOrReject } from "class-validator";
 import { plainToInstance } from "class-transformer";
+import { ErrorMessages, Messages } from "../../../utils/Messages";
 
 export class DeleteDoctorAvailabilityExceptionUseCase
   extends BaseUseCase<DeleteDoctorAvailabilityExceptionDTO , { message: string }>
@@ -17,8 +18,8 @@ export class DeleteDoctorAvailabilityExceptionUseCase
     await validateOrReject(dto);
 
     const deleted = await this.repo.deleteException(dto.exceptionId);
-    if (!deleted) throw new Error("Exception not found");
+    if (!deleted) throw new Error( ErrorMessages.EXCEPTION_NOT_FOUND);
 
-    return { message: "Availability exception deleted successfully" };
+    return { message: Messages.EXCEPTION_DELETED };
   }
 }

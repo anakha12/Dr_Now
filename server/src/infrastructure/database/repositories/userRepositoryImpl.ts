@@ -2,6 +2,7 @@ import UserModel from "../models/userModel";
 import { IUserRepository } from "../../../domain/repositories/userRepository";
 import { UserEntity } from "../../../domain/entities/userEntity";
 import { WalletTransactionUser } from "../../../domain/entities/walletTransactionUserEntity";
+import { ErrorMessages } from "../../../utils/Messages";
 
 export class UserRepositoryImpl implements IUserRepository {
 
@@ -43,7 +44,7 @@ export class UserRepositoryImpl implements IUserRepository {
   totalTransactions: number;
 }> {
   const user = await UserModel.findById(userId).lean();
-  if (!user) throw new Error("User not found");
+  if (!user) throw new Error( ErrorMessages.USER_NOT_FOUND );
 
   const allTransactions = user.walletTransactions || [];
 
@@ -89,7 +90,7 @@ export class UserRepositoryImpl implements IUserRepository {
       { isBlocked: block },
       { new: true }
     );
-    if (!updatedUser) throw new Error("User not found");
+    if (!updatedUser) throw new Error( ErrorMessages.USER_NOT_FOUND );
     return this._toDomain(updatedUser);
   }
 
@@ -106,13 +107,13 @@ export class UserRepositoryImpl implements IUserRepository {
 
   async updateUserByEmail(email: string, updates: Partial<UserEntity>): Promise<UserEntity> {
     const updatedUser = await UserModel.findOneAndUpdate({ email }, updates, { new: true });
-    if (!updatedUser) throw new Error("User not found");
+    if (!updatedUser) throw new Error( ErrorMessages.USER_NOT_FOUND );
     return this._toDomain(updatedUser);
   }
 
   async updateUser(id: string, updates: Partial<UserEntity>): Promise<UserEntity> {
     const updatedUser = await UserModel.findByIdAndUpdate(id, updates, { new: true });
-    if (!updatedUser) throw new Error("User not found");
+    if (!updatedUser) throw new Error( ErrorMessages.USER_NOT_FOUND );
     return this._toDomain(updatedUser);
   }
 

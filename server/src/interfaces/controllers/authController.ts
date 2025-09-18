@@ -28,7 +28,7 @@ async refreshToken(req: Request, res: Response): Promise<void> {
      const accessTokenMaxAge = Number(process.env.ACCESS_TOKEN_COOKIE_MAXAGE);
      const refreshTokenMaxAge = Number(process.env.REFRESH_TOKEN_COOKIE_MAXAGE);
 
-    // Set cookies
+
     res.cookie(this._cookieName, refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",

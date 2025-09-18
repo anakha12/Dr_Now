@@ -3,6 +3,7 @@ import { AddDoctorAvailabilityRuleDTO } from "../../../interfaces/dto/request/ad
 import { IAddDoctorAvailabilityRule } from "../interfaces/doctor/IAddDoctorAvailability";
 import { IAvailabilityRuleRepository } from "../../../domain/repositories/IAvailabilityRuleRepository";
 import { DoctorAvailabilityRule } from "../../../domain/entities/doctorAvailabilityRule.entity";
+import { Messages } from "../../../utils/Messages";
 
 export class AddDoctorAvailabilityRuleUseCase
   extends BaseUseCase<AddDoctorAvailabilityRuleDTO, { message: string }>
@@ -18,7 +19,7 @@ export class AddDoctorAvailabilityRuleUseCase
     const dto = await this.validateDto(AddDoctorAvailabilityRuleDTO, data);
 
     const existingRule = await this.ruleRepo.findByDoctorAndDay(dto.doctorId, dto.dayOfWeek);
-    if (existingRule) throw new Error(`Rule for day ${dto.dayOfWeek} already exists`);
+    if (existingRule) throw new Error( Messages.RULE_ALREADY_EXISTS(dto.dayOfWeek));
   
 
     const ruleEntity = new DoctorAvailabilityRule(
@@ -31,6 +32,6 @@ export class AddDoctorAvailabilityRuleUseCase
 
     await this.ruleRepo.create(ruleEntity);
 
-    return { message: "Availability rule added successfully" };
+    return { message: Messages.RULE_ADDED };
   }
 }

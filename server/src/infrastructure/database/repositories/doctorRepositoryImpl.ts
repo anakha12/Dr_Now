@@ -2,6 +2,7 @@ import DoctorModel, { IDoctor, Slot } from "../../database/models/doctorModel";
 import { IDoctorRepository } from "../../../domain/repositories/doctorRepository";
 import { DoctorEntity } from "../../../domain/entities/doctorEntity";
 import BookingModel from "../models/booking.model";
+import { ErrorMessages } from "../../../utils/Messages";
 
 export class DoctorRepositoryImpl implements IDoctorRepository {
 
@@ -127,13 +128,13 @@ async countFilteredDoctors(filters: {
       { new: true }
     );
 
-    if (!updated) throw new Error("Doctor not found");
+    if (!updated) throw new Error( ErrorMessages.DOCTOR_NOT_FOUND);
     return this._toDomain(updated);
   }
 
   async getDoctorById(id: string): Promise<DoctorEntity> {
     const doctor = await DoctorModel.findById(id);
-    if (!doctor) throw new Error("Doctor not found");
+    if (!doctor) throw new Error( ErrorMessages.DOCTOR_NOT_FOUND);
     return this._toDomain(doctor);
   }
 
@@ -142,7 +143,7 @@ async countFilteredDoctors(filters: {
     tx: { amount: number; description: string; date: Date }
   ): Promise<void> {
     const doctor = await DoctorModel.findById(doctorId);
-    if (!doctor) throw new Error("Doctor not found");
+    if (!doctor) throw new Error( ErrorMessages.DOCTOR_NOT_FOUND);
 
     doctor.walletBalance = doctor.walletBalance ?? 0;
     doctor.totalEarned = doctor.totalEarned ?? 0;
@@ -163,7 +164,7 @@ async countFilteredDoctors(filters: {
 
   async removeAllSlotsOnDate(doctorId: string, date: string): Promise<void> {
     const doctor = await DoctorModel.findById(doctorId);
-    if (!doctor) throw new Error("Doctor not found");
+    if (!doctor) throw new Error( ErrorMessages.DOCTOR_NOT_FOUND);
 
     doctor.availability = doctor.availability.filter((entry: any) => entry.date !== date);
     await doctor.save();
@@ -215,7 +216,7 @@ async countFilteredDoctors(filters: {
 
   async updateDoctor(id: string, updates: Partial<DoctorEntity>): Promise<DoctorEntity> {
     const updated = await DoctorModel.findByIdAndUpdate(id, updates, { new: true });
-    if (!updated) throw new Error("Doctor not found");
+    if (!updated) throw new Error( ErrorMessages.DOCTOR_NOT_FOUND);
     return this._toDomain(updated);
   }
 
@@ -224,7 +225,7 @@ async countFilteredDoctors(filters: {
     payload: { date: string; slots: Slot[] }
   ): Promise<void> {
     const doctor = await DoctorModel.findById(doctorId);
-    if (!doctor) throw new Error("Doctor not found");
+    if (!doctor) throw new Error( ErrorMessages.DOCTOR_NOT_FOUND );
 
     doctor.availability = doctor.availability ?? [];
     doctor.availability.push(payload);
@@ -233,7 +234,7 @@ async countFilteredDoctors(filters: {
 
   async removeSlot(doctorId: string, date: string, slot: Slot): Promise<void> {
     const doctor = await DoctorModel.findById(doctorId);
-    if (!doctor) throw new Error("Doctor not found");
+    if (!doctor) throw new Error( ErrorMessages.DOCTOR_NOT_FOUND);
 
     const entry = doctor.availability.find((a: any) => a.date === date);
     if (!entry) throw new Error("Date not found in availability");

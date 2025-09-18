@@ -2,6 +2,7 @@
 import { BaseUseCase } from "../base-usecase";
 import { IDeleteDoctorAvailabilityRuleUseCase } from "../interfaces/doctor/IDeleteDoctorAvailabilityRuleUseCase";
 import { IAvailabilityRuleRepository } from "../../../domain/repositories/IAvailabilityRuleRepository";
+import { ErrorMessages, Messages } from "../../../utils/Messages";
 
 export class DeleteDoctorAvailabilityRuleUseCase
   extends BaseUseCase<{ doctorId: string; dayOfWeek: number }, { message: string }>
@@ -17,11 +18,11 @@ export class DeleteDoctorAvailabilityRuleUseCase
     const existingRule = await this.ruleRepo.findByDoctorAndDay(doctorId, dayOfWeek);
 
     if (!existingRule || !existingRule.id) {
-      throw new Error("Availability rule not found for this day");
+      throw new Error( ErrorMessages.RULE_NOT_FOUND);
     }
 
     await this.ruleRepo.delete(existingRule.id);
 
-    return { message: "Availability rule deleted successfully" };
+    return { message: Messages.RULE_DELETED };
   }
 }
