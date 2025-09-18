@@ -188,7 +188,7 @@ async fetchAvailabilityRule(req: AuthRequest, res: Response): Promise<void> {
   try {
     const doctorId = req.user?.id;
     if (!doctorId) {
-      res.status(HttpStatus.UNAUTHORIZED).json({ error: "Unauthorized" });
+      res.status(HttpStatus.UNAUTHORIZED).json({ error: Messages.UNAUTHORIZED});
       return;
     }
 
@@ -218,7 +218,7 @@ async editAvailabilityRule(req: AuthRequest, res: Response) {
       const doctorId = req.user?.id;
       const dayOfWeek = Number(req.params.dayOfWeek);
       if(!doctorId){
-        res.status(HttpStatus.UNAUTHORIZED).json({ error: "Unauthorized" });
+        res.status(HttpStatus.UNAUTHORIZED).json({ error: Messages.UNAUTHORIZED });
         return;
       }
       
@@ -237,7 +237,7 @@ async addAvailabilityException(req: AuthRequest, res: Response): Promise<void> {
       const result = await this._addDoctorAvailabilityExceptionUsecase.execute(data);
       res.status(HttpStatus.CREATED).json(result);
     } catch (err: any) {
-      res.status(HttpStatus.BAD_REQUEST).json({ message: err.message || "Internal Server Error" });
+      res.status(HttpStatus.BAD_REQUEST).json({ message: err.message });
     }
 }
 
@@ -245,14 +245,14 @@ async fetchAvailabilityExceptions(req: AuthRequest, res: Response): Promise<void
     try {
       const doctorId = req.user?.id;
       if (!doctorId) {
-        res.status(HttpStatus.BAD_REQUEST).json({ message: "Doctor ID is required" });
+        res.status(HttpStatus.BAD_REQUEST).json({ message: Messages.DOCTOR_ID_REQUIRED });
         return;
       }
        const dto ={ doctorId}
       const result = await this._getDoctorAvailabilityExceptionsUseCase.execute(dto);
       res.status(HttpStatus.OK).json(result);
     } catch (err: any) {
-      res.status(HttpStatus.BAD_REQUEST).json({ message: err.message || "Internal Server Error" });
+      res.status(HttpStatus.BAD_REQUEST).json({ message: err.message });
     }
 }
 
@@ -262,7 +262,7 @@ async deleteAvailabilityException(req: AuthRequest, res: Response): Promise<void
     const { exceptionId } = req.params; 
 
     if (!doctorId || !exceptionId) {
-      res.status(400).json({ message: "Doctor ID and Exception ID are required" });
+      res.status(400).json({ message: Messages.DOCTOR_ID_REQUIRED });
       return;
     }
 
@@ -273,7 +273,7 @@ async deleteAvailabilityException(req: AuthRequest, res: Response): Promise<void
   } catch (err: any) {
     res
       .status(HttpStatus.BAD_REQUEST)
-      .json({ message: err.message || "Internal Server Error" });
+      .json({ message: err.message });
   }
 }
 

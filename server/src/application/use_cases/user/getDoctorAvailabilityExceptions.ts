@@ -34,7 +34,6 @@ export class GetDoctorAvailabilityExceptionsUseCase
       endTime: ex.endTime,
       slotDuration: ex.slotDuration,
     }));
-    console.log("plainExceptions",plainExceptions)
 
     return plainToInstance(DoctorAvailabilityExceptionResponseDTO, plainExceptions, {
       excludeExtraneousValues: true,

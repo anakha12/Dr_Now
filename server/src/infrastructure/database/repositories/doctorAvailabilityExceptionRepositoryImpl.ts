@@ -14,7 +14,6 @@ export class DoctorAvailabilityExceptionRepositoryImpl
 
   async getExceptionsForDoctor(doctorId: string): Promise<DoctorAvailabilityException[]> {
     const docs = await DoctorAvailabilityExceptionModel.find({ doctorId });
-    console.log("docs",docs)
     return docs.map((doc) => this._toDomain(doc));
   }
 

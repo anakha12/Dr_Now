@@ -76,9 +76,9 @@ export class UserController {
     try {
 
       const result = await this._sendUserOtp.execute(req.body);
-      res.status(HttpStatus.OK).json({ message: `OTP sent to ${result.email}` });
+      res.status(HttpStatus.OK).json({ message: Messages.OTP_SENT });
     } catch (err: any) {
-      console.error("Send OTP error:", err);
+  
       res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ error: Messages.FAILED_SENSD_OTP });
     }
   }
@@ -136,7 +136,6 @@ export class UserController {
       const result = await this._googleLoginUser.execute({ email, name, uid });
       res.status(HttpStatus.OK).json(result);
     } catch (err: any) {
-      console.error("Google login error:", err.message);
       res.status(HttpStatus.BAD_REQUEST).json({ error: err.message });
     }
   }
@@ -147,7 +146,6 @@ export class UserController {
       await this._sendResetOtp.execute(email);
       res.status(HttpStatus.OK).json({ message: Messages.RESET_OTP_SENT });
     } catch (err: any) {
-      console.error("Send reset OTP error:", err.message);
       res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ error: err.message });
     }
   }
@@ -158,7 +156,6 @@ export class UserController {
       await this._resetPassword.execute(email, otp, newPassword);
       res.status(HttpStatus.OK).json({ message:Messages.PASSWORD_RESET_SUCCESSFUL });
     } catch (err: any) {
-      console.error("Reset password error:", err.message);
       res.status(HttpStatus.BAD_REQUEST).json({ error: err.message });
     }
   }
@@ -175,7 +172,7 @@ export class UserController {
       } else {
         res
           .status(HttpStatus.INTERNAL_SERVER_ERROR)
-          .json({ success: false, message: "Unexpected error" });
+          .json({ success: false, message: Messages.UNAUTHORIZED });
       }
     }
   }
@@ -211,7 +208,7 @@ export class UserController {
         publishableKey: process.env.STRIPE_PUBLISHABLE_KEY,
       });
     } catch (error: any) {
-      console.error("Stripe session error:", error.message);
+     
       res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ error: error.message });
     }
   }
@@ -229,7 +226,7 @@ export class UserController {
       const slots = await this._getBookedSlotsUseCase.execute(doctorId, date);
       res.status(HttpStatus.OK).json(slots);
     } catch (err: any) {
-      console.error("Get booked slots error:", err.message);
+      
       res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ error: Messages.SLOT_FETCH_FAILED });
     }
   }
@@ -263,7 +260,6 @@ export class UserController {
 
     res.status(HttpStatus.OK).json({ bookings, totalPages, currentPage: page });
   } catch (err: any) {
-    console.error("Get user bookings error:", err.message);
     res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ error: Messages.SLOT_FETCH_FAILED });
   }
 }
@@ -293,7 +289,6 @@ export class UserController {
 
         res.status(HttpStatus.OK).json({ message: Messages.BOOKING_CANCELLED });
       } catch (err: any) {
-        console.error("Cancel booking error:", err.message);
         res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ error: Messages.BOOKING_FAILED});
       }
     }
@@ -325,8 +320,8 @@ export class UserController {
       const walletData = await this._getUserWalletUseCase.execute(userId, page, limit);
       res.status(HttpStatus.OK).json(walletData);
     } catch (error: any) {
-      console.error("Wallet error:", error.message);
-      res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ error: error.message || "Internal server error" });
+     
+      res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ error: error.message});
     }
   }
 
@@ -348,7 +343,7 @@ export class UserController {
       const result = await this._bookWithWalletUseCase.execute(userId, doctorId, slot, amount, date);
       res.status(HttpStatus.OK).json(result);
     } catch (err: any) {
-      console.error("Book with wallet error:", err.message);
+     
       res.status(HttpStatus.BAD_REQUEST).json({ error: err.message });
     }
   }
@@ -405,9 +400,8 @@ async getDoctorAvailabilityRules(req: Request, res: Response) {
 async getDoctorAvailabilityExceptions(req: Request, res: Response) {
   try {
     const { doctorId } = req.params;
-    console.log("doctorId", doctorId)
+
     const exceptions = await this._getDoctorAvailabilityExceptionsUseCase.execute({doctorId});
-    console.log(exceptions,"exceptions")
     res.status(200).json(exceptions);
   } catch (err: any) {
     res.status(400).json({ error: err.message });
@@ -416,3 +410,4 @@ async getDoctorAvailabilityExceptions(req: Request, res: Response) {
 
   
 }
+ 

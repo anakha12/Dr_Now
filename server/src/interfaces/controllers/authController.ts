@@ -50,7 +50,6 @@ async refreshToken(req: Request, res: Response): Promise<void> {
       message: Messages.TOKEN_REFRESHED,
     });
   } catch (err: any) {
-    console.error("Refresh token error:", err.message);
     res.status(HttpStatus.UNAUTHORIZED).json({ error: Messages.INVALID_OR_EXPIRED_TOKEN });
   }
 }

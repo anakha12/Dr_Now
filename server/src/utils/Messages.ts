@@ -12,6 +12,7 @@ export const Messages = {
   BOOKING_FAILED: "Failed to cancel booking",
   SLOT_FETCH_FAILED: "Failed to fetch booked slots",
   DOCTOR_NOT_FOUND: "Doctor not found",
+  DOCTOR_ID_REQUIRED:" Doctor ID is required",
   INTERNAL_SERVER_ERROR: "Internal server error",
   MISSING_BOOKING_DATA: "Missing booking data",
   MISSING_DOCTOR_AND_DATE:"Doctor ID and date are required",
