@@ -2,62 +2,36 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { getDoctorById } from "../../services/userService";
 import { motion } from "framer-motion";
-
-interface Experience {
-  hospital: string;
-  role: string;
-  years: string;
-}
-
-interface Education {
-  degree: string;
-  institution: string;
-  year: string;
-}
-
-interface Doctor {
-  _id: string;
-  name: string;
-  email: string;
-  phone: string;
-  specialization: string;
-  yearsOfExperience: number;
-  consultFee: number;
-  profileImage: string;
-  gender: string;
-  isVerified: boolean;
-  bio: string;
-  experience: Experience[];
-  education: Education[];
-  awards: string[];
-  affiliatedHospitals: string[];
-}
-
+import { useNotifications } from "../../context/NotificationContext";
+import { Messages } from "../../constants/messages";
+import type { DoctorProfile } from "../../types/doctorProfile";
+import logger from "../../utils/logger";
 const DoctorDetail = () => {
   const { id } = useParams();
-  
   const navigate = useNavigate();
-  const [doctor, setDoctor] = useState<Doctor | null>(null);
+  const { addNotification } = useNotifications();
+  const [doctor, setDoctor] = useState<DoctorProfile | null>(null);
 
   useEffect(() => {
     const fetchDoctor = async () => {
-      if (!id) return console.error("Doctor ID is missing from URL");
+      if (!id) return addNotification(Messages.DOCTOR_PROFILE.ERROR_FETCH, "ERROR");
 
       try {
         const data = await getDoctorById(id);
         setDoctor(data);
       } catch (error) {
-        console.error("Error loading doctor", error);
+        logger.error(error);
+        addNotification(Messages.DOCTOR_PROFILE.ERROR_FETCH, "ERROR");
       }
     };
 
     fetchDoctor();
-  }, [id]);
+  }, [id, addNotification]);
 
   if (!doctor) {
     return (
       <div className="text-center py-20 text-teal-700 text-lg">
-        Loading doctor details...
+        {Messages.DOCTOR_PROFILE.LOADING}
       </div>
     );
   }
@@ -87,7 +61,7 @@ const DoctorDetail = () => {
             Dr. {doctor.name}
           </h2>
           <p className="text-sm text-teal-600 font-medium">
-            {doctor.specialization}
+            {doctor.specialization || "-"}
           </p>
 
           <motion.button
@@ -95,7 +69,7 @@ const DoctorDetail = () => {
             className="mt-5 bg-gradient-to-r from-teal-500 to-teal-700 hover:from-teal-600 hover:to-teal-800 text-white px-6 py-2 rounded-lg shadow-md transition"
             whileTap={{ scale: 0.95 }}
           >
-            Book Appointment
+            {Messages.DOCTOR_PROFILE.BOOK_APPOINTMENT}
           </motion.button>
         </motion.div>
 
@@ -109,7 +83,9 @@ const DoctorDetail = () => {
           {/* About Section */}
           <section>
             <h3 className="text-xl font-semibold text-gray-800">About</h3>
-            <p className="text-gray-700 mt-2 leading-relaxed">{doctor.bio || "No bio available."}</p>
+            <p className="text-gray-700 mt-2 leading-relaxed">
+              {doctor.bio || Messages.DOCTOR_PROFILE.NO_BIO}
+            </p>
           </section>
 
           {/* Basic Info */}
@@ -117,43 +93,39 @@ const DoctorDetail = () => {
             <h3 className="text-xl font-semibold text-gray-800">Basic Information</h3>
             <ul className="mt-2 space-y-1 text-gray-700">
               <li><strong>Email:</strong> {doctor.email}</li>
-              <li><strong>Phone:</strong> {doctor.phone}</li>
-              <li><strong>Gender:</strong> {doctor.gender}</li>
-              <li><strong>Experience:</strong> {doctor.yearsOfExperience} years</li>
-              <li><strong>Consultation Fee:</strong> ₹{doctor.consultFee}</li>
+              <li><strong>Phone:</strong> {doctor.phone || "-"}</li>
+              <li><strong>Gender:</strong> {doctor.gender || "-"}</li>
+              <li><strong>Experience:</strong> {doctor.yearsOfExperience || 0} years</li>
+              <li><strong>Consultation Fee:</strong> ₹{doctor.consultFee || 0}</li>
             </ul>
           </section>
 
           {/* Experience */}
-          {doctor.experience?.length > 0 && (
+          {doctor.experience?.length ? (
             <section>
               <h3 className="text-xl font-semibold text-gray-800">Experience</h3>
               <ul className="mt-2 list-disc pl-6 text-gray-700 space-y-1">
                 {doctor.experience.map((exp, idx) => (
-                  <li key={idx}>
-                    {exp.role} at {exp.hospital} ({exp.years} years)
-                  </li>
+                  <li key={idx}>{exp.role} at {exp.hospital} ({exp.years} years)</li>
                 ))}
               </ul>
             </section>
-          )}
+          ) : null}
 
           {/* Education */}
-          {doctor.education?.length > 0 && (
+          {doctor.education?.length ? (
             <section>
               <h3 className="text-xl font-semibold text-gray-800">Education</h3>
               <ul className="mt-2 list-disc pl-6 text-gray-700 space-y-1">
                 {doctor.education.map((edu, idx) => (
-                  <li key={idx}>
-                    {edu.degree} from {edu.institution} ({edu.year})
-                  </li>
+                  <li key={idx}>{edu.degree} from {edu.institution} ({edu.year})</li>
                 ))}
               </ul>
             </section>
-          )}
+          ) : null}
 
           {/* Awards */}
-          {doctor.awards?.length > 0 && (
+          {doctor.awards?.length ? (
             <section>
               <h3 className="text-xl font-semibold text-gray-800">Awards</h3>
               <ul className="mt-2 list-disc pl-6 text-gray-700 space-y-1">
@@ -162,10 +134,10 @@ const DoctorDetail = () => {
                 ))}
               </ul>
             </section>
-          )}
+          ) : null}
 
           {/* Affiliated Hospitals */}
-          {doctor.affiliatedHospitals?.length > 0 && (
+          {doctor.affiliatedHospitals?.length ? (
             <section>
               <h3 className="text-xl font-semibold text-gray-800">Affiliated Hospitals</h3>
               <ul className="mt-2 list-disc pl-6 text-gray-700 space-y-1">
@@ -174,7 +146,7 @@ const DoctorDetail = () => {
                 ))}
               </ul>
             </section>
-          )}
+          ) : null}
         </motion.div>
       </div>
     </motion.div>

@@ -39,7 +39,6 @@ export class CancelDoctorBooking implements ICancelDoctorBooking{
     const refundAmount = (booking.doctorEarning || 0) + (booking.commissionAmount || 0);
 
     const user = await this._userRepository.findUserById(booking.userId);
-    console.log(user)
     if (!user) return { success: false, message: ErrorMessages.USER_NOT_FOUND };
 
   

@@ -1,117 +1,124 @@
-import { doctorAxios } from "./axiosInstances"
+// src/services/doctorService.ts
+
+import { doctorAxios } from "./axiosInstances";
 import type { DoctorProfile } from "../types/doctorProfile";
 import type { Booking } from "../types/booking";
 import type { AvailabilityException } from "../types/availabilityException";
 import type { AvailabilityRule } from "../types/availabilityRule";
 import type { WalletSummary } from "../types/walletSummary";
-import { handleError } from "../utils/errorHandler";
 import type { Department } from "../types/department";
+import { handleError } from "../utils/errorHandler";
+import { Messages } from "../constants/messages";
+import { DoctorRoutes } from "../constants/apiRoutes";
 
 
 export const sendOtp = async (formData: FormData): Promise<{ message: string }> => {
   try {
-    const response = await doctorAxios.post("/send-otp", formData, {
+    const response = await doctorAxios.post(DoctorRoutes.SEND_OTP, formData, {
       headers: { "Content-Type": "multipart/form-data" },
     });
     return response.data;
   } catch (error) {
-    throw handleError(error, "Doctor registration failed");
+    throw handleError(error, Messages.DOCTOR.REGISTRATION.OTP_FAILED);
   }
 };
 
 export const registerDoctor = async (email: string, otp: string): Promise<{ token: string }> => {
   try {
-    const response = await doctorAxios.post("/verify-otp", { email, otp });
+    const response = await doctorAxios.post(DoctorRoutes.VERIFY_OTP, { email, otp });
     return response.data;
   } catch (error) {
-    throw handleError(error, "OTP verification failed");
+    throw handleError(error, Messages.DOCTOR.REGISTRATION.INVALID_OTP);
   }
 };
 
 export const doctorLogin = async (email: string, password: string): Promise<{ token: string }> => {
   try {
-    const response = await doctorAxios.post("/login", { email, password });
+    const response = await doctorAxios.post(DoctorRoutes.LOGIN, { email, password });
     return response.data;
   } catch (error) {
-    throw handleError(error, "Login failed");
+    throw handleError(error, Messages.AUTH.LOGIN_FAILED);
   }
 };
 
 
 export const getDoctorProfile = async (): Promise<DoctorProfile> => {
   try {
-    const response = await doctorAxios.get("/profile");
+    const response = await doctorAxios.get(DoctorRoutes.PROFILE);
     return response.data;
   } catch (error) {
-    throw handleError(error, "Failed to fetch profile");
+    throw handleError(error, Messages.DOCTOR_PROFILE.ERROR_FETCH);
   }
 };
 
+
 export const updateDoctorProfile = async (profileData: Partial<DoctorProfile>): Promise<DoctorProfile> => {
   try {
-    const response = await doctorAxios.put("/profile", profileData);
+    const response = await doctorAxios.put(DoctorRoutes.PROFILE, profileData);
     return response.data;
   } catch (error) {
-    throw handleError(error, "Failed to update profile");
+    throw handleError(error, Messages.DOCTOR.PROFILE_UPDATE_FAILED);
   }
 };
+
 
 export const completeDoctorProfile = async (
   doctorId: string,
   profileData: Omit<DoctorProfile, "_id" | "email">
 ): Promise<DoctorProfile> => {
   try {
-    const response = await doctorAxios.put(`/complete-profile/${doctorId}`, profileData);
+    const response = await doctorAxios.put(DoctorRoutes.COMPLETE_PROFILE(doctorId), profileData);
     return response.data;
   } catch (error) {
-    throw handleError(error, "Failed to complete profile");
+    throw handleError(error, Messages.DOCTOR.PROFILE_UPDATE_FAILED);
   }
 };
-
 
 export const getDoctorBookings = async (page: number, limit: number): Promise<Booking[]> => {
   try {
-    const response = await doctorAxios.get("/bookings", { params: { page, limit } });
+    const response = await doctorAxios.get(DoctorRoutes.BOOKINGS, { params: { page, limit } });
     return response.data;
   } catch (error) {
-    throw handleError(error, "Failed to fetch bookings");
+    throw handleError(error, Messages.DOCTOR.APPOINTMENTS.FETCH_FAILED);
   }
 };
+
 
 export const getDoctorBookingDetails = async (bookingId: string): Promise<Booking> => {
   try {
-    const response = await doctorAxios.get(`/bookings/${bookingId}`);
+    const response = await doctorAxios.get(DoctorRoutes.BOOKING_DETAILS(bookingId));
     return response.data;
   } catch (error) {
-    throw handleError(error, "Failed to fetch booking details");
+    throw handleError(error, Messages.DOCTOR.BOOKING_DETAILS.FETCH_FAILED);
   }
 };
 
+
 export const cancelDoctorBooking = async (bookingId: string, reason: string): Promise<Booking> => {
   try {
-    const response = await doctorAxios.put(`/bookings/${bookingId}/cancel`, { reason });
+    const response = await doctorAxios.put(DoctorRoutes.CANCEL_BOOKING(bookingId), { reason });
     return response.data;
   } catch (error) {
-    throw handleError(error, "Failed to cancel booking");
+    throw handleError(error, Messages.DOCTOR.APPOINTMENTS.CANCEL_FAILED);
   }
 };
 
 
 export const fetchDoctorAvailabilityRules = async (): Promise<AvailabilityRule[]> => {
   try {
-    const response = await doctorAxios.get("/availability-rules");
+    const response = await doctorAxios.get(DoctorRoutes.AVAILABILITY_RULES);
     return response.data;
   } catch (error) {
-    throw handleError(error, "Failed to fetch availability rules");
+    throw handleError(error, Messages.AVAILABILITY.FETCH_RULES_FAILED);
   }
 };
 
 export const addDoctorAvailabilityRule = async (payload: AvailabilityRule): Promise<AvailabilityRule> => {
   try {
-    const response = await doctorAxios.post("/availability-rules", payload);
+    const response = await doctorAxios.post(DoctorRoutes.AVAILABILITY_RULES, payload);
     return response.data;
   } catch (error) {
-    throw handleError(error, "Failed to add availability rule");
+    throw handleError(error, Messages.AVAILABILITY.ADD_RULE_FAILED);
   }
 };
 
@@ -120,69 +127,67 @@ export const editDoctorAvailabilityRule = async (
   payload: Partial<Omit<AvailabilityRule, "dayOfWeek">>
 ): Promise<AvailabilityRule> => {
   try {
-    const response = await doctorAxios.put(`/availability-rules/${dayOfWeek}`, payload);
+    const response = await doctorAxios.put(DoctorRoutes.EDIT_AVAILABILITY_RULE(dayOfWeek), payload);
     return response.data;
   } catch (error) {
-    throw handleError(error, "Failed to edit availability rule");
+    throw handleError(error, Messages.AVAILABILITY.UPDATE_RULE_FAILED);
   }
 };
 
 export const deleteDoctorAvailabilityRule = async (dayOfWeek: number): Promise<{ message: string }> => {
   try {
-    const response = await doctorAxios.delete(`/availability-rules/${dayOfWeek}`);
+    const response = await doctorAxios.delete(DoctorRoutes.DELETE_AVAILABILITY_RULE(dayOfWeek));
     return response.data;
   } catch (error) {
-    throw handleError(error, "Failed to delete availability rule");
+    throw handleError(error, Messages.AVAILABILITY.DELETE_RULE_FAILED);
   }
 };
 
 
 export const fetchDoctorAvailabilityExceptions = async (): Promise<AvailabilityException[]> => {
   try {
-    const response = await doctorAxios.get("/availability-exceptions");
+    const response = await doctorAxios.get(DoctorRoutes.AVAILABILITY_EXCEPTIONS);
     return response.data;
   } catch (error) {
-    throw handleError(error, "Failed to fetch availability exceptions");
+    throw handleError(error, Messages.AVAILABILITY.FETCH_EXCEPTIONS_FAILED);
   }
 };
-
 
 export const addDoctorAvailabilityException = async (
   exception: Partial<Omit<AvailabilityException, "_id">>
 ): Promise<AvailabilityException> => {
   try {
-    const response = await doctorAxios.post("/availability-exceptions", exception);
+    const response = await doctorAxios.post(DoctorRoutes.AVAILABILITY_EXCEPTIONS, exception);
     return response.data;
   } catch (error) {
-    throw handleError(error, "Failed to add availability exception");
+    throw handleError(error, Messages.AVAILABILITY.ADD_EXCEPTION_FAILED);
   }
 };
 
 export const deleteDoctorAvailabilityException = async (id: string): Promise<{ message: string }> => {
   try {
-    const response = await doctorAxios.delete(`/availability-exceptions/${id}`);
+    const response = await doctorAxios.delete(DoctorRoutes.DELETE_AVAILABILITY_EXCEPTION(id));
     return response.data;
   } catch (error) {
-    throw handleError(error, "Failed to delete availability exception");
+    throw handleError(error, Messages.AVAILABILITY.DELETE_EXCEPTION_FAILED);
   }
 };
 
 
 export const getAllDepartments = async (): Promise<Department[]> => {
   try {
-    const response = await doctorAxios.get("/departments");
+    const response = await doctorAxios.get(DoctorRoutes.DEPARTMENTS);
     return response.data;
   } catch (error) {
-    throw handleError(error, "Failed to load departments");
+    throw handleError(error, Messages.AVAILABILITY.FETCH_DEPARTMENTS_FAILED);
   }
 };
 
-
 export const getWalletSummary = async (page: number, limit: number): Promise<WalletSummary[]> => {
   try {
-    const response = await doctorAxios.get("/wallet-summary", { params: { page, limit } });
+    const response = await doctorAxios.get(DoctorRoutes.WALLET_SUMMARY, { params: { page, limit } });
     return response.data;
   } catch (error) {
-    throw handleError(error, "Failed to fetch wallet summary");
+    throw handleError(error, Messages.WALLET.FETCH_FAILED);
   }
 };

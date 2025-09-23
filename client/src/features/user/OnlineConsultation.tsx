@@ -3,30 +3,21 @@ import { useNavigate } from "react-router-dom";
 import AOS from "aos";
 import "aos/dist/aos.css";
 import { getAllDoctors, getDepartments } from "../../services/userService";
+import { useNotifications } from "../../context/NotificationContext"; 
+import { Messages } from "../../constants/messages";
+import logger from "../../utils/logger";
 
 import front1 from "../../assets/front-1.jpg";
 import front2 from "../../assets/front2.jpg";
 import front3 from "../../assets/front3.png";
-
-interface Doctor {
-  id: string;
-  name: string;
-  specialization: string;
-  profileImage: string;
-  yearsOfExperience: string;
-  consultFee: number;
-}
-
-interface Department {
-  id: string;
-  Departmentname: string;
-  Description: string;
-}
+import type { Doctor } from "../../types/doctor";
+import type { Department } from "../../types/department";
 
 const OnlineConsultation = () => {
   const deptRef = useRef<HTMLDivElement>(null);
   const docRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
+  const { addNotification } = useNotifications();
 
   const [doctors, setDoctors] = useState<Doctor[]>([]);
   const [departments, setDepartments] = useState<Department[]>([]);
@@ -37,10 +28,10 @@ const OnlineConsultation = () => {
     const fetchDoctors = async () => {
       try {
         const data = await getAllDoctors();
-        console.log("data", data)
         setDoctors(data);
       } catch (error) {
-        console.error("Error fetching doctors:", error);
+        logger.error(error);
+        addNotification(Messages.ONLINE_CONSULTATION.FETCH_DOCTORS_FAILED, "ERROR");
       }
     };
 
@@ -49,7 +40,8 @@ const OnlineConsultation = () => {
         const data = await getDepartments();
         setDepartments(data);
       } catch (error) {
-        console.error("Error fetching departments:", error);
+        logger.error(error);
+        addNotification(Messages.ONLINE_CONSULTATION.FETCH_DEPARTMENTS_FAILED, "ERROR");
       }
     };
 
@@ -82,7 +74,7 @@ const OnlineConsultation = () => {
       clearInterval(deptInterval);
       clearInterval(docInterval);
     };
-  }, []);
+  }, [addNotification]);
 
   return (
     <div className="bg-gray-50 text-gray-800 font-sans">

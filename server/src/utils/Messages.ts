@@ -117,6 +117,7 @@ export const StripeWebhookMessages = {
   FAILED_TO_SAVE_BOOKING: "Failed to save booking",
   RECEIVED_NON_HANDLED_EVENT: (eventType: string) => `Received non-handled event type: ${eventType}`,
   WEBHOOK_RECEIVED: { received: true },
+  UNHANDLED_EVENT: (eventType: string) => `Received unhandled Stripe event type: ${eventType}`,
 };
 
 export const AppMessages = {

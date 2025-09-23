@@ -1,15 +1,13 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { getUserProfile } from "../../services/userService";
-
-interface User {
-  name: string;
-  email: string;
-  phone: string;
-}
+import type { User } from "../../types/user";
+import { useNotifications } from "../../context/NotificationContext";
+import { Messages } from "../../constants/messages";
 
 const UserProfile = () => {
   const [user, setUser] = useState<User | null>(null);
+  const { addNotification } = useNotifications();
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -17,7 +15,7 @@ const UserProfile = () => {
         const data = await getUserProfile();
         setUser(data);
       } catch (err) {
-        console.error("Error fetching profile");
+        addNotification(Messages.USER.FETCH_FAILED, "ERROR");
       }
     };
 
@@ -43,19 +41,19 @@ const UserProfile = () => {
         >
           <div>
             <label className="text-gray-600 text-sm">Full Name</label>
-            <p className="text-lg font-semibold">{user.name}</p>
+            <p className="text-lg font-semibold">{user.name || Messages.USER.NO_RESULTS}</p>
           </div>
           <div>
             <label className="text-gray-600 text-sm">Email</label>
-            <p className="text-lg font-semibold">{user.email}</p>
+            <p className="text-lg font-semibold">{user.email || Messages.USER.NO_RESULTS}</p>
           </div>
           <div>
             <label className="text-gray-600 text-sm">Phone</label>
-            <p className="text-lg font-semibold">{user.phone}</p>
+            <p className="text-lg font-semibold">{user.phone || "N/A"}</p>
           </div>
         </motion.div>
       ) : (
-        <p className="text-gray-500">Loading profile...</p>
+        <p className="text-gray-500">{Messages.USER.FETCH_FAILED}</p>
       )}
     </div>
   );

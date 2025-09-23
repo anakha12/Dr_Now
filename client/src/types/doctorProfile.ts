@@ -1,4 +1,4 @@
-export  interface DoctorProfile {
+export interface DoctorProfile {
   _id: string;
   name: string;
   email: string;
@@ -8,4 +8,11 @@ export  interface DoctorProfile {
   awards?: string[];
   experience?: { hospital: string; role: string; years: string }[];
   affiliatedHospitals?: string[];
+  message?: string;
+  confirm?: boolean;
+  profileImage?: string;
+  specialization?: string;
+  gender?: string;
+  yearsOfExperience?: number;
+  consultFee?: number;
 }

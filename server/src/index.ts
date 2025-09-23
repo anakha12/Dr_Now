@@ -12,6 +12,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 import cookieParser from "cookie-parser";
 import { AppMessages } from "./utils/Messages";
+import logger from "./utils/Logger";
 
 
 dotenv.config(); 
@@ -36,8 +37,8 @@ app.use(express.json());
 app.use('/uploads', express.static(path.join(__dirname, '..', 'uploads')));
 
 mongoose.connect(process.env.MONGO_URI || "mongodb://127.0.0.1:27017/drnow")
-  .then(() => console.log(AppMessages.MONGODB_CONNECTED))
-  .catch(err => console.error(AppMessages.MONGODB_ERROR(err)));
+  .then(() => logger.info(AppMessages.MONGODB_CONNECTED))
+  .catch(err => logger.error(AppMessages.MONGODB_ERROR(err), { stack: err.stack }));
 
 
 app.use("/api/users", userRoutes);
@@ -47,5 +48,5 @@ app.use("/api/doctor", doctorRoutes);
 
 const port = Number(process.env.PORT);
 app.listen(port, () => {
-  console.log( AppMessages.SERVER_RUNNING(port));
+  logger.info(AppMessages.SERVER_RUNNING(port));
 });

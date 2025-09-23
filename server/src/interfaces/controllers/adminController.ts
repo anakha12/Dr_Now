@@ -196,8 +196,6 @@ import { AdminLoginDTO } from "../dto/request/admin-login.dto";
 
       const errors = await validate(dto);
 
-      console.log("error",errors);
-
       if (errors.length > 0) {
         const formattedErrors = errors.reduce((acc, err) => {
           if (err.constraints) {

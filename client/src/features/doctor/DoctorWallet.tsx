@@ -1,20 +1,18 @@
 import { useEffect, useState } from "react";
 import { getWalletSummary } from "../../services/doctorService";
-
-interface Transaction {
-  type: "credit" | "debit";
-  amount: number;
-  reason: string;
-  date: string;
-}
+import type { WalletSummary } from "../../types/walletSummary";
+import { useNotifications } from "../../context/NotificationContext";
+import { Messages } from "../../constants/messages";
 
 const ITEMS_PER_PAGE = 5;
 
 const DoctorWallet = () => {
-  const [walletBalance, setWalletBalance] = useState(0);
-  const [transactions, setTransactions] = useState<Transaction[]>([]);
-  const [totalPages, setTotalPages] = useState(1);
-  const [currentPage, setCurrentPage] = useState(1);
+  const [transactions, setTransactions] = useState<WalletSummary[]>([]);
+  const [walletBalance, setWalletBalance] = useState<number>(0);
+  const [totalPages, setTotalPages] = useState<number>(1);
+  const [currentPage, setCurrentPage] = useState<number>(1);
+
+  const { addNotification } = useNotifications();
 
   useEffect(() => {
     fetchWalletData(currentPage);
@@ -22,12 +20,18 @@ const DoctorWallet = () => {
 
   const fetchWalletData = async (page: number) => {
     try {
-      const data = await getWalletSummary(page, ITEMS_PER_PAGE);
-      setWalletBalance(data.walletBalance);
-      setTransactions(data.transactions);
-      setTotalPages(Math.ceil(data.totalTransactions / ITEMS_PER_PAGE));
+      const data: WalletSummary[] = await getWalletSummary(page, ITEMS_PER_PAGE);
+      setTransactions(data);
+
+
+      const balance = data.reduce((acc, tx) => {
+        return tx.type === "credit" ? acc + tx.amount : acc - tx.amount;
+      }, 0);
+      setWalletBalance(balance);
+
+      setTotalPages(1);
     } catch (err: any) {
-      console.error(err.message);
+      addNotification(Messages.DOCTOR.FETCH_WALLET_FAILED, "ERROR");
     }
   };
 
@@ -52,7 +56,7 @@ const DoctorWallet = () => {
             <tr>
               <th className="p-3">Type</th>
               <th className="p-3">Amount</th>
-              <th className="p-3">Reason</th>
+              <th className="p-3">Description</th>
               <th className="p-3">Date</th>
             </tr>
           </thead>
@@ -64,8 +68,8 @@ const DoctorWallet = () => {
                 </td>
               </tr>
             ) : (
-              transactions.map((tx, idx) => (
-                <tr key={idx} className="border-t">
+              transactions.map((tx) => (
+                <tr key={tx._id} className="border-t">
                   <td className="p-3 capitalize text-gray-700">{tx.type}</td>
                   <td
                     className={`p-3 font-medium ${
@@ -74,7 +78,7 @@ const DoctorWallet = () => {
                   >
                     ₹{tx.amount.toFixed(2)}
                   </td>
-                  <td className="p-3 text-gray-600">{tx.reason}</td>
+                  <td className="p-3 text-gray-600">{tx.description || "-"}</td>
                   <td className="p-3 text-gray-600">
                     {new Date(tx.date).toLocaleString()}
                   </td>

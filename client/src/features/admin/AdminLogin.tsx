@@ -1,34 +1,45 @@
 import { useState } from "react";
 import { adminLogin } from "../../services/adminService";
 import toast, { Toaster } from "react-hot-toast";
-import { FaStethoscope } from "react-icons/fa";
-import { FaEye, FaEyeSlash } from "react-icons/fa";
+import { FaStethoscope, FaEye, FaEyeSlash } from "react-icons/fa";
 import { useDispatch } from "react-redux";
 import { setAdminAuth } from "../../redux/slices/authSlice";
 import { useNavigate } from "react-router-dom";
+import { AdminRoutes } from "../../constants/routes";
+import { Messages } from "../../constants/messages";
+import { adminLoginSchema } from "../../validation/adminSchema";
 
 const AdminLogin = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
 
-  const dispatch = useDispatch()
-  const navigate = useNavigate()
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+
     try {
+    
+      adminLoginSchema.parse({ email, password });
+
       const res = await adminLogin(email, password);
-      toast.success("Login successful! Redirecting...");
-      dispatch(setAdminAuth({ isAuthenticated: true, user: res.user}));
+      toast.success(Messages.AUTH.LOGIN_SUCCESS);
+      dispatch(setAdminAuth({ isAuthenticated: true, user: res.user }));
       setTimeout(() => {
-        navigate("/admin/dashboard");
+        navigate(AdminRoutes.DASHBOARD);
       }, 1200);
     } catch (err: any) {
+      if (err.errors) {
+        err.errors.forEach((e: any) => toast.error(e.message));
+        return;
+      }
+
       if (err.message === "Not an admin") {
-        toast.error("Access denied: You are not an admin.");
+        toast.error(Messages.AUTH.LOGIN_ACCESS_DENIED);
       } else {
-        toast.error("Login failed. Please check your credentials.");
+        toast.error(Messages.AUTH.LOGIN_FAILED);
       }
     }
   };
@@ -36,11 +47,11 @@ const AdminLogin = () => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-teal-50 via-white to-teal-100 px-4">
       <div className="w-full max-w-md p-10 bg-white rounded-[2.5rem] shadow-2xl border border-gray-100">
-        {/* ---- Brand Header ---- */}
+        {/* Brand Header */}
         <div className="text-center mb-6">
           <div className="flex justify-center items-center gap-2 mb-1">
             <FaStethoscope className="text-teal-600 text-3xl" />
-            <span className="text-3xl font-bold text-teal-700">MedConsult</span>
+            <span className="text-3xl font-bold text-teal-700">DrNow</span>
           </div>
           <p className="text-sm text-gray-500">Admin Panel Login</p>
         </div>

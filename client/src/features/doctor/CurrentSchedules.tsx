@@ -14,6 +14,7 @@ import { useNotifications } from "../../context/NotificationContext";
 import type { AvailabilityRule } from "../../types/availabilityRule";
 import type { AvailabilityException } from "../../types/availabilityException";
 import type { Department } from "../../types/department";
+import { Messages } from "../../constants/messages";
 
 const days = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
 
@@ -75,7 +76,7 @@ const CurrentSchedules = () => {
       const data = await fetchDoctorAvailabilityRules();
       setRules(data);
     } catch {
-      addNotification("Failed to load availability rules", "error");
+      addNotification(Messages.AVAILABILITY.FETCH_RULES_FAILED, "ERROR");
     }
   };
 
@@ -84,7 +85,7 @@ const CurrentSchedules = () => {
       const data = await fetchDoctorAvailabilityExceptions();
       setExceptions(data);
     } catch {
-      addNotification("Failed to load availability exceptions", "error");
+      addNotification(Messages.AVAILABILITY.FETCH_EXCEPTIONS_FAILED, "ERROR");
     }
   };
 
@@ -93,7 +94,7 @@ const CurrentSchedules = () => {
       const data = await getAllDepartments();
       setDepartments(data);
     } catch {
-      addNotification("Failed to load departments", "error");
+      addNotification(Messages.AVAILABILITY.FETCH_DEPARTMENTS_FAILED, "ERROR");
     }
   };
 
@@ -106,16 +107,16 @@ const CurrentSchedules = () => {
           endTime: ruleForm.endTime,
           slotDuration: ruleForm.slotDuration,
         });
-        addNotification("Availability rule updated successfully", "success");
+        addNotification(Messages.AVAILABILITY.UPDATE_RULE_SUCCESS, "SUCCESS");
       } else {
         await addDoctorAvailabilityRule(ruleForm);
-        addNotification("Availability rule added successfully", "success");
+        addNotification(Messages.AVAILABILITY.ADD_RULE_SUCCESS, "SUCCESS");
       }
       setShowRuleModal(false);
       setEditingRule(null);
       loadAvailabilityRules();
     } catch {
-      addNotification(editingRule ? "Failed to update rule" : "Failed to add rule", "error");
+      addNotification(editingRule ? Messages.AVAILABILITY.UPDATE_RULE_FAILED : Messages.AVAILABILITY.ADD_RULE_FAILED, "ERROR");
     }
   };
 
@@ -127,16 +128,16 @@ const CurrentSchedules = () => {
 
   const handleRemoveRule = async (rule: AvailabilityRule) => {
     const confirmed = await confirmMessage(
-      `Delete rule: ${days[rule.dayOfWeek]} ${rule.startTime}–${rule.endTime} (slot ${rule.slotDuration}m)?`
+      Messages.AVAILABILITY.CONFIRM_DELETE_RULE(days[rule.dayOfWeek], rule.startTime, rule.endTime, rule.slotDuration)
     );
     if (!confirmed) return;
 
     try {
       await deleteDoctorAvailabilityRule(rule.dayOfWeek);
-      addNotification("Rule deleted successfully", "success");
+      addNotification(Messages.AVAILABILITY.DELETE_RULE_SUCCESS, "SUCCESS");
       loadAvailabilityRules();
     } catch {
-      addNotification("Failed to delete rule", "error");
+      addNotification(Messages.AVAILABILITY.DELETE_RULE_FAILED, "ERROR");
     }
   };
 
@@ -144,23 +145,23 @@ const CurrentSchedules = () => {
     try {
       const newException = await addDoctorAvailabilityException(exceptionForm);
       setExceptions((prev) => [...prev, newException]);
-      addNotification("Availability exception added successfully", "success");
+      addNotification(Messages.AVAILABILITY.ADD_EXCEPTION_SUCCESS, "SUCCESS");
       setShowExceptionModal(false);
     } catch {
-      addNotification("Failed to add availability exception", "error");
+      addNotification(Messages.AVAILABILITY.ADD_EXCEPTION_FAILED, "ERROR");
     }
   };
 
   const handleDeleteException = async (id: string) => {
-    const confirmed = await confirmMessage("Are you sure you want to delete this exception?");
+    const confirmed = await confirmMessage(Messages.AVAILABILITY.CONFIRM_DELETE_EXCEPTION);
     if (!confirmed) return;
 
     try {
       await deleteDoctorAvailabilityException(id);
       setExceptions((prev) => prev.filter((ex) => ex._id !== id));
-      addNotification("Availability exception deleted successfully", "success");
+      addNotification(Messages.AVAILABILITY.DELETE_EXCEPTION_SUCCESS, "SUCCESS");
     } catch {
-      addNotification("Failed to delete availability exception", "error");
+      addNotification(Messages.AVAILABILITY.DELETE_EXCEPTION_FAILED, "ERROR");
     }
   };
 

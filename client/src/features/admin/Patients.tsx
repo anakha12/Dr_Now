@@ -1,15 +1,10 @@
 import { useEffect, useState } from "react";
 import { getAllUsers, toggleUserBlockStatus } from "../../services/adminService";
 import toast from "react-hot-toast";
-import Table, { type Column } from "../../components/Table";
-
-interface User {
-  id: string;
-  name: string;
-  email: string;
-  phone?: string;
-  isBlocked?: boolean;
-}
+import Table from "../../components/Table"; 
+import type { Column } from "../../types/table";  
+ import { Messages } from "../../constants/messages";
+import type { User } from "../../types/user";
 
 const Patients = () => {
   const [patients, setPatients] = useState<User[]>([]);
@@ -25,7 +20,7 @@ const Patients = () => {
       setPatients(data.users);
       setTotalPages(data.totalPages);
     } catch (error) {
-      toast.error("Failed to load patients");
+      toast.error(Messages.USER.FETCH_FAILED);
     } finally {
       setLoading(false);
     }
@@ -42,10 +37,15 @@ const Patients = () => {
   const handleToggleBlock = async (id: string, isBlocked: boolean) => {
     try {
       await toggleUserBlockStatus(id, isBlocked ? "unblock" : "block");
-      toast.success(`User ${isBlocked ? "unblocked" : "blocked"} successfully`);
+      toast.success(
+        isBlocked
+          ? Messages.USER.UNBLOCK_SUCCESS
+          : Messages.USER.BLOCK_SUCCESS
+      );
+
       fetchPatients();
     } catch {
-      toast.error("Action failed");
+      toast.error(Messages.USER.ACTION_FAILED);
     }
   };
 
@@ -58,7 +58,7 @@ const Patients = () => {
     { header: "Email", accessor: "email" },
     {
       header: "Status",
-      accessor: (user) => (
+      accessor: (user: User) => (
         <span className={`font-semibold ${user.isBlocked ? "text-red-600" : "text-green-600"}`}>
           {user.isBlocked ? "Blocked" : "Active"}
         </span>
@@ -66,7 +66,7 @@ const Patients = () => {
     },
     {
       header: "Action",
-      accessor: (user) => (
+      accessor: (user: User) => (
         <button
           onClick={() => handleToggleBlock(user.id, user.isBlocked || false)}
           className={`px-4 py-2 rounded text-white font-medium transition shadow ${

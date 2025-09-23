@@ -1,7 +1,9 @@
 import { useState } from "react";
 import { sendResetOtp, verifyResetOtp } from "../../services/userService";
-import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
+import { useNotifications } from "../../context/NotificationContext";
+import { Messages } from "../../constants/messages";
+import logger from "../../utils/logger";
 
 const ForgotPassword = () => {
   const [step, setStep] = useState<"email" | "verify">("email");
@@ -9,24 +11,40 @@ const ForgotPassword = () => {
   const [otp, setOtp] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const navigate = useNavigate();
+  const { addNotification } = useNotifications();
 
   const handleSendOtp = async () => {
+    if (!email) {
+      addNotification(Messages.FORGOT_PASSWORD.ENTER_EMAIL, "INFO");
+      return;
+    }
     try {
       await sendResetOtp(email);
-      toast.success("OTP sent to your email");
+      addNotification(Messages.FORGOT_PASSWORD.OTP_SENT, "SUCCESS");
       setStep("verify");
     } catch (err: any) {
-      toast.error(err.message || "Failed to send OTP");
+      logger.error(err);
+      addNotification(err?.message || Messages.FORGOT_PASSWORD.OTP_FAILED, "ERROR");
     }
   };
 
   const handleResetPassword = async () => {
+    if (!otp) {
+      addNotification(Messages.FORGOT_PASSWORD.ENTER_OTP, "INFO");
+      return;
+    }
+    if (!newPassword) {
+      addNotification(Messages.FORGOT_PASSWORD.ENTER_NEW_PASSWORD, "INFO");
+      return;
+    }
+
     try {
       await verifyResetOtp({ email, otp, newPassword });
-      toast.success("Password reset successful");
+      addNotification(Messages.FORGOT_PASSWORD.RESET_SUCCESS, "SUCCESS");
       navigate("/user/login");
     } catch (err: any) {
-      toast.error(err.message || "Failed to reset password");
+      logger.error(err);
+      addNotification(err?.message || Messages.FORGOT_PASSWORD.RESET_FAILED, "ERROR");
     }
   };
 

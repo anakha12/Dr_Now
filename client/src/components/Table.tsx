@@ -1,21 +1,10 @@
 import React from "react";
-
-export interface Column<T> {
-  header: string;
-  accessor: keyof T | ((row: T) => React.ReactNode); 
-  className?: string;
-}
-
-interface TableProps<T> {
-  data: T[];
-  columns: Column<T>[];
-  emptyMessage?: string;
-  onViewDetails?: (id: string) => void; // ✅ new prop
-}
+import type { TableProps } from "../types/table";
 
 function Table<T extends { id: string }>({
   data,
   columns,
+  rowKey = "id", 
   emptyMessage = "No records found",
   onViewDetails,
 }: TableProps<T>) {
@@ -35,7 +24,6 @@ function Table<T extends { id: string }>({
               </th>
             ))}
 
-            {/* ✅ Always show "View" column if onViewDetails is provided */}
             {onViewDetails && (
               <th className="px-6 py-3 text-left font-medium text-teal-800">
                 View
@@ -54,37 +42,40 @@ function Table<T extends { id: string }>({
               </td>
             </tr>
           ) : (
-            data.map((row) => (
-              <tr key={row.id} className="border-b hover:bg-teal-50">
-                {columns.map((col, i) => {
-                  const value =
-                    typeof col.accessor === "function"
-                      ? col.accessor(row)
-                      : (row[col.accessor] as React.ReactNode);
+            data.map((row, rowIdx) => {
+              const key =
+                (rowKey && (row as any)[rowKey]) ?? rowIdx; // ✅ stable key
+              return (
+                <tr key={key} className="border-b hover:bg-teal-50">
+                  {columns.map((col, i) => {
+                    const value =
+                      typeof col.accessor === "function"
+                        ? col.accessor(row)
+                        : (row[col.accessor] as React.ReactNode);
 
-                  return (
-                    <td
-                      key={i}
-                      className={`px-6 py-4 ${col.className ?? ""}`}
-                    >
-                      {value}
+                    return (
+                      <td
+                        key={i}
+                        className={`px-6 py-4 ${col.className ?? ""}`}
+                      >
+                        {value}
+                      </td>
+                    );
+                  })}
+
+                  {onViewDetails && (
+                    <td className="px-6 py-4">
+                      <button
+                        onClick={() => onViewDetails((row as any)[rowKey])}
+                        className="px-4 py-2 rounded bg-teal-600 hover:bg-teal-700 text-white font-medium shadow"
+                      >
+                        View Details
+                      </button>
                     </td>
-                  );
-                })}
-
-                {/* ✅ Render "View Details" button */}
-                {onViewDetails && (
-                  <td className="px-6 py-4">
-                    <button
-                      onClick={() => onViewDetails(row.id)}
-                      className="px-4 py-2 rounded bg-teal-600 hover:bg-teal-700 text-white font-medium shadow"
-                    >
-                      View Details
-                    </button>
-                  </td>
-                )}
-              </tr>
-            ))
+                  )}
+                </tr>
+              );
+            })
           )}
         </tbody>
       </table>

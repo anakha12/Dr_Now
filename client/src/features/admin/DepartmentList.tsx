@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { toast } from "react-hot-toast";
+import { addDepartmentSchema } from "../../validation/departmentSchema";
 import { useNotifications } from "../../context/NotificationContext";
 import {
   getAllDepartments,
@@ -7,6 +7,8 @@ import {
   addDepartment,
 } from "../../services/adminService";
 import type { Department, DepartmentResponse } from "../../types/department";
+import { Messages } from "../../constants/messages";
+import { ZodError } from "zod";
 
 const DepartmentList = () => {
   const [departments, setDepartments] = useState<Department[]>([]);
@@ -15,26 +17,33 @@ const DepartmentList = () => {
   const [showAddForm, setShowAddForm] = useState(false);
   const [newDeptName, setNewDeptName] = useState("");
   const [newDescription, setNewDescription] = useState("");
-  const [searchQuery, setSearchQuery]= useState("");
+  const [searchQuery, setSearchQuery] = useState("");
   const { addNotification } = useNotifications();
   const itemsPerPage = 5;
 
   const fetchDepartments = async () => {
     try {
-      const data: DepartmentResponse = await getAllDepartments(currentPage, itemsPerPage, searchQuery);
+      const data: DepartmentResponse = await getAllDepartments(
+        currentPage,
+        itemsPerPage,
+        searchQuery
+      );
       if (data?.departments) {
         setDepartments(data.departments);
-        setTotalPages(data.totalPages); 
+        setTotalPages(data.totalPages);
       }
     } catch (err: any) {
-      addNotification(err.message || "Failed to load departments.", "error");
+      addNotification(
+        err.message || Messages.AVAILABILITY.FETCH_DEPARTMENTS_FAILED,
+        "ERROR"
+      );
     }
   };
 
-  const handleSearch=(e:React.ChangeEvent<HTMLInputElement>)=>{
+  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
     setCurrentPage(1);
-  }
+  };
 
   const handleToggleStatus = async (
     id: string,
@@ -43,49 +52,58 @@ const DepartmentList = () => {
     try {
       const newStatus = currentStatus === "Listed" ? "Unlisted" : "Listed";
       await toggleDepartmentStatus(id, newStatus);
-      addNotification(`Department ${newStatus}`, "success");
+      addNotification(`Department ${newStatus}`, "SUCCESS");
       fetchDepartments();
     } catch (err: any) {
-      addNotification(err.message || "Error updating status", "error");
+      addNotification(err.message || "Error updating status", "ERROR");
     }
   };
 
   const handleAddDepartment = async () => {
-    if (!newDeptName.trim() || !newDescription.trim()) {
-      return toast.error("All fields are required.");
-    }
-
     try {
+      // Zod validation
+      addDepartmentSchema.parse({
+        Departmentname: newDeptName,
+        Description: newDescription,
+      });
+
+      // API call
       await addDepartment({
         Departmentname: newDeptName,
         Description: newDescription,
       });
 
-      addNotification("Department added successfully", "success");
+      addNotification(Messages.AVAILABILITY.ADD_RULE_SUCCESS, "SUCCESS");
       setNewDeptName("");
       setNewDescription("");
       setShowAddForm(false);
       fetchDepartments();
-    } catch (err: any) {
-      console.log('error',err)
-      if (err.Departmentname || err.Description) {
-        const message=Object.values(err).join(', ')
-        addNotification(message, "error");
+    } catch (err: unknown) {
+      if (err instanceof ZodError) {
+        // Use `issues` instead of `errors`
+        err.issues.forEach((issue) => {
+          addNotification(issue.message, "ERROR");
+        });
+      } else if (err instanceof Error) {
+        addNotification(
+          err.message || Messages.AVAILABILITY.FETCH_DEPARTMENTS_FAILED,
+          "ERROR"
+        );
       } else {
-        addNotification(err.message || "Failed to add department", "error");
+        addNotification(Messages.AVAILABILITY.FETCH_DEPARTMENTS_FAILED, "ERROR");
       }
     }
   };
 
   useEffect(() => {
-    const delayDebounce= setTimeout(()=>{
+    const delayDebounce = setTimeout(() => {
       fetchDepartments();
-    },400);
+    }, 400);
 
-    return ()=> clearTimeout(delayDebounce);
+    return () => clearTimeout(delayDebounce);
   }, [currentPage, searchQuery]);
 
-   return (
+  return (
     <div className="max-w-4xl mx-auto p-4">
       {/* Header */}
       <div className="flex justify-between items-center mb-6">
@@ -220,7 +238,7 @@ const DepartmentList = () => {
       </div>
 
       {/* Pagination */}
-      { totalPages > 1 && (
+      {totalPages > 1 && (
         <div className="mt-4 flex justify-center items-center space-x-2">
           <button
             onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}

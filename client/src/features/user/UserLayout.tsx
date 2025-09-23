@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { getUserProfile } from "../../services/userService"; 
 import { useDispatch } from "react-redux";
 import { userLogout } from "../../redux/slices/authSlice";
+import logger from "../../utils/logger";
 
 const UserLayout = () => {
   const [user, setUser] = useState<{ name: string } | null>(null);
@@ -23,7 +24,7 @@ const UserLayout = () => {
   }, []);
 
   const handleLogout = () => {
-      console.log("Logout clicked");
+      logger.log("Logout clicked");
       dispatch(userLogout());
       navigate("/user/login");
   };
@@ -35,7 +36,7 @@ const UserLayout = () => {
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
           <div className="flex items-center gap-2">
             <FaStethoscope className="text-teal-600 text-2xl" />
-            <h1 className="text-xl font-bold text-teal-600">MedConsult</h1>
+            <h1 className="text-xl font-bold text-teal-600">DrNow</h1>
           </div>
           <nav className="flex items-center gap-6 text-sm md:text-base">
             <Link to="/user/dashboard" className="hover:text-teal-600">Home</Link>
@@ -75,7 +76,7 @@ const UserLayout = () => {
       {/* Footer */}
       <footer className="bg-gray-100 mt-20">
         <div className="container mx-auto px-4 py-10 text-center text-sm text-gray-600">
-          <p>© {new Date().getFullYear()} MedConsult. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} DrNow. All rights reserved.</p>
           <p>Providing trusted care to patients and support to doctors.</p>
         </div>
       </footer>

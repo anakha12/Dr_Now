@@ -3,18 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { cancelUserBooking, getUserBookings } from "../../services/userService";
 import { useNotifications } from "../../context/NotificationContext";
-
-interface Booking {
-  id: string;
-  doctorName: string;
-  department: string;
-  date: string;
-  time: string;
-  amount: number;
-  status: string;
-  paymentStatus: string;
-  canCancel: boolean;
-}
+import type { Booking } from "../../types/booking";
+import { Messages } from "../../constants/messages";
 
 const ITEMS_PER_PAGE = 4;
 
@@ -33,7 +23,7 @@ const UserBookings = () => {
       setBookings(res.bookings);
       setTotalPages(res.totalPages);
     } catch (error) {
-      addNotification("Failed to load bookings", "error");
+      addNotification(Messages.DOCTOR.APPOINTMENTS.FETCH_FAILED, "ERROR");
     } finally {
       setLoading(false);
     }
@@ -44,21 +34,24 @@ const UserBookings = () => {
   }, [currentPage]);
 
   const handleCancel = async (bookingId: string) => {
-    const confirmed = await confirmMessage("Are you sure you want to cancel this appointment?");
+    const confirmed = await confirmMessage(Messages.DOCTOR.APPOINTMENTS.CONFIRM_CANCEL);
     if (!confirmed) return;
 
-    const reason = await promptInput("Please provide a reason for cancellation", "e.g. emergency, change of plans");
+    const reason = await promptInput(
+      Messages.DOCTOR.APPOINTMENTS.PROMPT_CANCEL_REASON,
+      Messages.DOCTOR.APPOINTMENTS.PROMPT_CANCEL_PLACEHOLDER
+    );
     if (!reason || reason.trim() === "") {
-      addNotification("Cancellation reason is required", "warning");
+      addNotification(Messages.DOCTOR.APPOINTMENTS.CANCEL_REASON_REQUIRED, "WARNING");
       return;
     }
 
     try {
       await cancelUserBooking(bookingId, reason);
-      addNotification("Booking cancelled", "success");
+      addNotification(Messages.DOCTOR.APPOINTMENTS.CANCEL_SUCCESS, "SUCCESS");
       fetchBookings(currentPage);
     } catch (err) {
-      addNotification("Cancellation failed", "error");
+      addNotification(Messages.DOCTOR.APPOINTMENTS.CANCEL_FAILED, "ERROR");
     }
   };
 
@@ -116,9 +109,9 @@ const UserBookings = () => {
                   <p>
                     <strong>Status:</strong>{" "}
                     <span
-                      className={`inline-block px-2 py-0.5 text-xs font-semibold rounded-full border ${statusColor(booking.status)}`}
+                      className={`inline-block px-2 py-0.5 text-xs font-semibold rounded-full border ${statusColor(booking.status || "Pending")}`}
                     >
-                      {booking.status}
+                      {booking.status || Messages.DOCTOR.BOOKING_DETAILS.PENDING}
                     </span>
                   </p>
                   <p><strong>Amount:</strong> ₹{booking.amount}</p>

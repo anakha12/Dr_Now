@@ -1,14 +1,8 @@
 import { useEffect, useState } from "react";
 import { useNotifications } from "../../context/NotificationContext";
 import { getUserWallet } from "../../services/userService";
-
-interface Transaction {
-  type: "credit" | "debit";
-  amount: number;
-  reason: string;
-  bookingId?: string;
-  date: string;
-}
+import type { Transaction } from "../../types/transaction";
+import { Messages } from "../../constants/messages";
 
 const ITEMS_PER_PAGE = 3;
 
@@ -29,7 +23,7 @@ const UserWallet = () => {
         setTransactions(data.walletTransactions || []);
         setTotalTransactions(data.totalTransactions || 0);
       } catch (err) {
-        addNotification("Failed to load wallet info", "error");
+        addNotification(Messages.WALLET.FETCH_FAILED, "ERROR");
       }
     };
 

@@ -1,14 +1,18 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { sendOtp, registerDoctor,getAllDepartments } from "../../services/doctorService";
-import toast, { Toaster } from "react-hot-toast";
+import { sendOtp, registerDoctor, getAllDepartments } from "../../services/doctorService";
 import { FaStethoscope } from "react-icons/fa";
+import type { Department } from "../../types/department"; 
+import { useNotifications } from "../../context/NotificationContext";
+import { Messages } from "../../constants/messages";
+import { z, ZodError } from "zod";
+import { doctorRegisterSchema } from "../../validation/doctorSchema";
 
 const DoctorRegister = () => {
   const [otpSent, setOtpSent] = useState(false);
   const [otp, setOtp] = useState("");
   const [name, setName] = useState("");
-  const [gender, setGender] = useState("");
+  const [gender, setGender] = useState<"Male" | "Female" | "Other" | "">("");
   const [age, setAge] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
@@ -20,10 +24,12 @@ const DoctorRegister = () => {
   const [profileImage, setProfileImage] = useState<File | null>(null);
   const [idProof, setIdProof] = useState<File | null>(null);
   const [medicalLicense, setMedicalLicense] = useState<File | null>(null);
-  const [departments, setDepartments] = useState<{ _id: string; Departmentname: string }[]>([]);
+  const [departments, setDepartments] = useState<Department[]>([]);
 
   const navigate = useNavigate();
+  const { addNotification } = useNotifications();
 
+  // File handler
   const handleFileChange = (
     e: React.ChangeEvent<HTMLInputElement>,
     setter: React.Dispatch<React.SetStateAction<File | null>>
@@ -33,37 +39,45 @@ const DoctorRegister = () => {
     }
   };
 
+  useEffect(() => {
+    const fetchDepartments = async () => {
+      try {
+        const data = await getAllDepartments();
+        setDepartments(data); 
+      } catch {
+        addNotification(Messages.DOCTOR.REGISTRATION.DEPARTMENTS_FETCH_FAILED, "ERROR");
+      }
+    };
+    fetchDepartments();
+  }, []);
+
   const validateForm = () => {
-    const trimmed = (val: string) => val.trim();
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    const phoneRegex = /^[0-9]{10}$/;
+    try {
+      doctorRegisterSchema.parse({
+        name,
+        email,
+        password,
+        age: Number(age),
+        phone,
+        gender: gender as "Male" | "Female" | "Other",
+        yearsOfExperience: Number(yearsOfExperience),
+        consultFee: Number(consultFee),
+        specialization,
+        language,
+      });
 
-    if (
-      !trimmed(name) || !trimmed(gender) || !trimmed(age) || !trimmed(email) ||
-      !trimmed(phone) || !trimmed(language) || !trimmed(specialization) ||
-      !trimmed(yearsOfExperience) || !trimmed(consultFee) || !trimmed(password) ||
-      !profileImage || !idProof || !medicalLicense
-    ) {
-      toast.error("Please fill in all fields and upload documents.");
+      if (!profileImage || !idProof || !medicalLicense) {
+        addNotification(Messages.DOCTOR.REGISTRATION.FILL_ALL_FIELDS, "ERROR");
+        return false;
+      }
+
+      return true;
+    } catch (err) {
+      if (err instanceof ZodError) {
+        err.issues.forEach(issue => addNotification(issue.message, "ERROR"));
+      }
       return false;
     }
-
-    if (!emailRegex.test(trimmed(email))) {
-      toast.error("Invalid email.");
-      return false;
-    }
-
-    if (!phoneRegex.test(trimmed(phone))) {
-      toast.error("Invalid phone number.");
-      return false;
-    }
-
-    if (Number(age) < 18 || Number(yearsOfExperience) < 0 || Number(consultFee) < 0) {
-      toast.error("Check age, experience, and consultation fee.");
-      return false;
-    }
-
-    return true;
   };
 
   const handleSendOtp = async (e: React.FormEvent) => {
@@ -88,33 +102,27 @@ const DoctorRegister = () => {
     try {
       await sendOtp(formData);
       setOtpSent(true);
-      toast.success("OTP sent. Please check your email.");
+      addNotification(Messages.DOCTOR.REGISTRATION.OTP_SENT, "SUCCESS");
     } catch {
-      toast.error("Failed to send OTP.");
+      addNotification(Messages.DOCTOR.REGISTRATION.OTP_FAILED, "ERROR");
     }
   };
-  useEffect(() => {
-    const fetchDepartments = async () => {
-      try {
-        const data = await getAllDepartments();
-        setDepartments(data);
-      } catch {
-        toast.error("Unable to load specializations");
-      }
-    };
-    fetchDepartments();
-  }, []);
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!otp.trim()) {
+      addNotification(Messages.DOCTOR.REGISTRATION.INVALID_OTP, "ERROR");
+      return;
+    }
+
     try {
       const response = await registerDoctor(email, otp);
-      const doctorId = response.doctorId;
+      const doctorId = (response as any).doctorId;
       localStorage.setItem("doctorId", doctorId);
-      toast.success("Registration successful!");
+      addNotification(Messages.DOCTOR.REGISTRATION.REGISTRATION_SUCCESS, "SUCCESS");
       setTimeout(() => navigate("/doctor/profile-complete", { state: { email } }), 1500);
     } catch {
-      toast.error("Invalid OTP. Try again.");
+      addNotification(Messages.DOCTOR.REGISTRATION.INVALID_OTP, "ERROR");
     }
   };
 
@@ -126,24 +134,24 @@ const DoctorRegister = () => {
           className="w-full p-6 sm:p-10 bg-white/90 rounded-[2.5rem] shadow-2xl border border-gray-200 backdrop-blur-lg"
           encType="multipart/form-data"
         >
-          {/* ---- Logo ---- */}
+          {/* Logo */}
           <div className="text-center mb-6">
             <div className="flex justify-center items-center gap-2 mb-1">
               <FaStethoscope className="text-teal-600 text-3xl" />
-              <span className="text-3xl font-bold text-teal-700">MedConsult</span>
+              <span className="text-3xl font-bold text-teal-700">DrNow</span>
             </div>
             <p className="text-sm text-gray-500">Doctor Portal</p>
           </div>
 
           <h2 className="text-2xl font-bold text-gray-800 mb-6 text-center">
-            {otpSent ? "Enter OTP" : "Doctor Registration"}
+            {otpSent ? Messages.DOCTOR.REGISTRATION.ENTER_OTP : Messages.DOCTOR.REGISTRATION.HEADER}
           </h2>
 
           {!otpSent ? (
             <>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                 <input type="text" placeholder="Full Name" value={name} onChange={(e) => setName(e.target.value)} className="input-style" required />
-                <select value={gender} onChange={(e) => setGender(e.target.value)} className="input-style" required>
+                <select value={gender} onChange={(e) => setGender(e.target.value as any)} className="input-style" required>
                   <option value="">Gender</option>
                   <option>Male</option>
                   <option>Female</option>
@@ -161,12 +169,11 @@ const DoctorRegister = () => {
                 >
                   <option value="">Select Specialization</option>
                   {departments.map((dept) => (
-                    <option key={dept._id} value={dept.Departmentname}>
+                    <option key={dept.id} value={dept.Departmentname}>
                       {dept.Departmentname}
                     </option>
                   ))}
                 </select>
-
                 <input type="number" placeholder="Years of Experience" value={yearsOfExperience} onChange={(e) => setYearsOfExperience(e.target.value)} className="input-style" min={0} required />
                 <input type="number" placeholder="Consultation Fee" value={consultFee} onChange={(e) => setConsultFee(e.target.value)} className="input-style" min={0} required />
                 <input type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} className="input-style" required />
@@ -195,10 +202,9 @@ const DoctorRegister = () => {
             type="submit"
             className="w-full py-4 bg-teal-600 hover:bg-teal-700 text-white font-bold rounded-2xl shadow-lg text-lg transition"
           >
-            {otpSent ? "Verify & Register" : "Send OTP"}
+            {otpSent ? Messages.DOCTOR.REGISTRATION.VERIFY_REGISTER : Messages.DOCTOR.REGISTRATION.SEND_OTP}
           </button>
         </form>
-        <Toaster position="top-center" reverseOrder={false} />
       </div>
     </div>
   );

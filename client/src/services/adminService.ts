@@ -1,121 +1,131 @@
 
-import { adminAxios } from "./axiosInstances"; 
+
+import { adminAxios } from "./axiosInstances";
 import type { DepartmentResponse } from "../types/department";
+import { Messages } from "../constants/messages";
+import { handleError } from "../utils/errorHandler";
+import { AdminRoutes } from "../constants/apiRoutes";
+import logger from "../utils/logger";
 
 export const adminLogin = async (email: string, password: string) => {
   try {
     const response = await adminAxios.post(
-      "/login",
+      AdminRoutes.LOGIN,
       { email, password },
-      { withCredentials: true } 
+      { withCredentials: true }
     );
     return response.data;
-  } catch (error: any) {
-    const message = error.response?.data?.message || "Admin login failed";
-    throw new Error(message);
+  } catch (error) {
+    throw handleError(error, Messages.AUTH.LOGIN_FAILED);
   }
 };
-
 
 export const getUnverifiedDoctors = async (page = 1, limit = 5) => {
   try {
-    const response = await adminAxios.get(`/unverified-doctors?page=${page}&limit=${limit}`);
+    const response = await adminAxios.get(
+      `${AdminRoutes.UNVERIFIED_DOCTORS}?page=${page}&limit=${limit}`
+    );
     return response.data;
-  } catch (error: any) {
-    const message = error.response?.data?.message || "Failed to fetch unverified doctors";
-    throw new Error(message);
+  } catch (error) {
+    throw handleError(error, Messages.DOCTOR.NO_RESULTS);
   }
 };
 
-
 export const verifyDoctorById = async (doctorId: string) => {
   try {
-    const response = await adminAxios.post(`/verify-doctor/${doctorId}`);
+    const response = await adminAxios.post(AdminRoutes.VERIFY_DOCTOR(doctorId));
     return response.data;
-  } catch (error: any) {
-    const message = error.response?.data?.message || "Failed to verify doctor";
-    throw new Error(message);
+  } catch (error) {
+    throw handleError(error, Messages.DOCTOR.VERIFY_FAILED);
   }
 };
 
 export const rejectDoctorById = async (doctorId: string) => {
   try {
-    const response = await adminAxios.post(`/reject-doctor/${doctorId}`);
+    const response = await adminAxios.post(AdminRoutes.REJECT_DOCTOR(doctorId));
     return response.data;
-  } catch (error: any) {
-    const message = error.response?.data?.message || "Failed to reject doctor";
-    throw new Error(message);
+  } catch (error) {
+    throw handleError(error, Messages.DOCTOR.REJECT_FAILED);
   }
 };
 
-export const getAllDoctors = async (page: number = 1, limit: number = 5, searchQuery: string="") => {
+export const getAllDoctors = async (page = 1, limit = 5, searchQuery = "") => {
   try {
-    const response = await adminAxios.get("/doctors", {
+    const response = await adminAxios.get(AdminRoutes.ALL_DOCTORS, {
       params: { page, limit, search: searchQuery },
     });
-    return response.data; 
-  } catch (error: any) {
-    const message = error.response?.data?.message || "Failed to fetch doctors";
-    throw new Error(message);
-  }
-};
-
-
-export const toggleDoctorBlockStatus = async (doctorId: string, action: "block" | "unblock") => {
-  try {
-    const response = await adminAxios.patch(`/doctors/${doctorId}/${action}`);
     return response.data;
-  } catch (error: any) {
-    const message = error.response?.data?.message || "Failed to update doctor status";
-    throw new Error(message);
+  } catch (error) {
+    throw handleError(error, Messages.DOCTOR.FETCH_FAILED);
   }
 };
 
-export const getAllUsers = async (
-  page: number,
-  limit: number = 5,
-  searchQuery: string = ""
+export const toggleDoctorBlockStatus = async (
+  doctorId: string,
+  action: "block" | "unblock"
 ) => {
   try {
-    const response = await adminAxios.get(`/users`, {
-      params: { page, limit, search: searchQuery }, 
+    const response = await adminAxios.patch(
+      AdminRoutes.TOGGLE_DOCTOR_STATUS(doctorId, action)
+    );
+    return response.data;
+  } catch (error) {
+    throw handleError(error, Messages.DOCTOR.ACTION_FAILED);
+  }
+};
+
+export const getAllUsers = async (page = 1, limit = 5, searchQuery = "") => {
+  try {
+    const response = await adminAxios.get(AdminRoutes.ALL_USERS, {
+      params: { page, limit, search: searchQuery },
     });
     return response.data;
-  } catch (error: any) {
-    const message = error.response?.data?.message || "Failed to fetch users";
-    throw new Error(message);
+  } catch (error) {
+    throw handleError(error, Messages.USER.FETCH_FAILED);
   }
 };
 
-
-
-export const toggleUserBlockStatus = async (userId: string, action: "block" | "unblock") => {
+export const toggleUserBlockStatus = async (
+  userId: string,
+  action: "block" | "unblock"
+) => {
   try {
-    const response = await adminAxios.patch(`/users/${userId}/${action}`);
+    const response = await adminAxios.patch(
+      AdminRoutes.TOGGLE_USER_STATUS(userId, action)
+    );
     return response.data;
-  } catch (error: any) {
-    const message = error.response?.data?.message || "Failed to update user status";
-    throw new Error(message);
+  } catch (error) {
+    throw handleError(error, Messages.USER.ACTION_FAILED);
   }
 };
 
-export const getAllDepartments = async (page: number, limit: number = 5, searchQuery: string=""):Promise<DepartmentResponse> => {
+export const getAllDepartments = async (
+  page = 1,
+  limit = 5,
+  searchQuery = ""
+): Promise<DepartmentResponse> => {
   try {
-    const response = await adminAxios.get(`/departments?page=${page}&limit=${limit}&search=${encodeURIComponent(searchQuery)}`);
-    return response.data; 
-  } catch (error: any) {
-    const message = error.response?.data?.message || "Failed to fetch departments";
-    throw new Error(message);
-  }
-};
-
-export const toggleDepartmentStatus = async (departmentId: string, newStatus: "Listed" | "Unlisted") => {
-  try {
-    const response = await adminAxios.patch(`/departments/${departmentId}/status`, { status: newStatus });
+    const response = await adminAxios.get(AdminRoutes.ALL_DEPARTMENTS, {
+      params: { page, limit, search: searchQuery },
+    });
     return response.data;
-  } catch (error: any) {
-    const message = error.response?.data?.message || "Failed to update department status";
-    throw new Error(message);
+  } catch (error) {
+    throw handleError(error, Messages.AVAILABILITY.FETCH_DEPARTMENTS_FAILED);
+  }
+};
+
+export const toggleDepartmentStatus = async (
+  departmentId: string,
+  newStatus: "Listed" | "Unlisted"
+) => {
+  try {
+    const response = await adminAxios.patch(
+      AdminRoutes.TOGGLE_DEPARTMENT_STATUS(departmentId),
+      { status: newStatus }
+    );
+    return response.data;
+  } catch (error) {
+    throw handleError(error, Messages.AVAILABILITY.FETCH_DEPARTMENTS_FAILED);
   }
 };
 
@@ -124,50 +134,42 @@ export const addDepartment = async (data: {
   Description: string;
 }) => {
   try {
-    const response = await adminAxios.post("/departments", data);
+    const response = await adminAxios.post(AdminRoutes.ADD_DEPARTMENT, data);
     return response.data;
   } catch (error: any) {
-    
     if (error.response?.data?.errors) {
-      console.log("Validation errors:", error.response.data.errors);
-      throw error.response.data.errors; 
+      logger.log("Validation errors:", error.response.data.errors);
+      throw error.response.data.errors;
     }
-    const message = error.response?.data?.message;
-    throw new Error(message);
+    throw handleError(error, Messages.AVAILABILITY.FETCH_DEPARTMENTS_FAILED);
   }
 };
-
 
 export const getWalletSummary = async () => {
   try {
-    const response = await adminAxios.get("/wallet-summary");
+    const response = await adminAxios.get(AdminRoutes.WALLET_SUMMARY);
     return response.data;
-  } catch (error: any) {
-    const message = error.response?.data?.message || "Failed to fetch wallet summary";
-    throw new Error(message);
+  } catch (error) {
+    throw handleError(error, Messages.DOCTOR.FETCH_WALLET_FAILED);
   }
 };
-
 
 export const getPendingDoctors = async (page = 1, limit = 5) => {
   try {
-    const response = await adminAxios.get(`/pending-doctors?page=${page}&limit=${limit}`);
-    return response.data; 
-  } catch (error: any) {
-    const message = error.response?.data?.message || "Failed to fetch pending doctors";
-    throw new Error(message);
+    const response = await adminAxios.get(
+      `${AdminRoutes.PENDING_DOCTORS}?page=${page}&limit=${limit}`
+    );
+    return response.data;
+  } catch (error) {
+    throw handleError(error, Messages.DOCTOR.NO_RESULTS);
   }
 };
-
-
 
 export const payoutDoctor = async (doctorId: string) => {
   try {
-    const response = await adminAxios.post(`/pay-doctor/${doctorId}`);
+    const response = await adminAxios.post(AdminRoutes.PAY_DOCTOR(doctorId));
     return response.data;
-  } catch (error: any) {
-    const message = error.response?.data?.message || "Doctor payout failed";
-    throw new Error(message);
+  } catch (error) {
+    throw handleError(error, Messages.DOCTOR.PAYOUT_FAILED);
   }
 };
-

@@ -14,7 +14,6 @@ export class AddDoctorAvailabilityRuleUseCase
   }
 
   async execute(data: AddDoctorAvailabilityRuleDTO): Promise<{ message: string }> {
-    console.log(data)
 
     const dto = await this.validateDto(AddDoctorAvailabilityRuleDTO, data);
 

@@ -1,58 +1,73 @@
-
-import { useState,useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import toast, { Toaster } from "react-hot-toast";
 import { FaStethoscope } from "react-icons/fa";
 import { completeDoctorProfile } from "../../services/doctorService";
-
-
+import { useNotifications } from "../../context/NotificationContext";
+import { Messages } from "../../constants/messages";
 
 const DoctorProfileComplete = () => {
+  const [name, setName] = useState("");
+  const [specialization, setSpecialization] = useState("");
+  const [gender, setGender] = useState("");
+  const [consultFee, setConsultFee] = useState<number>(0);
+
   const [bio, setBio] = useState("");
   const [education, setEducation] = useState([{ degree: "", institution: "", year: "" }]);
   const [awards, setAwards] = useState([""]);
   const [experience, setExperience] = useState([{ hospital: "", role: "", years: "" }]);
   const [affiliatedHospitals, setAffiliatedHospitals] = useState("");
+
   const navigate = useNavigate();
   const doctorId = localStorage.getItem("doctorId");
+  const { addNotification } = useNotifications();
 
+  useEffect(() => {
+    if (!doctorId) {
+      addNotification(Messages.DOCTOR.PROFILE_UPDATE_FAILED, "ERROR");
+      navigate("/doctor/register");
+    }
+  }, [doctorId, navigate]);
 
-    useEffect(() => {
-      console.log("doctorId",doctorId)
-        if (!doctorId) {
-            toast.error("Missing doctor ID. Please re-register.");
-            navigate("/doctor/register");
-        }
-    }, [doctorId, navigate]);
-
-if (!doctorId) return null;
+  if (!doctorId) return null;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const profileData = {
-        bio,
-        education: education.map((edu) => ({
-            degree: edu.degree,
-            institution: edu.institution,
-            year: edu.year,
-        })),
-        awards,
-        experience,
-        affiliatedHospitals: affiliatedHospitals
-            .split(",")
-            .map((h) => h.trim())
-            .filter(Boolean),
-    };
+    if (!name || !specialization || !gender || !consultFee) {
+      addNotification(Messages.COMMON.INPUT_PLACEHOLDER, "ERROR");
+      return;
+    }
 
+    const profileData = {
+      name,
+      specialization,
+      gender,
+      consultFee,
+      bio,
+      education: education.map((edu) => ({
+        degree: edu.degree,
+        institution: edu.institution,
+        year: edu.year,
+      })),
+      awards,
+      experience: experience.map((exp) => ({
+        hospital: exp.hospital,
+        role: exp.role,
+        years: exp.years,
+      })),
+      affiliatedHospitals: affiliatedHospitals
+        .split(",")
+        .map((h) => h.trim())
+        .filter(Boolean),
+    };
 
     try {
       await completeDoctorProfile(doctorId, profileData);
-      localStorage.removeItem("doctorId"); 
-      toast.success("Profile completed successfully!");
+      localStorage.removeItem("doctorId");
+      addNotification(Messages.DOCTOR.PROFILE_UPDATE_SUCCESS, "SUCCESS");
       setTimeout(() => navigate("/doctor/login"), 1500);
     } catch (error: any) {
-      toast.error(error.message || "Failed to complete profile.");
+      addNotification(error.message || Messages.DOCTOR.PROFILE_UPDATE_FAILED, "ERROR");
     }
   };
 
@@ -71,12 +86,49 @@ if (!doctorId) return null;
             <p className="text-sm text-gray-500">Complete Your Profile</p>
           </div>
 
+          {/* Required Fields */}
+          <input
+            type="text"
+            placeholder="Full Name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            className="input-style w-full mb-4"
+            required
+          />
+
+          <input
+            type="text"
+            placeholder="Specialization"
+            value={specialization}
+            onChange={(e) => setSpecialization(e.target.value)}
+            className="input-style w-full mb-4"
+            required
+          />
+
+          <input
+            type="text"
+            placeholder="Gender"
+            value={gender}
+            onChange={(e) => setGender(e.target.value)}
+            className="input-style w-full mb-4"
+            required
+          />
+
+          <input
+            type="number"
+            placeholder="Consult Fee"
+            value={consultFee}
+            onChange={(e) => setConsultFee(Number(e.target.value))}
+            className="input-style w-full mb-4"
+            required
+          />
+
+          {/* Bio */}
           <textarea
             placeholder="Bio"
             value={bio}
             onChange={(e) => setBio(e.target.value)}
             className="input-style w-full mb-4 h-24"
-            required
           />
 
           {/* Education */}
@@ -119,7 +171,15 @@ if (!doctorId) return null;
                 />
               </div>
             ))}
-            <button type="button" onClick={() => setEducation([...education, { degree: "", institution: "", year: "" }])} className="text-teal-600 text-sm">+ Add more</button>
+            <button
+              type="button"
+              onClick={() =>
+                setEducation([...education, { degree: "", institution: "", year: "" }])
+              }
+              className="text-teal-600 text-sm"
+            >
+              + Add more
+            </button>
           </div>
 
           {/* Awards */}
@@ -139,7 +199,13 @@ if (!doctorId) return null;
                 className="input-style mb-2"
               />
             ))}
-            <button type="button" onClick={() => setAwards([...awards, ""])} className="text-teal-600 text-sm">+ Add more</button>
+            <button
+              type="button"
+              onClick={() => setAwards([...awards, ""])}
+              className="text-teal-600 text-sm"
+            >
+              + Add more
+            </button>
           </div>
 
           {/* Experience */}
@@ -182,7 +248,15 @@ if (!doctorId) return null;
                 />
               </div>
             ))}
-            <button type="button" onClick={() => setExperience([...experience, { hospital: "", role: "", years: "" }])} className="text-teal-600 text-sm">+ Add more</button>
+            <button
+              type="button"
+              onClick={() =>
+                setExperience([...experience, { hospital: "", role: "", years: "" }])
+              }
+              className="text-teal-600 text-sm"
+            >
+              + Add more
+            </button>
           </div>
 
           {/* Affiliated Hospitals */}
@@ -201,7 +275,6 @@ if (!doctorId) return null;
             Save Profile
           </button>
         </form>
-        <Toaster position="top-center" reverseOrder={false} />
       </div>
     </div>
   );

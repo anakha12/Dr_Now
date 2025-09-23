@@ -1,7 +1,10 @@
 import { useEffect, useState } from "react";
 import { getAllDoctors, toggleDoctorBlockStatus } from "../../services/adminService";
 import toast from "react-hot-toast";
-import Table, { type Column } from "../../components/Table"; 
+import Table from "../../components/Table"; 
+import type { Column } from "../../types/table";  
+import { Messages } from "../../constants/messages";  
+
 
 interface Doctor {
   id: string;
@@ -15,15 +18,19 @@ const Doctors = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [searchQuery, setSearchQuery] = useState("");
+  const [loading, setLoading] = useState(false);
   const doctorsPerPage = 5;
 
   const fetchDoctors = async () => {
     try {
+      setLoading(true);
       const data = await getAllDoctors(currentPage, doctorsPerPage, searchQuery);
       setDoctors(data.doctors);
       setTotalPages(data.totalPages);
-    } catch (error) {
-      toast.error("Failed to load doctors");
+    } catch (error: any) {
+      toast.error(error?.message || Messages.DOCTOR.FETCH_FAILED);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -38,10 +45,12 @@ const Doctors = () => {
   const handleBlockToggle = async (id: string, currentStatus: boolean) => {
     try {
       await toggleDoctorBlockStatus(id, currentStatus ? "unblock" : "block");
-      toast.success(`Doctor ${currentStatus ? "unblocked" : "blocked"} successfully`);
+      toast.success(
+        currentStatus ? Messages.DOCTOR.UNBLOCK_SUCCESS : Messages.DOCTOR.BLOCK_SUCCESS
+      );
       fetchDoctors();
-    } catch (error) {
-      toast.error("Action failed");
+    } catch (error: any) {
+      toast.error(error?.message || Messages.DOCTOR.ACTION_FAILED);
     }
   };
 
@@ -57,7 +66,6 @@ const Doctors = () => {
   const handlePrev = () => setCurrentPage((p) => Math.max(1, p - 1));
   const handleNext = () => setCurrentPage((p) => Math.min(totalPages, p + 1));
 
-  
   const columns: Column<Doctor>[] = [
     { header: "Name", accessor: "name" },
     { header: "Email", accessor: "email" },
@@ -78,6 +86,7 @@ const Doctors = () => {
       accessor: (doctor) => (
         <button
           onClick={() => handleBlockToggle(doctor.id, doctor.isBlocked)}
+          disabled={loading}
           className={`px-4 py-2 rounded text-white font-medium shadow transition ${
             doctor.isBlocked
               ? "bg-green-500 hover:bg-green-600"
@@ -108,6 +117,7 @@ const Doctors = () => {
       <Table
         data={doctors}
         columns={columns}
+        rowKey="id"
         onViewDetails={handleViewDetails}
         emptyMessage="No doctors available."
       />
@@ -117,7 +127,7 @@ const Doctors = () => {
         <div className="mt-4 flex justify-center items-center space-x-2">
           <button
             onClick={handlePrev}
-            disabled={currentPage === 1}
+            disabled={currentPage === 1 || loading}
             className="px-3 py-1 bg-gray-200 hover:bg-gray-300 rounded disabled:opacity-50"
           >
             Prev
@@ -127,7 +137,7 @@ const Doctors = () => {
           </span>
           <button
             onClick={handleNext}
-            disabled={currentPage === totalPages}
+            disabled={currentPage === totalPages || loading}
             className="px-3 py-1 bg-gray-200 hover:bg-gray-300 rounded disabled:opacity-50"
           >
             Next

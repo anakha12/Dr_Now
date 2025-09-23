@@ -4,4 +4,5 @@ export interface Doctor {
   consultFee: number;
   profileImage: string;
   specialization: string;
+  yearsOfExperience: number;
 }

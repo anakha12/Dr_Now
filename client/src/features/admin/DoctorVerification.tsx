@@ -1,20 +1,21 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { getUnverifiedDoctors, verifyDoctorById, rejectDoctorById } from "../../services/adminService";
+import { 
+  getUnverifiedDoctors, 
+  verifyDoctorById, 
+  rejectDoctorById 
+} from "../../services/adminService";
+import type { Doctor } from "../../types/doctor";
+import { Messages } from "../../constants/messages";
+import { useNotifications } from "../../context/NotificationContext";
 
 const ITEMS_PER_PAGE = 5;
-
-interface Doctor {
-  id: string;
-  name: string;
-  specialization: string;
-  isVerified: boolean;
-}
 
 const DoctorVerification = () => {
   const [doctors, setDoctors] = useState<Doctor[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(true);
+  const { addNotification } = useNotifications();
 
   useEffect(() => {
     const fetchDoctors = async () => {
@@ -22,15 +23,14 @@ const DoctorVerification = () => {
         const data = await getUnverifiedDoctors(currentPage, ITEMS_PER_PAGE);
         setDoctors(data.doctors);
       } catch (err) {
-        console.error((err as Error).message);
+        addNotification(Messages.DOCTOR.FETCH_FAILED);
       } finally {
         setLoading(false);
       }
     };
 
     fetchDoctors();
-  }, [currentPage]); 
-
+  }, [currentPage, addNotification]);
 
   const totalPages = Math.ceil(doctors.length / ITEMS_PER_PAGE);
   const startIdx = (currentPage - 1) * ITEMS_PER_PAGE;
@@ -43,8 +43,9 @@ const DoctorVerification = () => {
     try {
       await verifyDoctorById(doctorId);
       setDoctors((prev) => prev.filter((doc) => doc.id !== doctorId));
-    } catch (err) {
-      console.error("Error approving doctor:", (err as Error).message);
+      addNotification(Messages.DOCTOR.VERIFY_SUCCESS);
+    } catch {
+      addNotification( Messages.DOCTOR.VERIFY_FAILED);
     }
   };
 
@@ -52,20 +53,27 @@ const DoctorVerification = () => {
     try {
       await rejectDoctorById(doctorId);
       setDoctors((prev) => prev.filter((doc) => doc.id !== doctorId));
-    } catch (error) {
-      console.error("Error rejecting doctor:", (error as Error).message);
+      addNotification( Messages.DOCTOR.REJECT_SUCCESS);
+    } catch {
+      addNotification( Messages.DOCTOR.REJECT_FAILED);
     }
   };
 
   if (loading) {
-    return <div className="p-4 text-teal-700 font-medium">Loading doctors...</div>;
+    return (
+      <div className="p-4 text-teal-700 font-medium">
+        {Messages.DOCTOR.LOADING}
+      </div>
+    );
   }
 
   return (
     <div className="max-w-4xl mx-auto p-4">
       {/* Header */}
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold text-teal-700">Doctor Verification</h2>
+        <h2 className="text-2xl font-bold text-teal-700">
+          Doctor Verification
+        </h2>
       </div>
 
       {/* Table */}
@@ -84,7 +92,7 @@ const DoctorVerification = () => {
             {paginatedDoctors.length === 0 ? (
               <tr>
                 <td colSpan={5} className="text-center py-6 text-gray-500">
-                  No doctors to verify.
+                  {Messages.DOCTOR.NO_RESULTS}
                 </td>
               </tr>
             ) : (
@@ -136,7 +144,9 @@ const DoctorVerification = () => {
           >
             Prev
           </button>
-          <span className="text-gray-700 font-medium">Page {currentPage} of {totalPages}</span>
+          <span className="text-gray-700 font-medium">
+            Page {currentPage} of {totalPages}
+          </span>
           <button
             onClick={handleNext}
             disabled={currentPage === totalPages}

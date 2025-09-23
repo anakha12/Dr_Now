@@ -7,6 +7,7 @@ import {
   getPendingDoctors,
   payoutDoctor,
 } from "../../services/adminService";
+import { Messages } from "../../constants/messages";
 
 const ITEMS_PER_PAGE = 5;
 
@@ -43,7 +44,7 @@ const DoctorPaymentPage = () => {
       setPendingDoctors(doctorsData.doctors);
       setTotalPages(doctorsData.totalPages);
     } catch (error: any) {
-      toast.error(error.message || "Failed to load data.");
+      toast.error(error.message || Messages.DOCTOR.FETCH_WALLET_FAILED);
     }
   };
 
@@ -53,16 +54,16 @@ const DoctorPaymentPage = () => {
       `Are you sure you want to pay ₹${doctor?.totalPendingEarnings} to Dr. ${doctor?.doctorName}?`
     );
     if (!confirmed) {
-      addNotification("Payout cancelled.", "info");
+      addNotification( Messages.DOCTOR.PAYOUT_CANCELLED, "INFO");
       return;
     }
 
     try {
       await payoutDoctor(doctorId);
-      addNotification("Payout successful!", "success");
+      addNotification( Messages.DOCTOR.PAYOUT_SUCCESS, "SUCCESS");
       fetchData();
     } catch (error: any) {
-      addNotification(error.message || "Payout failed.", "error");
+      addNotification(error.message || Messages.DOCTOR.PAYOUT_FAILED, "ERROR");
     }
   };
 

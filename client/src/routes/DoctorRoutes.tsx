@@ -5,7 +5,7 @@ import DoctorWaitingVerification from "../features/doctor/waiting-verification";
 import DoctorRejected from "../features/doctor/DoctorRejected";
 import DoctorLayout from "../features/doctor/DoctorLayout";
 import Dashboard from "../features/doctor/DoctorDashboard";
-import DoctorProfile from "../features/doctor/DoctorProfile";
+import DoctorProfileComponent from "../features/doctor/DoctorProfile";
 import CurrentSchedules from "../features/doctor/CurrentSchedules";
 import DoctorAppointments from "../features/doctor/DoctorAppointments";
 import DoctorWallet from "../features/doctor/DoctorWallet";
@@ -42,7 +42,7 @@ const DoctorRoutes = () => {
         }
       >
         <Route path="dashboard" element={<Dashboard />} />
-        <Route path="profile" element={<DoctorProfile />} />
+        <Route path="profile" element={<DoctorProfileComponent />} />
         <Route path="current-schedules" element={<CurrentSchedules/>}/>
         <Route path="appointments" element={<DoctorAppointments />} />
         <Route path="wallet" element={<DoctorWallet />} />

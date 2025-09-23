@@ -1,10 +1,13 @@
 import { useState, useEffect } from "react";
 import { sendOtp, registerUser } from "../../services/userService";
 import { useNavigate, useLocation } from "react-router-dom";
-import toast,{Toaster} from "react-hot-toast";
+import { useNotifications } from "../../context/NotificationContext";
+import { Messages } from "../../constants/messages";
+
 const VerifyOtp = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { addNotification } = useNotifications();
   const { email, password, name, isDonner } = location.state || {};
 
   const [otp, setOtp] = useState("");
@@ -19,11 +22,14 @@ const VerifyOtp = () => {
         password,
         isDonner: isDonner ? "true" : "false",
       });
-      toast.success(res.message);
+      addNotification(res.message || Messages.DOCTOR.REGISTRATION.OTP_SENT, "SUCCESS");
       setTimer(60);
       setIsCountingDown(true);
     } catch (err: any) {
-      toast.error(err.response?.data?.message || "Failed to resend OTP");
+      addNotification(
+        err.response?.data?.message || Messages.DOCTOR.REGISTRATION.OTP_FAILED,
+        "ERROR"
+      );
     }
   };
 
@@ -36,14 +42,16 @@ const VerifyOtp = () => {
         otp,
         isDonner: isDonner ? "true" : "false",
       });
-      toast.success("Verified successfully. You can now log in.");
+      addNotification(Messages.DOCTOR.REGISTRATION.REGISTRATION_SUCCESS, "SUCCESS");
       setTimeout(() => navigate("/user/login"), 1500);
     } catch (err: any) {
-      toast.error(err.response?.data?.message || "OTP Verification failed");
+      addNotification(
+        err.response?.data?.message || Messages.DOCTOR.REGISTRATION.INVALID_OTP,
+        "ERROR"
+      );
     }
   };
 
-  // Timer countdown (useEffect instead of useState)
   useEffect(() => {
     if (!isCountingDown) return;
     const interval = setInterval(() => {
@@ -60,13 +68,15 @@ const VerifyOtp = () => {
   }, [isCountingDown]);
 
   if (!email || !password || !name) {
-    return <p className="text-center mt-20">Invalid access. Please register again.</p>;
+    return <p className="text-center mt-20">{Messages.AUTH.LOGIN_FAILED}</p>;
   }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-blue-100">
       <div className="bg-white p-8 rounded-2xl shadow-lg w-full max-w-md">
-        <h2 className="text-2xl font-bold text-center mb-6 text-blue-700">Verify OTP</h2>
+        <h2 className="text-2xl font-bold text-center mb-6 text-blue-700">
+          {Messages.DOCTOR.REGISTRATION.VERIFY_REGISTER}
+        </h2>
 
         <input
           type="text"
@@ -80,7 +90,7 @@ const VerifyOtp = () => {
           onClick={handleVerifyOtp}
           className="w-full bg-green-500 text-white py-3 rounded-xl font-semibold"
         >
-          Verify
+          {Messages.COMMON.SUBMIT}
         </button>
 
         {isCountingDown ? (
@@ -92,13 +102,10 @@ const VerifyOtp = () => {
             onClick={handleResendOtp}
             className="text-sm mt-4 text-blue-600 hover:underline block mx-auto"
           >
-            Resend OTP
+            {Messages.DOCTOR.REGISTRATION.SEND_OTP}
           </button>
         )}
-
-        
       </div>
-      <Toaster position="top-center" reverseOrder={false} />
     </div>
   );
 };

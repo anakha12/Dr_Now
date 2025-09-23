@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getDoctorBookings, cancelDoctorBooking } from "../../services/doctorService";
 import { useNotifications } from "../../context/NotificationContext";
+import { Messages } from "../../constants/messages";
 
 interface Booking {
   id: string;
@@ -19,7 +20,7 @@ const DoctorAppointments = () => {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const itemsPerPage = 5;
+  // const itemsPerPage = 5;
 
   const { addNotification, confirmMessage, promptInput } = useNotifications();
   const navigate = useNavigate();
@@ -27,11 +28,11 @@ const DoctorAppointments = () => {
   useEffect(() => {
     const fetchBookings = async () => {
       try {
-        const res = await getDoctorBookings(currentPage, itemsPerPage);
-        setBookings(res.bookings || []);
-        setTotalPages(res.totalPages || 1);
+        // const res = await getDoctorBookings(currentPage, itemsPerPage);
+        // setBookings(res.bookings || []);
+        // setTotalPages(res.totalPages || 1);
       } catch {
-        addNotification("Failed to load appointments", "error");
+        addNotification(Messages.DOCTOR.APPOINTMENTS.FETCH_FAILED, "ERROR");
       }
     };
 
@@ -39,22 +40,25 @@ const DoctorAppointments = () => {
   }, [currentPage]);
 
   const handleCancel = async (bookingId: string) => {
-    const confirm = await confirmMessage("Are you sure you want to cancel this appointment?");
+    const confirm = await confirmMessage(Messages.DOCTOR.APPOINTMENTS.CONFIRM_CANCEL);
     if (!confirm) return;
 
-    const reason= await promptInput("Please enter the reason for cancellation", "e.g., Emergency");
+    const reason = await promptInput(
+      Messages.DOCTOR.APPOINTMENTS.PROMPT_CANCEL_REASON,
+      Messages.DOCTOR.APPOINTMENTS.PROMPT_CANCEL_PLACEHOLDER
+    );
 
     if (!reason || reason.trim() === "") {
-      return addNotification("Cancellation reason is required", "warning");
+      return addNotification(Messages.DOCTOR.APPOINTMENTS.CANCEL_REASON_REQUIRED, "WARNING");
     }
     try {
       await cancelDoctorBooking(bookingId,reason);
       setBookings((prev) =>
         prev.map((b) => (b.id === bookingId ? { ...b, status: "Cancelled" } : b))
       );
-      addNotification("Appointment cancelled", "success");
+      addNotification(Messages.DOCTOR.APPOINTMENTS.CANCEL_SUCCESS, "SUCCESS");
     } catch {
-      addNotification("Cancellation failed", "error");
+      addNotification(Messages.DOCTOR.APPOINTMENTS.CANCEL_FAILED, "ERROR");
     }
   };
 
@@ -77,7 +81,7 @@ const DoctorAppointments = () => {
             {bookings.length === 0 ? (
               <tr>
                 <td colSpan={5} className="text-center p-4 text-gray-500">
-                  No bookings found.
+                  {Messages.DOCTOR.APPOINTMENTS.NO_BOOKINGS}
                 </td>
               </tr>
             ) : (

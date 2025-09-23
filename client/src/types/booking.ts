@@ -1,8 +1,13 @@
 export interface Booking {
-  _id: string;
-  patientName: string;
-  date: string;
-  slot: string;
-  status: string;
-  fee: number;
+  id: string; 
+  patientName?: string;
+  doctorName?: string;
+  date?: string;
+  time?: string;
+  slot?: string;
+  department?: string;
+  status?: string;
+  amount?: number;
+  fee?: number;
+  canCancel?: boolean;
 }

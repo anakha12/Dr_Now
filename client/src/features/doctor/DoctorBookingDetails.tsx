@@ -1,7 +1,10 @@
+
+
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { getDoctorBookingDetails } from "../../services/doctorService";
 import { motion } from "framer-motion";
+import { useNotifications } from "../../context/NotificationContext";
 import {
   CalendarDays,
   User,
@@ -12,6 +15,7 @@ import {
   FileWarning,
   Landmark,
 } from "lucide-react";
+import { Messages } from "../../constants/messages";
 
 const DoctorBookingDetails = () => {
   const { id } = useParams<{ id: string }>();
@@ -19,6 +23,7 @@ const DoctorBookingDetails = () => {
   const navigate = useNavigate();
   const [booking, setBooking] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const { addNotification } = useNotifications();
 
   useEffect(() => {
     const fetchBooking = async () => {
@@ -26,7 +31,7 @@ const DoctorBookingDetails = () => {
         const res = await getDoctorBookingDetails(bookingId);
         setBooking(res);
       } catch (error) {
-        console.error("Failed to fetch booking details", error);
+        addNotification(Messages.DOCTOR.BOOKING_DETAILS.FETCH_FAILED, "ERROR");
       } finally {
         setLoading(false);
       }
@@ -42,7 +47,7 @@ const DoctorBookingDetails = () => {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
       >
-        Loading booking details...
+        {Messages.DOCTOR.BOOKING_DETAILS.LOADING}
       </motion.div>
     );
   }
@@ -54,7 +59,7 @@ const DoctorBookingDetails = () => {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
       >
-        Booking not found.
+        {Messages.DOCTOR.BOOKING_DETAILS.NOT_FOUND}
       </motion.div>
     );
   }
@@ -68,21 +73,37 @@ const DoctorBookingDetails = () => {
         transition={{ duration: 0.4 }}
       >
         <h1 className="text-4xl font-bold text-center text-teal-700 mb-4 tracking-tight">
-          Appointment Summary
+          {Messages.DOCTOR.BOOKING_DETAILS.HEADING}
         </h1>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-gray-700 text-lg">
-          <Item label="Booking ID" value={booking.id} icon={<FileText size={20} />} />
-          <Item label="Patient Name" value={booking.patientName} icon={<User size={20} />} />
-          <Item label="Department" value={booking.department || "N/A"} icon={<Landmark size={20} />} />
-          <Item label="Date" value={booking.date} icon={<CalendarDays size={20} />} />
           <Item
-            label="Time Slot"
+            label={Messages.DOCTOR.BOOKING_DETAILS.LABELS.BOOKING_ID}
+            value={booking.id}
+            icon={<FileText size={20} />}
+          />
+          <Item
+            label={Messages.DOCTOR.BOOKING_DETAILS.LABELS.PATIENT_NAME}
+            value={booking.patientName}
+            icon={<User size={20} />}
+          />
+          <Item
+            label={Messages.DOCTOR.BOOKING_DETAILS.LABELS.DEPARTMENT}
+            value={booking.department || Messages.DOCTOR.BOOKING_DETAILS.NA}
+            icon={<Landmark size={20} />}
+          />
+          <Item
+            label={Messages.DOCTOR.BOOKING_DETAILS.LABELS.DATE}
+            value={booking.date}
+            icon={<CalendarDays size={20} />}
+          />
+          <Item
+            label={Messages.DOCTOR.BOOKING_DETAILS.LABELS.TIME_SLOT}
             value={`${booking.slot?.from} - ${booking.slot?.to}`}
             icon={<Clock size={20} />}
           />
           <Item
-            label="Status"
+            label={Messages.DOCTOR.BOOKING_DETAILS.LABELS.STATUS}
             value={booking.status}
             icon={<FileText size={20} />}
             color={
@@ -94,35 +115,34 @@ const DoctorBookingDetails = () => {
             }
           />
           <Item
-            label="Total Amount"
+            label={Messages.DOCTOR.BOOKING_DETAILS.LABELS.TOTAL_AMOUNT}
             value={`₹${booking.totalAmount}`}
             icon={<CreditCard size={20} />}
           />
           <Item
-            label="Doctor Earning"
+            label={Messages.DOCTOR.BOOKING_DETAILS.LABELS.DOCTOR_EARNING}
             value={`₹${booking.doctorEarning || 0}`}
             icon={<CreditCard size={20} />}
           />
           <Item
-            label="Commission Amount"
+            label={Messages.DOCTOR.BOOKING_DETAILS.LABELS.COMMISSION_AMOUNT}
             value={`₹${booking.commissionAmount || 0}`}
             icon={<CreditCard size={20} />}
           />
           <Item
-            label="Payout Status"
-            value={booking.payoutStatus || "Pending"}
+            label={Messages.DOCTOR.BOOKING_DETAILS.LABELS.PAYOUT_STATUS}
+            value={booking.payoutStatus || Messages.DOCTOR.BOOKING_DETAILS.PENDING}
             icon={<FileText size={20} />}
           />
           <Item
-            label="Booked On"
+            label={Messages.DOCTOR.BOOKING_DETAILS.LABELS.BOOKED_ON}
             value={new Date(booking.createdAt).toLocaleString()}
             icon={<CalendarDays size={20} />}
           />
 
-         
           {booking.status === "Cancelled" && booking.cancellationReason && (
             <Item
-              label="Cancellation Reason"
+              label={Messages.DOCTOR.BOOKING_DETAILS.LABELS.CANCELLATION_REASON}
               value={booking.cancellationReason}
               icon={<FileWarning size={20} />}
               color="text-red-600"
@@ -136,7 +156,7 @@ const DoctorBookingDetails = () => {
             onClick={() => navigate("/doctor/appointments")}
             className="flex items-center gap-2 text-base text-blue-700 hover:text-blue-900 font-medium transition"
           >
-            <ArrowLeft size={20} /> Back to Appointments
+            <ArrowLeft size={20} /> {Messages.DOCTOR.BOOKING_DETAILS.BACK_BUTTON}
           </button>
         </div>
       </motion.div>
