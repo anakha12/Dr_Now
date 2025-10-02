@@ -6,7 +6,7 @@ import { ErrorMessages } from "../../../utils/Messages";
 export class GetBookingDetails implements GetBookingDetails{
   constructor(private bookingRepo: IBookingRepository) {}
 
-  async execute(bookingId: string, userId: string) {
+  async execute(bookingId: string, userId: string) {2
     
     if (!bookingId || !userId) {
       const err: any = new Error( ErrorMessages.BOOKING_ID_AND_DOCTOR_ID_REQUIRED);
@@ -34,3 +34,4 @@ export class GetBookingDetails implements GetBookingDetails{
     };
   }
 }
+

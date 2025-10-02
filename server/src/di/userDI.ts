@@ -20,7 +20,7 @@ import { ResetPassword } from "../application/use_cases/user/resetPassword";
 import { GetAllDoctorsForUser } from "../application/use_cases/user/getAllDoctorsForUser";
 import { GetDoctorById } from "../application/use_cases/user/getDoctorById";
 import { CreateStripeSession } from "../application/use_cases/user/createStripeSession";
-import { GetBookedSlots } from "../application/use_cases/user/getBookedSlots";
+import { GetBookedSlotsUseCase } from "../application/use_cases/user/getBookedSlots";
 import { GetUserProfile } from "../application/use_cases/user/getUserProfile";
 import { GetUserBookings } from "../application/use_cases/user/getUserBookings";
 import { CancelUserBookingUseCase } from "../application/use_cases/user/cancelUserBooking";
@@ -35,6 +35,7 @@ import { AuthController } from "../interfaces/controllers/authController";
 import { AvailabilityRuleRepositoryImpl } from "../infrastructure/database/repositories/availabilityRuleRepositoryImpl";
 import { GetDoctorAvailabilityRulesUseCase } from "../application/use_cases/user/getDoctorAvailabilityRules";
 import { GetDoctorAvailabilityExceptionsUseCase } from "../application/use_cases/user/getDoctorAvailabilityExceptions";
+import { UpdateUserProfileUseCase } from "../application/use_cases/user/updateUserProfile";
 
 
 const userRepository = new UserRepositoryImpl();
@@ -66,7 +67,7 @@ const resetPassword = new ResetPassword(userRepository);
 const getAllDoctorsForUser = new GetAllDoctorsForUser(doctorRepository);
 const getDoctorById = new GetDoctorById(doctorRepository);
 const createStripeSession = new CreateStripeSession(doctorRepository, stripe);
-const getBookedSlots = new GetBookedSlots(bookingRepository);
+const getBookedSlots = new GetBookedSlotsUseCase(bookingRepository);
 const getUserProfile = new GetUserProfile(userRepository)
 const getUserBookings = new GetUserBookings(bookingRepository);
 const cancelBooking = new CancelUserBookingUseCase(bookingRepository,userRepository,adminWalletRepository)
@@ -76,7 +77,7 @@ const getUserWallet = new GetUserWalletUseCase(userRepository)
 const getFilteredDoctors = new GetFilteredDoctorsUseCase(doctorRepository,departmentRepository);
 const getDoctorAvailabilityRules = new GetDoctorAvailabilityRulesUseCase(availabilityRuleRepository);
 const getDoctorAvailabilityExceptions = new GetDoctorAvailabilityExceptionsUseCase(doctorAvailabilityExceptionRepository);
-
+const updateUserProfile = new UpdateUserProfileUseCase(userRepository)
 
 
 export const userController = new UserController(
@@ -102,6 +103,7 @@ export const userController = new UserController(
   getFilteredDoctors,
   getDoctorAvailabilityRules,
   getDoctorAvailabilityExceptions,
+  updateUserProfile
 );
 
 export const userAuthController = new AuthController(jwtService, "refreshToken")

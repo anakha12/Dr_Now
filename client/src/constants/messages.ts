@@ -108,6 +108,9 @@ export const Messages = {
     UNBLOCK_SUCCESS: "User unblocked successfully.",
     ACTION_FAILED: "User action failed. Please try again.",
     NO_RESULTS: "No patients found.",
+    FETCH_FAILED_USER_AFTER_BOOK: "Failed to fetch user after Booking.",
+    UPDATE_FAILED: "Profile update failed",
+    PROFILE_UPDATE_SUCCESS: "Profile updated successfully",
   },
 
   COMMON: {

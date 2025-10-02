@@ -42,7 +42,7 @@ export class CreateStripeSession implements ICreateStripeSession{
         quantity: 1,
       },
     ],
-    success_url: `${process.env.CLIENT_URL}/user/success`,
+    success_url: `${process.env.CLIENT_URL}/user/success?userId=${userId}&doctorName=${encodeURIComponent(doctor.name)}&date=${date}&slotFrom=${slot.from}&slotTo=${slot.to}&fee=${fee}`,
     cancel_url: `${process.env.CLIENT_URL}/cancel`,
     metadata: {
       doctorId,

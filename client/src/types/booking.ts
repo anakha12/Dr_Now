@@ -3,8 +3,10 @@ export interface Booking {
   patientName?: string;
   doctorName?: string;
   date?: string;
-  time?: string;
-  slot?: string;
+  slot?: {
+    from: string;
+    to: string;
+  };
   department?: string;
   status?: string;
   amount?: number;

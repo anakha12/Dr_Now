@@ -16,6 +16,7 @@ import UserNotifications from "../features/user/UserNotifications";
 import UserWallet from "../features/user/UserWallet";
 import DoctorListing from "../features/user/DoctorListing";
 import BookingDetails from "../features/user/BookingDetails";
+import UpdateProfile from "../features/user/UpdateProfile";
 import { useSelector } from "react-redux";
 import type { RootState } from "../redux/store";
 
@@ -29,6 +30,7 @@ const UserRoutes = () => {
       <Route path="/user/register" element={<UserRegister />} />
       <Route path="/user/verify-otp" element={<VerifyOtp />} />
       <Route path="/user/forgot-password" element={<ForgotPassword />} />
+      <Route path="/user/success" element={<Success />} />
       <Route
         path="/user"
         element={
@@ -40,14 +42,14 @@ const UserRoutes = () => {
         <Route path="/user/doctors" element={<DoctorListing />} />
         <Route path="consult/doctor/:id" element={<DoctorDetail />} />
         <Route path="book/:id" element={<BookAppointment />} />
-        <Route path="success" element={<Success />} />
+        {/* <Route path="success" element={<Success />} /> */}
         <Route path="notifications" element={<UserNotifications />} />
         <Route path="/user/bookings/:id" element={<BookingDetails />} />
-        {/* ProfileLayout nested routes */}
         <Route path="" element={<ProfileLayout />}>
           <Route path="profile" element={<UserProfile />} />
           <Route path="bookings" element={<UserBookings />} />
           <Route path="wallet" element={<UserWallet />} />
+          <Route path="update-profile" element={<UpdateProfile />} /> 
         </Route>
       </Route>
     </Routes>

@@ -15,7 +15,7 @@ export const userAxios = createAxiosInstance({
   redirectPath: "/user/login",
   skipInterceptorUrls: ["/protected"],
 });
-
+  
 // Doctor 
 export const doctorAxios = createAxiosInstance({
   baseURL: import.meta.env.VITE_DOCTOR_API_URL,

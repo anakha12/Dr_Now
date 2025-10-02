@@ -22,7 +22,7 @@ export const doctorSidebarItems = [
 ];
 
 export const profileSidebarItems = [
-  { label: "Update Profile", key: "profile" },
+  { label: "Profile", key: "profile" },
   { label: "See Bookings", key: "bookings" },
   { label: "Prescriptions", key: "prescriptions" },
   { label: "Chat", key: "chat" },

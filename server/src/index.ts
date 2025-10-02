@@ -1,5 +1,6 @@
 import "reflect-metadata";
 import dotenv from "dotenv";
+dotenv.config(); 
 import express from "express";
 import mongoose from "mongoose";
 
@@ -14,8 +15,6 @@ import cookieParser from "cookie-parser";
 import { AppMessages } from "./utils/Messages";
 import logger from "./utils/Logger";
 
-
-dotenv.config(); 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 

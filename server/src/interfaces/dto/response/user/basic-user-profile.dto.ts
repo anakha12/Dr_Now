@@ -2,7 +2,7 @@
 import { Exclude, Expose, Transform } from "class-transformer";
 
 @Exclude()
-export class UserProfileResponseDTO {
+export class BasicUserProfileResponseDTO {
   @Expose()
   @Transform(({ obj }) => obj.id)
   userId!: string;

@@ -12,7 +12,7 @@ export class CancelDoctorBooking implements ICancelDoctorBooking{
   ) {}
 
   async execute(doctorId: string, bookingId: string, reason: string): Promise<{ success: boolean; message?: string }> {
-    const booking = await this._bookingRepository.findById(bookingId);
+    const booking = await this._bookingRepository.findBookingById(bookingId);
 
     if (!booking) {
       return { success: false, message: ErrorMessages.BOOKING_NOT_FOUND };
@@ -26,7 +26,7 @@ export class CancelDoctorBooking implements ICancelDoctorBooking{
       return { success: false, message: ErrorMessages.NON_UPCOMING_BOOKING };
     }
 
-    const appointmentDateTime = new Date(`${booking.date}T${booking.slot.from}`);
+    const appointmentDateTime = new Date(`${booking.date}T${booking.startTime}`);
     const now = new Date();
     if (now > appointmentDateTime) {
       return { success: false, message: ErrorMessages.CANNOT_CANCEL_PAST};

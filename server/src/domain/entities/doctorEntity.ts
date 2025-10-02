@@ -28,6 +28,7 @@ export interface DoctorEntity {
   otpExpiresAt?: Date;
   availability: Availability[]; 
   isRejected?: boolean;
+  rejectionReason?:string;
   walletBalance?: number;
   totalEarned?: number;
   walletTransactions?: {

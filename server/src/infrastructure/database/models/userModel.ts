@@ -19,6 +19,7 @@ export interface IUSER extends Document{
     uid?: string;
     isDonner: boolean;
     walletBalance?: number;
+    profileCompletion?:boolean;
     walletTransactions?: {
     type: 'credit' | 'debit';
     amount: number;
@@ -48,7 +49,7 @@ const UserSchema: Schema =new Schema<IUSER>(
         role: { type: String, default: "user" },
         uid: { type: String, required: false, unique: true, sparse: true },
 
-        // profileCompletion: { type: String, default: "false" },
+        profileCompletion: { type: Boolean, default: false },
         isDonner: { type: Boolean, default: false },
         walletBalance: { type: Number, default: 0 },
         walletTransactions: [

@@ -1,4 +1,4 @@
-// src/services/userService.ts
+
 import { userAxios } from "./axiosInstances";
 import type { Slot } from "../types/slot";
 import { Messages } from "../constants/messages";
@@ -98,6 +98,7 @@ export const getDoctorById = async (id: string) => {
   }
 };
 
+
 export const createStripeSession = async (
   doctorId: string,
   userId: string,
@@ -158,6 +159,7 @@ export const getDoctorAvailabilityExceptions = async (doctorId: string) => {
 export const getUserBookings = async (page = 1, limit = 4) => {
   try {
     const response = await userAxios.get(UserRoutes.BOOKINGS, { params: { page, limit } });
+    console.log(response)
     return response.data;
   } catch (error) {
     throw handleError(error, Messages.DOCTOR.APPOINTMENTS.FETCH_FAILED);
@@ -245,3 +247,13 @@ export const getBookingDetails = async (bookingId: string | undefined) => {
     throw handleError(error, Messages.DOCTOR.BOOKING_DETAILS.FETCH_FAILED);
   }
 };
+
+export const updateUserProfile = async (data: FormData) => {
+  try {
+    const response = await userAxios.put(UserRoutes.UPDATE_PROFILE, data);
+    return response.data;
+  } catch (error) {
+    throw handleError(error, Messages.USER.UPDATE_FAILED);
+  }
+};
+

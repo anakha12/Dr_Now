@@ -21,6 +21,7 @@ export interface UserEntity {
   otp?: string; 
   otpExpiresAt?: Date;
   isDonner: boolean;
+  profileCompletion: boolean;
   uid?: string; 
   walletBalance?: number;
   walletTransactions?: WalletTransactionUser[];

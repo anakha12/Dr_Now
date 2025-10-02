@@ -12,7 +12,7 @@ export class CancelUserBookingUseCase implements ICancelUserBooking{
   ) {}
 
   async execute(bookingId: string, userId: string, reason?: string) {
-    const booking = await this._bookingRepository.findById(bookingId);
+    const booking = await this._bookingRepository.findBookingById(bookingId);
     if (!booking) return { success: false, message: ErrorMessages.BOOKING_NOT_FOUND };
 
     if (booking.userId.toString() !== userId.toString()) {
@@ -23,14 +23,14 @@ export class CancelUserBookingUseCase implements ICancelUserBooking{
       return { success: false, message: ErrorMessages.NON_UPCOMING_BOOKING };
     }
 
-    const appointmentDateTime = new Date(`${booking.date}T${booking.slot.from}`);
+    const appointmentDateTime = new Date(`${booking.date}T${booking.startTime}`);
     const now = new Date();
     if (now > appointmentDateTime) {
       return { success: false, message: ErrorMessages.CANNOT_CANCEL_PAST };
     }
 
  
-    await this._bookingRepository.cancelBooking(bookingId, reason);
+    await this._bookingRepository.cancelBooking(bookingId, reason!);
 
     const refundAmount = (booking.doctorEarning || 0) + (booking.commissionAmount || 0);
 

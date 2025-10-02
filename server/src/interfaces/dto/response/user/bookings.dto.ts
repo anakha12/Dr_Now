@@ -1,15 +1,13 @@
-import { Exclude, Expose } from "class-transformer";
-
+import { Exclude, Expose, Transform } from "class-transformer";
 
 @Exclude()
-
 export class BookingResponseDTO {
   @Expose()
   id!: string;
 
   @Expose()
   doctorName!: string;
-  
+
   @Expose()
   department!: string;
 
@@ -19,7 +17,9 @@ export class BookingResponseDTO {
   @Expose()
   date!: string;
 
+  // Map DB fields into slot { from, to }
   @Expose()
+  @Transform(({ obj }) => ({ from: obj.startTime, to: obj.endTime }))
   slot!: { from: string; to: string };
 
   @Expose()
@@ -37,7 +37,7 @@ export class BookingResponseDTO {
   @Expose()
   createdAt!: Date;
 
-  // computed getters
+  // Computed getters
   @Expose()
   get time(): string {
     return `${this.slot.from} - ${this.slot.to}`;

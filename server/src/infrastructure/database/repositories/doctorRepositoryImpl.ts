@@ -162,13 +162,6 @@ async countFilteredDoctors(filters: {
     await doctor.save();
   }
 
-  async removeAllSlotsOnDate(doctorId: string, date: string): Promise<void> {
-    const doctor = await DoctorModel.findById(doctorId);
-    if (!doctor) throw new Error( ErrorMessages.DOCTOR_NOT_FOUND);
-
-    doctor.availability = doctor.availability.filter((entry: any) => entry.date !== date);
-    await doctor.save();
-  }
 
   async checkIfAnySlotBooked(doctorId: string, date: string, slots: Slot[]): Promise<boolean> {
     for (const slot of slots) {
@@ -220,33 +213,7 @@ async countFilteredDoctors(filters: {
     return this._toDomain(updated);
   }
 
-  async addAvailability(
-    doctorId: string,
-    payload: { date: string; slots: Slot[] }
-  ): Promise<void> {
-    const doctor = await DoctorModel.findById(doctorId);
-    if (!doctor) throw new Error( ErrorMessages.DOCTOR_NOT_FOUND );
 
-    doctor.availability = doctor.availability ?? [];
-    doctor.availability.push(payload);
-    await doctor.save();
-  }
-
-  async removeSlot(doctorId: string, date: string, slot: Slot): Promise<void> {
-    const doctor = await DoctorModel.findById(doctorId);
-    if (!doctor) throw new Error( ErrorMessages.DOCTOR_NOT_FOUND);
-
-    const entry = doctor.availability.find((a: any) => a.date === date);
-    if (!entry) throw new Error("Date not found in availability");
-
-    entry.slots = entry.slots.filter((s: any) => s.from !== slot.from || s.to !== slot.to);
-
-    if (entry.slots.length === 0) {
-      doctor.availability = doctor.availability.filter((a: any) => a.date !== date);
-    }
-
-    await doctor.save();
-  }
 
   private _toPersistence(entity: DoctorEntity): Partial<IDoctor> {
     return {
@@ -265,8 +232,8 @@ async countFilteredDoctors(filters: {
       consultFee: entity.consultFee,
       isBlocked: entity.isBlocked,
       otp: entity.otp,
+      rejectionReason:entity.rejectionReason,
       otpExpiresAt: entity.otpExpiresAt,
-      availability: entity.availability,
       age: entity.age,
     };
   }

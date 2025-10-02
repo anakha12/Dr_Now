@@ -1,123 +1,315 @@
 import { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
-import { getBookingDetails } from "../../services/userService";
-import { motion } from "framer-motion";
-import { CalendarDays, User, CreditCard, Clock, FileText, ArrowLeft } from "lucide-react";
-import { useNotifications } from "../../context/NotificationContext";
-import { Messages } from "../../constants/messages";
-import logger from "../../utils/logger";
+import { useParams, useNavigate } from "react-router-dom";
+import { Calendar, dateFnsLocalizer } from "react-big-calendar";
+import type { Event as CalendarEvent } from "react-big-calendar";
+import { format, parse, startOfWeek, getDay, isBefore, isSameDay } from "date-fns";
+import "react-big-calendar/lib/css/react-big-calendar.css";
+import { enUS } from "date-fns/locale/en-US";
 
-const BookingDetails = () => {
-  const { id: bookingId } = useParams();
+import type { Slot } from "../../types/slot";
+import type { Doctor } from "../../types/doctor";
+import type { AvailabilityRule } from "../../types/availabilityRule";
+import type { AvailabilityException } from "../../types/availabilityException";
+
+import {
+  getDoctorById,
+  createStripeSession,
+  getBookedSlots,
+  getDoctorAvailabilityRules,
+  getDoctorAvailabilityExceptions,
+  getUserProfile,
+  bookAppointmentWithWallet,
+} from "../../services/userService";
+
+import { loadStripe } from "@stripe/stripe-js";
+import { useNotifications } from "../../context/NotificationContext";
+
+const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY!);
+
+const BookAppointment = () => {
+  const { id } = useParams();
   const navigate = useNavigate();
   const { addNotification } = useNotifications();
-  const [booking, setBooking] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
 
+  const [doctor, setDoctor] = useState<Doctor | null>(null);
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const [rules, setRules] = useState<AvailabilityRule[]>([]);
+  const [exceptions, setExceptions] = useState<AvailabilityException[]>([]);
+  const [availableSlots, setAvailableSlots] = useState<Slot[]>([]);
+  const [selectedSlot, setSelectedSlot] = useState<Slot | null>(null);
+  const [bookedSlots, setBookedSlots] = useState<any[]>([]);
+  const [paymentMethod, setPaymentMethod] = useState<"stripe" | "wallet">("stripe");
+
+  const [currentDate, setCurrentDate] = useState(new Date());
+  const locales = { "en-US": enUS };
+  const localizer = dateFnsLocalizer({ format, parse, startOfWeek, getDay, locales });
+
+  // ------------------- Generate slots -------------------
+  const generateSlotsFromTime = (startTime: string, endTime: string, slotDuration: number): Slot[] => {
+    const slots: Slot[] = [];
+    const [sh, sm] = startTime.split(":").map(Number);
+    const [eh, em] = endTime.split(":").map(Number);
+
+    let current = new Date(1970, 0, 1, sh, sm);
+    const end = new Date(1970, 0, 1, eh, em);
+
+    while (current < end) {
+      const next = new Date(current.getTime() + slotDuration * 60000);
+      if (next > end) break;
+
+      slots.push({
+        from: `${current.getHours().toString().padStart(2, "0")}:${current.getMinutes().toString().padStart(2, "0")}`,
+        to: `${next.getHours().toString().padStart(2, "0")}:${next.getMinutes().toString().padStart(2, "0")}`,
+      });
+
+      current = next;
+    }
+
+    return slots;
+  };
+
+  // ------------------- Fetch doctor, rules, exceptions -------------------
   useEffect(() => {
-    const fetchBooking = async () => {
+    if (!id) return;
+
+    const fetchData = async () => {
       try {
-        const res = await getBookingDetails(bookingId);
-        if (!res) {
-          addNotification(Messages.DOCTOR.BOOKING_DETAILS.NOT_FOUND, "ERROR");
-          setBooking(null);
-        } else {
-          setBooking(res);
-        }
-      } catch (error) {
-        logger.error(error);
-        addNotification(Messages.DOCTOR.BOOKING_DETAILS.NOT_FOUND, "ERROR");
-      } finally {
-        setLoading(false);
+        const doctorData = await getDoctorById(id);
+        setDoctor(doctorData);
+
+        const rulesData = await getDoctorAvailabilityRules(id);
+        setRules(rulesData);
+
+        const exceptionsData = await getDoctorAvailabilityExceptions(id);
+        setExceptions(exceptionsData);
+      } catch {
+        addNotification("Failed to load doctor info", "ERROR");
       }
     };
 
-    fetchBooking();
-  }, [bookingId, addNotification]);
+    fetchData();
+  }, [id]);
 
-  if (loading) {
-    return (
-      <motion.div
-        className="min-h-screen flex items-center justify-center text-lg text-gray-600"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-      >
-        {Messages.DOCTOR.BOOKING_DETAILS.LOADING}
-      </motion.div>
-    );
+  // ------------------- Fetch booked & available slots -------------------
+  useEffect(() => {
+    if (!selectedDate || !doctor?.id) return;
+
+    const fetchSlots = async () => {
+      try {
+        const dateStr = selectedDate.toISOString().split("T")[0];
+        console.log(dateStr)
+        const fetchedBookedSlots = await getBookedSlots(doctor.id, dateStr);
+
+        console.log("boked slot", fetchedBookedSlots);
+        setBookedSlots(fetchedBookedSlots);
+
+        const dayOfWeek = selectedDate.getDay();
+        const exception = exceptions.find((ex) => isSameDay(new Date(ex.date), selectedDate));
+
+        let slots: Slot[] = [];
+
+        if (exception?.isAvailable && exception.startTime && exception.endTime && exception.slotDuration) {
+          slots = generateSlotsFromTime(exception.startTime, exception.endTime, exception.slotDuration);
+        } else {
+          const rule = rules.find((r) => r.dayOfWeek === dayOfWeek);
+          if (rule) slots = generateSlotsFromTime(rule.startTime, rule.endTime, rule.slotDuration);
+        }
+
+        // ❌ FIX: remove slots already booked from DB
+        const bookedKeys = new Set(
+          fetchedBookedSlots.map((b: any) => `${b.startTime || b.from}-${b.endTime || b.to}`)
+        );
+
+        slots = slots.filter(slot => !bookedKeys.has(`${slot.from}-${slot.to}`));
+
+        // ❌ Remove past slots for today
+        const now = new Date();
+        if (isSameDay(selectedDate, now)) {
+          slots = slots.filter(slot => {
+            const [sh, sm] = slot.from.split(":").map(Number);
+            const slotTime = new Date(selectedDate);
+            slotTime.setHours(sh, sm, 0, 0);
+            return slotTime > now;
+          });
+        }
+
+        console.log("slots available", slots);
+        setAvailableSlots(slots);
+        setSelectedSlot(null);
+      } catch (err) {
+        console.error("Failed to fetch booked slots:", err);
+      }
+    };
+
+    fetchSlots();
+  }, [selectedDate, doctor?.id, rules, exceptions]);
+
+  // ------------------- Handle booking -------------------
+  const handleBook = async () => {
+    if (!selectedDate || !selectedSlot || !doctor?.id) {
+      return addNotification("Please select date and slot", "ERROR");
+    }
+
+    try {
+      const user = await getUserProfile();
+      const userId = user.id || user.userId;
+
+      if (paymentMethod === "wallet") {
+        await bookAppointmentWithWallet(
+          doctor.id,
+          userId,
+          selectedSlot,
+          doctor.consultFee,
+          selectedDate.toISOString()
+        );
+        addNotification("Appointment booked using wallet!", "SUCCESS");
+        navigate("/user/appointment/success");
+        return;
+      }
+
+      const { sessionId } = await createStripeSession(
+        doctor.id,
+        userId,
+        selectedSlot,
+        doctor.consultFee,
+        selectedDate.toISOString()
+      );
+      const stripe = await stripePromise;
+      if (!stripe) return addNotification("Stripe initialization failed", "ERROR");
+
+      await stripe.redirectToCheckout({ sessionId });
+    } catch (error: any) {
+      console.error("Booking error:", error);
+      addNotification(error?.response?.data?.message || error.message || "Something went wrong", "ERROR");
+    }
+  };
+
+  if (!doctor) {
+    return <div className="text-center py-20 text-lg text-teal-600">Loading doctor info...</div>;
   }
 
-  if (!booking) {
-    return (
-      <motion.div
-        className="min-h-screen flex items-center justify-center text-red-500 text-xl"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-      >
-        {Messages.DOCTOR.BOOKING_DETAILS.NOT_FOUND}
-      </motion.div>
-    );
+  // ------------------- Prepare calendar events -------------------
+  const today = new Date();
+  const events: CalendarEvent[] = [];
+  const nextDays = 60;
+
+  for (let i = 0; i < nextDays; i++) {
+    const date = new Date(today);
+    date.setDate(today.getDate() + i);
+
+    const dayRule = rules.find(r => r.dayOfWeek === date.getDay());
+    const exception = exceptions.find(ex => isSameDay(new Date(ex.date), date) && ex.isAvailable);
+
+    if (dayRule || exception) {
+      events.push({
+        start: date,
+        end: date,
+        title: "",
+        allDay: true,
+      });
+    }
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-100 to-gray-100 py-10 px-4">
-      <motion.div
-        className="max-w-4xl mx-auto bg-white rounded-3xl shadow-xl p-10 space-y-8"
-        initial={{ opacity: 0, y: 40 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4 }}
-      >
-        <h1 className="text-4xl font-bold text-center text-teal-700 mb-4 tracking-tight">
-          Booking Summary
-        </h1>
+    <div className="max-w-3xl mx-auto py-10 px-6">
+      <h2 className="text-2xl font-bold text-center text-gray-800 mb-6">Book Appointment</h2>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-gray-700 text-lg">
-          <Item label="Booking ID" value={booking.id} icon={<FileText size={20} />} />
-          <Item label="Doctor Name" value={booking.doctorName || "N/A"} icon={<User size={20} />} />
-          <Item label="Department" value={booking.department || "N/A"} icon={<User size={20} />} />
-          <Item label="Date" value={booking.date} icon={<CalendarDays size={20} />} />
-          <Item label="Time Slot" value={`${booking.slot?.from} - ${booking.slot?.to}`} icon={<Clock size={20} />} />
-          <Item
-            label="Status"
-            value={booking.status}
-            color={booking.status === "Cancelled" ? "text-red-500" : "text-green-600"}
-            icon={<FileText size={20} />}
+      <div className="bg-white shadow-md rounded-lg p-6 space-y-6 border border-teal-100">
+        {/* Doctor Info */}
+        <div className="flex items-center gap-4">
+          <img
+            src={doctor.profileImage}
+            alt={doctor.name}
+            className="w-24 h-24 rounded-full object-cover border-2 border-teal-500 shadow-sm"
           />
-          <Item label="Payment Status" value={booking.paymentStatus} icon={<CreditCard size={20} />} />
-          <Item label="Total Amount" value={`₹${booking.totalAmount}`} icon={<CreditCard size={20} />} />
-          <Item label="Booked On" value={new Date(booking.createdAt).toLocaleString()} icon={<CalendarDays size={20} />} />
-
-          {/* Go Back Button */}
-          <button
-            onClick={() => navigate("/user/bookings")}
-            className="flex items-center gap-2 text-sm text-blue-700 hover:text-blue-900 font-medium transition"
-          >
-            <ArrowLeft size={18} /> {Messages.DOCTOR.BOOKING_DETAILS.BACK_BUTTON}
-          </button>
+          <div>
+            <h3 className="text-xl font-semibold text-gray-800">Dr. {doctor.name}</h3>
+            <p className="text-sm text-teal-600">{doctor.specialization}</p>
+            <p className="text-sm text-gray-500">₹{doctor.consultFee} Fee</p>
+          </div>
         </div>
-      </motion.div>
+
+        {/* Payment Method */}
+        <div>
+          <label className="block text-gray-700 font-medium mb-1">Payment Method</label>
+          <select
+            value={paymentMethod}
+            onChange={(e) => setPaymentMethod(e.target.value as "stripe" | "wallet")}
+            className="w-full border border-gray-300 rounded px-2 py-2 focus:ring-2 focus:ring-teal-400"
+          >
+            <option value="stripe">Pay Online (Stripe)</option>
+            <option value="wallet">Pay with Wallet</option>
+          </select>
+        </div>
+
+        {/* Calendar */}
+        <div style={{ height: 450 }}>
+          <Calendar
+            localizer={localizer}
+            events={events}
+            startAccessor="start"
+            endAccessor="end"
+            views={["month"]}
+            selectable
+            date={currentDate}
+            onNavigate={(date) => setCurrentDate(date)}
+            onSelectEvent={(event) => event.start && setSelectedDate(event.start)}
+            onSelectSlot={(slotInfo) => {
+              if (isBefore(slotInfo.start, today)) return;
+              setSelectedDate(slotInfo.start);
+            }}
+            dayPropGetter={(date) => {
+              if (isBefore(date, today))
+                return { style: { backgroundColor: "#f5f5f5", pointerEvents: "none" } };
+              return { style: { backgroundColor: "white" } };
+            }}
+            toolbar={true}
+            popup={false}
+          />
+        </div>
+
+        {/* Available Slots */}
+        {selectedDate && (
+          <div>
+            <h4 className="font-semibold mb-2">Available Slots for {selectedDate.toDateString()}</h4>
+            <div className="flex flex-wrap gap-2">
+              {availableSlots.length > 0 ? (
+                availableSlots.map((slot, idx) => {
+                  const isSelected =
+                    selectedSlot?.from === slot.from && selectedSlot?.to === slot.to;
+                  return (
+                    <button
+                      key={idx}
+                      onClick={() => setSelectedSlot(slot)}
+                      className={`px-4 py-2 rounded-lg border text-sm font-medium transition ${
+                        isSelected
+                          ? "bg-teal-600 text-white border-teal-700"
+                          : "bg-white text-gray-700 border-gray-300 hover:bg-teal-50"
+                      }`}
+                    >
+                      {slot.from} - {slot.to}
+                    </button>
+                  );
+                })
+              ) : (
+                <p className="text-sm text-gray-500 italic mt-2">
+                  No slots available for this date.
+                </p>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Confirm Button */}
+        <button
+          onClick={handleBook}
+          className="w-full bg-teal-600 text-white py-3 rounded-lg font-semibold hover:bg-teal-700 transition"
+        >
+          Confirm Appointment
+        </button>
+      </div>
     </div>
   );
 };
 
-const Item = ({
-  label,
-  value,
-  icon,
-  color,
-}: {
-  label: string;
-  value: string;
-  icon: React.ReactNode;
-  color?: string;
-}) => (
-  <div className="flex items-start gap-4">
-    <div className="text-teal-600 pt-1">{icon}</div>
-    <div>
-      <p className="text-sm font-medium text-gray-600">{label}</p>
-      <p className={`text-lg font-semibold ${color || "text-gray-800"}`}>{value}</p>
-    </div>
-  </div>
-);
-
-export default BookingDetails;
+export default BookAppointment;

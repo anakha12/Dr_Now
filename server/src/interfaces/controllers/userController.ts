@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 
 import { HttpStatus } from "../../utils/HttpStatus";
-import { Messages } from "../../utils/Messages";
+import { ErrorMessages, Messages } from "../../utils/Messages";
 import { ILoginUser } from "../../application/use_cases/interfaces/user/ILoginUser";
 import { IBookWithWallet } from "../../application/use_cases/interfaces/user/IBookWithWallet";
 import { IRegisterUser } from "../../application/use_cases/interfaces/user/IRegisterUser";
@@ -25,6 +25,7 @@ import { IGetFilteredDoctors } from "../../application/use_cases/interfaces/user
 import { IGetDoctorAvailabilityRules } from "../../application/use_cases/interfaces/user/IGetDoctorAvailabilityRules";
 import { IGetDoctorAvailability } from "../../application/use_cases/interfaces/doctor/IGetDoctorAvailability";
 import { IGetDoctorAvailabilityExceptions } from "../../application/use_cases/interfaces/user/IGetDoctorAvailabilityExceptions";
+import { IUpdateDoctorProfile } from "../../application/use_cases/interfaces/doctor/IUpdateDoctorProfile";
 
 
 interface AuthenticatedRequest extends Request {
@@ -58,6 +59,7 @@ export class UserController {
       private _getFilteredDoctorsUseCase: IGetFilteredDoctors,
       private _getDoctorAvailabilityRulesUseCase: IGetDoctorAvailabilityRules,
       private _getDoctorAvailabilityExceptionsUseCase: IGetDoctorAvailabilityExceptions,
+      private _updateUserProfileUseCase: IUpdateDoctorProfile,
   ) {}
   
   async register(req: Request, res: Response): Promise<void> {
@@ -90,20 +92,20 @@ export class UserController {
 
     const accessTokenMaxAge= Number(process.env.ACCESS_TOKEN_COOKIE_MAXAGE);
     const refreshTokenMaxAge= Number(process.env.REFRESH_TOKEN_COOKIE_MAXAGE);
-
+  
     res.cookie("userAccessToken", accessToken, {
       httpOnly: true,
       secure: false, 
-      sameSite: "lax",
-      maxAge:accessTokenMaxAge, 
+      sameSite: "lax",                               
+      maxAge: accessTokenMaxAge,
     });
-
     res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
-      secure: false, 
+      secure: false,
       sameSite: "lax",
-      maxAge:refreshTokenMaxAge, 
+      maxAge: refreshTokenMaxAge,
     });
+
     res.status(HttpStatus.OK).json({ message: Messages.LOGIN_SUCCESSFUL, user });
   } catch (err: any) {
     res.status(HttpStatus.BAD_REQUEST).json({ error: err.message });
@@ -217,19 +219,18 @@ export class UserController {
     try {
       const doctorId = req.params.doctorId;
       const date = req.query.date as string;
-
       if (!doctorId || !date) {
-        res.status(HttpStatus.BAD_REQUEST).json({ error: Messages.MISSING_DOCTOR_AND_DATE});
+        res.status(HttpStatus.BAD_REQUEST).json({ error: Messages.MISSING_DOCTOR_AND_DATE });
         return;
       }
 
       const slots = await this._getBookedSlotsUseCase.execute(doctorId, date);
       res.status(HttpStatus.OK).json(slots);
     } catch (err: any) {
-      
       res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ error: Messages.SLOT_FETCH_FAILED });
     }
   }
+
 
    async getUserProfile(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
@@ -408,6 +409,30 @@ async getDoctorAvailabilityExceptions(req: Request, res: Response) {
   }
 }
 
-  
+async updateUserProfile(req: AuthenticatedRequest, res: Response) {
+  try {
+    const userId = req.user?.id;
+    if (!userId) {
+      return res
+        .status(HttpStatus.UNAUTHORIZED)
+        .json({ error: Messages.UNAUTHORIZED });
+    }
+
+    const data: any = { ...req.body }; 
+    if (req.file) data.file = req.file; 
+
+    const updatedUser = await this._updateUserProfileUseCase.execute(userId, data);
+
+    return res.status(HttpStatus.OK).json({ user: updatedUser });
+  } catch (err: any) {
+    console.error(err);
+    return res.status(HttpStatus.BAD_REQUEST).json({
+      message: err.message || ErrorMessages.PROFILE_UPDATE_FAILED,
+    });
+  }
 }
- 
+
+
+
+
+}

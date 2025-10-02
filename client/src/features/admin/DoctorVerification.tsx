@@ -15,7 +15,7 @@ const DoctorVerification = () => {
   const [doctors, setDoctors] = useState<Doctor[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(true);
-  const { addNotification } = useNotifications();
+  const { addNotification, promptInput } = useNotifications();
 
   useEffect(() => {
     const fetchDoctors = async () => {
@@ -51,7 +51,13 @@ const DoctorVerification = () => {
 
   const handleReject = async (doctorId: string) => {
     try {
-      await rejectDoctorById(doctorId);
+      const reason = await promptInput("Please enter the reason for rejection:", "Reason...");
+      if (!reason) {
+        addNotification("Rejection cancelled", "WARNING");
+        return;
+      }
+
+      await rejectDoctorById(doctorId, reason);
       setDoctors((prev) => prev.filter((doc) => doc.id !== doctorId));
       addNotification( Messages.DOCTOR.REJECT_SUCCESS);
     } catch {

@@ -31,6 +31,7 @@ export interface IDoctor extends Document {
   otp?: string;
   otpExpiresAt?: Date;
   isRejected?: boolean;
+  rejectionReason?:string;
   walletBalance?: number;
   totalEarned?: number;
   walletTransactions?: {
@@ -77,6 +78,7 @@ const DoctorSchema: Schema = new Schema<IDoctor>(
     otp: { type: String },
     otpExpiresAt: { type: Date },
     isRejected: { type: Boolean, default: false },
+    rejectionReason: { type: String, default: null },
     walletBalance: { type: Number, default: 0 },
     totalEarned: { type: Number, default: 0 },
     walletTransactions: [

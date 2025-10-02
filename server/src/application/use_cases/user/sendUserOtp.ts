@@ -17,7 +17,6 @@ export class SendUserOtp
   async execute(data: UserRegisterDTO): Promise<{ email: string}> {
 
     const dto = await this.validateDto(UserRegisterDTO, data);
-    console.log(dto)
 
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
 

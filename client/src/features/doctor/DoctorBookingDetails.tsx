@@ -134,11 +134,6 @@ const DoctorBookingDetails = () => {
             value={booking.payoutStatus || Messages.DOCTOR.BOOKING_DETAILS.PENDING}
             icon={<FileText size={20} />}
           />
-          <Item
-            label={Messages.DOCTOR.BOOKING_DETAILS.LABELS.BOOKED_ON}
-            value={new Date(booking.createdAt).toLocaleString()}
-            icon={<CalendarDays size={20} />}
-          />
 
           {booking.status === "Cancelled" && booking.cancellationReason && (
             <Item

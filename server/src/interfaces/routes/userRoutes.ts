@@ -1,5 +1,5 @@
 
-
+import upload from '../middleware/upload';
 import express, { Request, Response } from "express";
 import { verifyToken } from "../middleware/authMiddleware";
 import { userController, userAuthController } from "../../di/userDI"; 
@@ -32,4 +32,7 @@ router.post("/book-with-wallet", verifyToken("user"), (req: Request, res: Respon
 router.get("/doctors/filter", (req: Request, res: Response) => userController.getFilteredDoctors(req, res));
 router.get("/user/bookings/:id", verifyToken("user"), (req: Request, res: Response) => userController.getBookingDetails(req, res));
 router.post("/logout", verifyToken("user"), (req: Request, res: Response) => userController.logoutUserController(req, res));
+router.put("/update-profile",verifyToken("user"),upload.single("file"),(req, res) => userController.updateUserProfile(req, res));
+
+
 export default router;

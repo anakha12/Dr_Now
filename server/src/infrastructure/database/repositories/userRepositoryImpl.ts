@@ -2,7 +2,7 @@ import UserModel from "../models/userModel";
 import { IUserRepository } from "../../../domain/repositories/userRepository";
 import { UserEntity } from "../../../domain/entities/userEntity";
 import { WalletTransactionUser } from "../../../domain/entities/walletTransactionUserEntity";
-import { ErrorMessages } from "../../../utils/Messages";
+import { ErrorMessages, Messages } from "../../../utils/Messages";
 
 export class UserRepositoryImpl implements IUserRepository {
 
@@ -117,12 +117,28 @@ export class UserRepositoryImpl implements IUserRepository {
     return this._toDomain(updatedUser);
   }
 
+  async updateUserProfile(userId: string, updates: Partial<UserEntity>): Promise<UserEntity> {
+    const updatedUser = await UserModel.findByIdAndUpdate(
+      userId,
+      { $set: updates },
+      { new: true } 
+    );
+
+    if (!updatedUser) {
+      throw new Error(Messages.USER_NOT_FOUND);
+    }
+
+    return this._toDomain(updatedUser);
+  }
+
+
   private _toDomain(user: any): UserEntity {
     return {
       id: user._id.toString(),
       name: user.name,
       email: user.email,
       age: user.age,
+      profileCompletion: user.profileCompletion,
       gender: user.gender,
       phone: user.phone,
       dateOfBirth: user.dateOfBirth,

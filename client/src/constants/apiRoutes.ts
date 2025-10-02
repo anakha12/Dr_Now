@@ -45,6 +45,7 @@ export const DoctorRoutes = {
 };
 
 export const UserRoutes = {
+  UPDATE_PROFILE: "/update-profile",
   SEND_OTP: "/send-otp",
   REGISTER: "/register",
   LOGIN: "/login",

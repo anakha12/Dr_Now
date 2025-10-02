@@ -5,16 +5,28 @@ import { completeDoctorProfile } from "../../services/doctorService";
 import { useNotifications } from "../../context/NotificationContext";
 import { Messages } from "../../constants/messages";
 
+interface Education {
+  degree: string;
+  institution: string;
+  year: string;
+}
+
+interface Experience {
+  hospital: string;
+  role: string;
+  years: string;
+}
+
 const DoctorProfileComplete = () => {
   const [name, setName] = useState("");
   const [specialization, setSpecialization] = useState("");
-  const [gender, setGender] = useState("");
-  const [consultFee, setConsultFee] = useState<number>(0);
+  const [gender, setGender] = useState<"Male" | "Female" | "Other" | "">("");
+  const [consultFee, setConsultFee] = useState<number | "">("");
 
   const [bio, setBio] = useState("");
-  const [education, setEducation] = useState([{ degree: "", institution: "", year: "" }]);
-  const [awards, setAwards] = useState([""]);
-  const [experience, setExperience] = useState([{ hospital: "", role: "", years: "" }]);
+  const [education, setEducation] = useState<Education[]>([{ degree: "", institution: "", year: "" }]);
+  const [awards, setAwards] = useState<string[]>([""]);
+  const [experience, setExperience] = useState<Experience[]>([{ hospital: "", role: "", years: "" }]);
   const [affiliatedHospitals, setAffiliatedHospitals] = useState("");
 
   const navigate = useNavigate();
@@ -44,17 +56,9 @@ const DoctorProfileComplete = () => {
       gender,
       consultFee,
       bio,
-      education: education.map((edu) => ({
-        degree: edu.degree,
-        institution: edu.institution,
-        year: edu.year,
-      })),
-      awards,
-      experience: experience.map((exp) => ({
-        hospital: exp.hospital,
-        role: exp.role,
-        years: exp.years,
-      })),
+      education: education.filter(edu => edu.degree && edu.institution && edu.year),
+      awards: awards.filter(a => a.trim() !== ""),
+      experience: experience.filter(exp => exp.hospital && exp.role && exp.years),
       affiliatedHospitals: affiliatedHospitals
         .split(",")
         .map((h) => h.trim())
@@ -105,14 +109,17 @@ const DoctorProfileComplete = () => {
             required
           />
 
-          <input
-            type="text"
-            placeholder="Gender"
+          <select
             value={gender}
-            onChange={(e) => setGender(e.target.value)}
+            onChange={(e) => setGender(e.target.value as "Male" | "Female" | "Other")}
             className="input-style w-full mb-4"
             required
-          />
+          >
+            <option value="">Select Gender</option>
+            <option value="Male">Male</option>
+            <option value="Female">Female</option>
+            <option value="Other">Other</option>
+          </select>
 
           <input
             type="number"
@@ -120,6 +127,7 @@ const DoctorProfileComplete = () => {
             value={consultFee}
             onChange={(e) => setConsultFee(Number(e.target.value))}
             className="input-style w-full mb-4"
+            min={0}
             required
           />
 
@@ -173,9 +181,7 @@ const DoctorProfileComplete = () => {
             ))}
             <button
               type="button"
-              onClick={() =>
-                setEducation([...education, { degree: "", institution: "", year: "" }])
-              }
+              onClick={() => setEducation([...education, { degree: "", institution: "", year: "" }])}
               className="text-teal-600 text-sm"
             >
               + Add more
@@ -250,9 +256,7 @@ const DoctorProfileComplete = () => {
             ))}
             <button
               type="button"
-              onClick={() =>
-                setExperience([...experience, { hospital: "", role: "", years: "" }])
-              }
+              onClick={() => setExperience([...experience, { hospital: "", role: "", years: "" }])}
               className="text-teal-600 text-sm"
             >
               + Add more

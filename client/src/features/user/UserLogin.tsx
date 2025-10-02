@@ -7,7 +7,7 @@ import { loginUser } from "../../services/userService";
 import { useNotifications } from "../../context/NotificationContext";
 import { Messages } from "../../constants/messages";
 import { userLoginSchema } from "../../validation/userSchema"; 
-import { ZodError } from "zod";
+import { ZodError } from "zod";  
 
 const UserLogin = () => {
   const [email, setEmail] = useState("");
@@ -49,8 +49,6 @@ const UserLogin = () => {
         });
         return;
       }
-
-      // Other errors
       addNotification((err as any).message || Messages.AUTH.LOGIN_FAILED, "ERROR");
     }
   };

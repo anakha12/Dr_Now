@@ -5,7 +5,7 @@ import { FaStethoscope } from "react-icons/fa";
 import type { Department } from "../../types/department"; 
 import { useNotifications } from "../../context/NotificationContext";
 import { Messages } from "../../constants/messages";
-import { z, ZodError } from "zod";
+import { ZodError } from "zod";
 import { doctorRegisterSchema } from "../../validation/doctorSchema";
 
 const DoctorRegister = () => {
@@ -29,14 +29,11 @@ const DoctorRegister = () => {
   const navigate = useNavigate();
   const { addNotification } = useNotifications();
 
-  // File handler
   const handleFileChange = (
     e: React.ChangeEvent<HTMLInputElement>,
     setter: React.Dispatch<React.SetStateAction<File | null>>
   ) => {
-    if (e.target.files && e.target.files[0]) {
-      setter(e.target.files[0]);
-    }
+    if (e.target.files && e.target.files[0]) setter(e.target.files[0]);
   };
 
   useEffect(() => {
@@ -70,7 +67,6 @@ const DoctorRegister = () => {
         addNotification(Messages.DOCTOR.REGISTRATION.FILL_ALL_FIELDS, "ERROR");
         return false;
       }
-
       return true;
     } catch (err) {
       if (err instanceof ZodError) {
@@ -118,9 +114,16 @@ const DoctorRegister = () => {
     try {
       const response = await registerDoctor(email, otp);
       const doctorId = (response as any).doctorId;
+
+      // Store required values for profile completion
       localStorage.setItem("doctorId", doctorId);
+      localStorage.setItem("doctorName", name);
+      localStorage.setItem("doctorGender", gender);
+      localStorage.setItem("doctorSpecialization", specialization);
+      localStorage.setItem("doctorConsultFee", consultFee);
+
       addNotification(Messages.DOCTOR.REGISTRATION.REGISTRATION_SUCCESS, "SUCCESS");
-      setTimeout(() => navigate("/doctor/profile-complete", { state: { email } }), 1500);
+      setTimeout(() => navigate("/doctor/profile-complete"), 1500);
     } catch {
       addNotification(Messages.DOCTOR.REGISTRATION.INVALID_OTP, "ERROR");
     }
@@ -149,6 +152,7 @@ const DoctorRegister = () => {
 
           {!otpSent ? (
             <>
+              {/* Form fields */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                 <input type="text" placeholder="Full Name" value={name} onChange={(e) => setName(e.target.value)} className="input-style" required />
                 <select value={gender} onChange={(e) => setGender(e.target.value as any)} className="input-style" required>
@@ -161,12 +165,7 @@ const DoctorRegister = () => {
                 <input type="tel" placeholder="Phone" value={phone} onChange={(e) => setPhone(e.target.value)} className="input-style" required />
                 <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} className="input-style sm:col-span-2" required />
                 <input type="text" placeholder="Language(s)" value={language} onChange={(e) => setLanguage(e.target.value)} className="input-style sm:col-span-2" required />
-                <select
-                  value={specialization}
-                  onChange={(e) => setSpecialization(e.target.value)}
-                  className="input-style"
-                  required
-                >
+                <select value={specialization} onChange={(e) => setSpecialization(e.target.value)} className="input-style" required>
                   <option value="">Select Specialization</option>
                   {departments.map((dept) => (
                     <option key={dept.id} value={dept.Departmentname}>
@@ -179,6 +178,7 @@ const DoctorRegister = () => {
                 <input type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} className="input-style" required />
               </div>
 
+              {/* File uploads */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                 <div>
                   <label className="block mb-1 text-gray-700">Profile Image</label>
@@ -198,10 +198,7 @@ const DoctorRegister = () => {
             <input type="text" value={otp} onChange={(e) => setOtp(e.target.value)} placeholder="Enter OTP" className="w-full p-4 mb-6 border border-gray-300 focus:border-teal-500 outline-none rounded-2xl bg-teal-50 transition shadow" required />
           )}
 
-          <button
-            type="submit"
-            className="w-full py-4 bg-teal-600 hover:bg-teal-700 text-white font-bold rounded-2xl shadow-lg text-lg transition"
-          >
+          <button type="submit" className="w-full py-4 bg-teal-600 hover:bg-teal-700 text-white font-bold rounded-2xl shadow-lg text-lg transition">
             {otpSent ? Messages.DOCTOR.REGISTRATION.VERIFY_REGISTER : Messages.DOCTOR.REGISTRATION.SEND_OTP}
           </button>
         </form>

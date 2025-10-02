@@ -10,7 +10,8 @@ import type { Department } from "../types/department";
 import { handleError } from "../utils/errorHandler";
 import { Messages } from "../constants/messages";
 import { DoctorRoutes } from "../constants/apiRoutes";
-
+import type { DoctorLoginResponse } from "../types/auth";
+import type { DoctorBookingsResponse } from "../types/doctorBookingsResponse";
 
 export const sendOtp = async (formData: FormData): Promise<{ message: string }> => {
   try {
@@ -32,9 +33,10 @@ export const registerDoctor = async (email: string, otp: string): Promise<{ toke
   }
 };
 
-export const doctorLogin = async (email: string, password: string): Promise<{ token: string }> => {
+export const doctorLogin = async (email: string, password: string): Promise<DoctorLoginResponse> => {
   try {
     const response = await doctorAxios.post(DoctorRoutes.LOGIN, { email, password });
+    console.log(response)
     return response.data;
   } catch (error) {
     throw handleError(error, Messages.AUTH.LOGIN_FAILED);
@@ -74,10 +76,13 @@ export const completeDoctorProfile = async (
   }
 };
 
-export const getDoctorBookings = async (page: number, limit: number): Promise<Booking[]> => {
+export const getDoctorBookings = async (
+  page: number,
+  limit: number
+): Promise<DoctorBookingsResponse> => {
   try {
     const response = await doctorAxios.get(DoctorRoutes.BOOKINGS, { params: { page, limit } });
-    return response.data;
+    return response.data; // response.data is { bookings: [...], totalPages: n }
   } catch (error) {
     throw handleError(error, Messages.DOCTOR.APPOINTMENTS.FETCH_FAILED);
   }

@@ -3,24 +3,13 @@ import { useNavigate } from "react-router-dom";
 import { getDoctorBookings, cancelDoctorBooking } from "../../services/doctorService";
 import { useNotifications } from "../../context/NotificationContext";
 import { Messages } from "../../constants/messages";
-
-interface Booking {
-  id: string;
-  patientName: string;
-  date: string;
-  slot: {
-    from: string;
-    to: string;
-  };
-  status: string;
-  paymentStatus: string;
-}
+import type { Booking } from "../../types/booking";
 
 const DoctorAppointments = () => {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  // const itemsPerPage = 5;
+  const itemsPerPage = 5;
 
   const { addNotification, confirmMessage, promptInput } = useNotifications();
   const navigate = useNavigate();
@@ -28,9 +17,9 @@ const DoctorAppointments = () => {
   useEffect(() => {
     const fetchBookings = async () => {
       try {
-        // const res = await getDoctorBookings(currentPage, itemsPerPage);
-        // setBookings(res.bookings || []);
-        // setTotalPages(res.totalPages || 1);
+        const res = await getDoctorBookings(currentPage, itemsPerPage);
+        setBookings(res.bookings || []);
+        setTotalPages(res.totalPages || 1);
       } catch {
         addNotification(Messages.DOCTOR.APPOINTMENTS.FETCH_FAILED, "ERROR");
       }

@@ -1,6 +1,6 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 import type { Draft } from "immer";
-
+import type { Doctor, User, Admin } from "../../types/auth"; 
 
 export interface AuthState<UserType> {
   isAuthenticated: boolean;
@@ -19,7 +19,10 @@ function createAuthSlice<T extends object>(name: string) {
     name,
     initialState,
     reducers: {
-      setAuth: (state, action: PayloadAction<{ isAuthenticated: boolean; user?: T }>) => {
+      setAuth: (
+        state,
+        action: PayloadAction<{ isAuthenticated: boolean; user?: T }>
+      ) => {
         state.isAuthenticated = action.payload.isAuthenticated;
         state.user = action.payload.user as Draft<T>;
       },
@@ -37,33 +40,28 @@ function createAuthSlice<T extends object>(name: string) {
 }
 
 // --- Doctor ---
-export interface Doctor {
-  id: string;
-  email: string;
-  role: "doctor";
-}
 const doctorSlice = createAuthSlice<Doctor>("doctorAuth");
-export const { setAuth: setDoctorAuth, setLoading: setDoctorLoading, logout: doctorLogout } = doctorSlice.actions;
+export const {
+  setAuth: setDoctorAuth,
+  setLoading: setDoctorLoading,
+  logout: doctorLogout,
+} = doctorSlice.actions;
 
 // --- User ---
-export interface User {
-  id: string;
-  email: string;
-  role: "user";
-}
 const userSlice = createAuthSlice<User>("userAuth");
-export const { setAuth: setUserAuth, setLoading: setUserLoading, logout: userLogout } = userSlice.actions;
-
+export const {
+  setAuth: setUserAuth,
+  setLoading: setUserLoading,
+  logout: userLogout,
+} = userSlice.actions;
 
 // --- Admin ---
-export interface Admin {
-  id: string;
-  email: string;
-  role: "admin";
-}
 const adminSlice = createAuthSlice<Admin>("adminAuth");
-export const { setAuth: setAdminAuth, setLoading: setAdminLoading, logout: adminLogout } = adminSlice.actions;
-
+export const {
+  setAuth: setAdminAuth,
+  setLoading: setAdminLoading,
+  logout: adminLogout,
+} = adminSlice.actions;
 
 export const doctorAuthReducer = doctorSlice.reducer;
 export const userAuthReducer = userSlice.reducer;

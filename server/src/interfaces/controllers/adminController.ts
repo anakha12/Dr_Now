@@ -108,8 +108,8 @@ import { AdminLoginDTO } from "../dto/request/admin-login.dto";
     async rejectDoctor(req: Request, res: Response): Promise<void> {
       try {
         const doctorId = req.params.id;
-        
-        await this._rejectDoctorUseCase.execute(doctorId);
+        const { reason } = req.body;
+        await this._rejectDoctorUseCase.execute(doctorId, reason);
         res.status(HttpStatus.OK).json({ message: Messages.DOCTOR_REJECTED });
       } catch (err: any) {
         res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: err.message });

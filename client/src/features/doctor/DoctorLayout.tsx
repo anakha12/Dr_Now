@@ -1,5 +1,6 @@
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import type { RootState } from "../../redux/store"; 
 import { doctorLogout } from "../../redux/slices/authSlice";
 import { doctorSidebarItems } from "../../constants/sidebar";
 import Sidebar from "../../components/Sidebar";
@@ -8,6 +9,10 @@ const DoctorLayout = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const dispatch = useDispatch();
+
+  
+  const doctor = useSelector((state: RootState) => state.doctorAuth.user);
+
   const active = location.pathname.split("/")[2] || "dashboard";
 
   const handleSidebarClick = (key: string) => {
@@ -31,10 +36,15 @@ const DoctorLayout = () => {
       {/* Main Content */}
       <div className="flex-1 flex flex-col">
         {/* Header */}
-        <header className="flex justify-end items-center h-16 px-8 bg-white border-b border-teal-200 shadow">
+        <header className="flex justify-between items-center h-16 px-8 bg-white border-b border-teal-200 shadow">
+         
+          <h2 className="text-lg font-semibold text-teal-700">
+            {doctor?.name || "Doctor"}
+          </h2>
+
           <button
             onClick={() => {
-              localStorage.removeItem("token");
+              dispatch(doctorLogout());
               navigate("/doctor/login");
             }}
             className="py-2 px-5 bg-teal-600 hover:bg-teal-700 text-white font-semibold rounded-lg shadow-sm transition"

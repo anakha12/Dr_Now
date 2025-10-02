@@ -13,6 +13,7 @@ export interface IUserRepository {
     users: UserEntity[];
     totalPages: number;
   }>;
+  updateUserProfile(userId: string, updates: Partial<UserEntity>): Promise<UserEntity>
   toggleBlockStatus(userId: string, block: boolean): Promise<UserEntity>;
   findUserById(userId: string): Promise<UserEntity | null>;
   updateUserWalletAndTransactions(userId: string, amount: number, transaction: WalletTransactionUser): Promise<void>;

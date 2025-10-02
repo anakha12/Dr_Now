@@ -1,11 +1,15 @@
 import { IBookingRepository } from "../../../domain/repositories/bookingRepository";
-import { IGetBookedSlots } from "../interfaces/user/IGetBookedSlots";
+import { SlotDto } from "../../../interfaces/dto/response/user/slot.dto";
+import { plainToInstance } from "class-transformer";
 
-export class GetBookedSlots implements IGetBookedSlots{
-  constructor(private _bookingRepo: IBookingRepository) {}
+export class GetBookedSlotsUseCase {
+  constructor(private bookingRepo: IBookingRepository) {}
 
-  async execute(doctorId: string, date: string) {
-    return await this._bookingRepo.getBookedSlotsByDoctorAndDate(doctorId, date);
+  async execute(doctorId: string, date: string): Promise<SlotDto[]> {
+    const bookings = await this.bookingRepo.findBookingsByDoctorAndDate(doctorId, date);
+    const bookedSlots = bookings.map(
+      (b) => new SlotDto(b.startTime, b.endTime, true)
+    );
+    return plainToInstance(SlotDto, bookedSlots);
   }
 }
-

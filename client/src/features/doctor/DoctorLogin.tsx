@@ -5,7 +5,7 @@ import toast, { Toaster } from "react-hot-toast";
 import { FaStethoscope, FaEye, FaEyeSlash } from "react-icons/fa";
 import { useDispatch } from "react-redux";
 import { setDoctorAuth } from "../../redux/slices/authSlice";
-import { z, ZodError } from "zod";
+import { ZodError } from "zod";
 import { Messages } from "../../constants/messages";  
 import { doctorLoginSchema } from "../../validation/doctorSchema";
 
@@ -23,10 +23,10 @@ const DoctorLogin = () => {
     try {
       doctorLoginSchema.parse({ email, password });
 
-      await doctorLogin(email, password);
+      const data = await doctorLogin(email, password);
 
       toast.success(Messages.AUTH.LOGIN_SUCCESS); 
-      dispatch(setDoctorAuth({ isAuthenticated: true}));
+      dispatch(setDoctorAuth({ isAuthenticated: true,user: data?.user, }));
 
       setTimeout(() => navigate("/doctor/dashboard"), 1500);
     } catch (err: any) {

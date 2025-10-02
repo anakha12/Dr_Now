@@ -40,9 +40,9 @@ export const verifyDoctorById = async (doctorId: string) => {
   }
 };
 
-export const rejectDoctorById = async (doctorId: string) => {
+export const rejectDoctorById = async (doctorId: string, reason: string) => {
   try {
-    const response = await adminAxios.post(AdminRoutes.REJECT_DOCTOR(doctorId));
+    const response = await adminAxios.post(AdminRoutes.REJECT_DOCTOR(doctorId), { reason });
     return response.data;
   } catch (error) {
     throw handleError(error, Messages.DOCTOR.REJECT_FAILED);
