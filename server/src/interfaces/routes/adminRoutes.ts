@@ -30,5 +30,6 @@ router.patch("/departments/:id/status", verifyToken("admin"), (req, res) => admi
 router.get("/pending-doctors", verifyToken("admin"), (req, res) => adminController.getPendingDoctors(req, res));
 router.get("/wallet-summary", verifyToken("admin"), (req, res) => adminController.getWalletSummary(req, res));
 router.post("/pay-doctor/:id", verifyToken("admin"), (req, res) => adminController.payoutDoctor(req, res));
+router.get("/doctors/:id", verifyToken("admin"), (req, res) => adminController.getDoctorById(req, res));
 
 export default router;

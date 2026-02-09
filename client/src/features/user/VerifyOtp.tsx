@@ -3,6 +3,7 @@ import { sendOtp, registerUser } from "../../services/userService";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useNotifications } from "../../context/NotificationContext";
 import { Messages } from "../../constants/messages";
+import { handleError } from "../../utils/errorHandler";
 
 const VerifyOtp = () => {
   const navigate = useNavigate();
@@ -25,11 +26,9 @@ const VerifyOtp = () => {
       addNotification(res.message || Messages.DOCTOR.REGISTRATION.OTP_SENT, "SUCCESS");
       setTimer(60);
       setIsCountingDown(true);
-    } catch (err: any) {
-      addNotification(
-        err.response?.data?.message || Messages.DOCTOR.REGISTRATION.OTP_FAILED,
-        "ERROR"
-      );
+    } catch (error: unknown) {
+      const err = handleError(error, Messages.DOCTOR.REGISTRATION.OTP_FAILED);
+      addNotification(err.message, "ERROR");
     }
   };
 
@@ -44,12 +43,10 @@ const VerifyOtp = () => {
       });
       addNotification(Messages.DOCTOR.REGISTRATION.REGISTRATION_SUCCESS, "SUCCESS");
       setTimeout(() => navigate("/user/login"), 1500);
-    } catch (err: any) {
-      addNotification(
-        err.response?.data?.message || Messages.DOCTOR.REGISTRATION.INVALID_OTP,
-        "ERROR"
-      );
-    }
+    } catch (error: unknown) {
+        const err = handleError(error, Messages.DOCTOR.REGISTRATION.INVALID_OTP);
+        addNotification(err.message, "ERROR");
+      }
   };
 
   useEffect(() => {

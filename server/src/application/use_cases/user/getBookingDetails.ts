@@ -2,6 +2,7 @@ import { plainToInstance } from "class-transformer";
 import { IBookingRepository } from "../../../domain/repositories/bookingRepository";
 import { BookingResponseDTO } from "../../../interfaces/dto/response/user/bookings.dto";
 import { ErrorMessages } from "../../../utils/Messages";
+import { AppError } from "../../../utils/AppError";
 
 export class GetBookingDetails implements GetBookingDetails{
   constructor(private bookingRepo: IBookingRepository) {}
@@ -9,17 +10,13 @@ export class GetBookingDetails implements GetBookingDetails{
   async execute(bookingId: string, userId: string) {2
     
     if (!bookingId || !userId) {
-      const err: any = new Error( ErrorMessages.BOOKING_ID_AND_DOCTOR_ID_REQUIRED);
-      err.statusCode = 400;
-      throw err;
+      throw new AppError(ErrorMessages.BOOKING_ID_AND_DOCTOR_ID_REQUIRED, 400);
     }
 
     const booking = await this.bookingRepo.findBookingByIdAndUser(bookingId, userId);
   
     if (!booking) {
-      const err: any = new Error( ErrorMessages.BOOKING_NOT_FOUND );
-      err.statusCode = 404;
-      throw err;
+      throw new AppError(ErrorMessages.BOOKING_NOT_FOUND, 404);
     }
 
     const totalAmount = (booking.doctorEarning ?? 0) + (booking.commissionAmount ?? 0);

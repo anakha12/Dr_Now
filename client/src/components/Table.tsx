@@ -4,7 +4,7 @@ import type { TableProps } from "../types/table";
 function Table<T extends { id: string }>({
   data,
   columns,
-  rowKey = "id", 
+  rowKey = "id",
   emptyMessage = "No records found",
   onViewDetails,
 }: TableProps<T>) {
@@ -31,6 +31,7 @@ function Table<T extends { id: string }>({
             )}
           </tr>
         </thead>
+
         <tbody>
           {data.length === 0 ? (
             <tr>
@@ -43,8 +44,8 @@ function Table<T extends { id: string }>({
             </tr>
           ) : (
             data.map((row, rowIdx) => {
-              const key =
-                (rowKey && (row as any)[rowKey]) ?? rowIdx; // ✅ stable key
+              const key = (row[rowKey] as React.Key) ?? rowIdx;
+
               return (
                 <tr key={key} className="border-b hover:bg-teal-50">
                   {columns.map((col, i) => {
@@ -54,10 +55,7 @@ function Table<T extends { id: string }>({
                         : (row[col.accessor] as React.ReactNode);
 
                     return (
-                      <td
-                        key={i}
-                        className={`px-6 py-4 ${col.className ?? ""}`}
-                      >
+                      <td key={i} className={`px-6 py-4 ${col.className ?? ""}`}>
                         {value}
                       </td>
                     );
@@ -66,7 +64,7 @@ function Table<T extends { id: string }>({
                   {onViewDetails && (
                     <td className="px-6 py-4">
                       <button
-                        onClick={() => onViewDetails((row as any)[rowKey])}
+                        onClick={() => onViewDetails(String(row[rowKey]))}
                         className="px-4 py-2 rounded bg-teal-600 hover:bg-teal-700 text-white font-medium shadow"
                       >
                         View Details

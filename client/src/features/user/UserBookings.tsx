@@ -103,7 +103,10 @@ const UserBookings = () => {
                   Dr. {booking.doctorName}
                 </h2>
                 <div className="space-y-1 text-sm text-gray-700">
-                  <p><strong>Date:</strong> {booking.date}</p>
+                  <p>
+                    <strong>Date:</strong>{" "}
+                    {booking.date ? new Date(booking.date).toLocaleDateString("en-GB") : "N/A"}
+                  </p>
                   <p><strong>Time:</strong> {booking.time}</p>
                   <p><strong>Department:</strong> {booking.department}</p>
                   <p>

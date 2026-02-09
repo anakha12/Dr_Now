@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-
+import { handleControllerError } from "../../utils/errorHandler";
 import { HttpStatus } from "../../utils/HttpStatus";
 import { ErrorMessages, Messages } from "../../utils/Messages";
 import { ILoginUser } from "../../application/use_cases/interfaces/user/ILoginUser";
@@ -69,8 +69,8 @@ export class UserController {
       const userData = { email, password } as any;
       await this._registerUser.execute(userData);
       res.status(HttpStatus.CREATED).json({ message: Messages.USER_REGISTERED_SUCCESSFULLY });
-    } catch (err: any) {
-      res.status(HttpStatus.BAD_REQUEST).json({ error: err.message });
+    } catch (err: unknown) {
+      handleControllerError(res, err, HttpStatus.BAD_REQUEST);
     }
   }
 
@@ -79,15 +79,14 @@ export class UserController {
 
       const result = await this._sendUserOtp.execute(req.body);
       res.status(HttpStatus.OK).json({ message: Messages.OTP_SENT });
-    } catch (err: any) {
-  
-      res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ error: Messages.FAILED_SENSD_OTP });
+    } catch (err: unknown) {
+      handleControllerError(res, err, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
  async login(req: Request, res: Response): Promise<void> {
   try {
-     const { email, password } = req.body;
+    const { email, password } = req.body;
     const { accessToken, refreshToken, user } = await this._userLogin.execute(req.body);
 
     const accessTokenMaxAge= Number(process.env.ACCESS_TOKEN_COOKIE_MAXAGE);
@@ -107,8 +106,8 @@ export class UserController {
     });
 
     res.status(HttpStatus.OK).json({ message: Messages.LOGIN_SUCCESSFUL, user });
-  } catch (err: any) {
-    res.status(HttpStatus.BAD_REQUEST).json({ error: err.message });
+  } catch (err: unknown) {
+      handleControllerError(res, err, HttpStatus.BAD_REQUEST);
   }
 }
 
@@ -122,8 +121,8 @@ export class UserController {
 
     const result = await this._logoutUserUseCase.execute();
     res.status(HttpStatus.OK).json(result);
-  } catch (error: any) {
-    res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ error: error.message });
+  } catch (err: unknown) {
+      handleControllerError(res, err, HttpStatus.INTERNAL_SERVER_ERROR);
   }
 }
 
@@ -137,8 +136,8 @@ export class UserController {
       }
       const result = await this._googleLoginUser.execute({ email, name, uid });
       res.status(HttpStatus.OK).json(result);
-    } catch (err: any) {
-      res.status(HttpStatus.BAD_REQUEST).json({ error: err.message });
+    } catch (err: unknown) {
+      handleControllerError(res, err, HttpStatus.BAD_REQUEST);
     }
   }
 
@@ -147,8 +146,8 @@ export class UserController {
       const { email } = req.body;
       await this._sendResetOtp.execute(email);
       res.status(HttpStatus.OK).json({ message: Messages.RESET_OTP_SENT });
-    } catch (err: any) {
-      res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ error: err.message });
+    } catch (err: unknown) {
+      handleControllerError(res, err);
     }
   }
 
@@ -157,8 +156,8 @@ export class UserController {
       const { email, otp, newPassword } = req.body;
       await this._resetPassword.execute(email, otp, newPassword);
       res.status(HttpStatus.OK).json({ message:Messages.PASSWORD_RESET_SUCCESSFUL });
-    } catch (err: any) {
-      res.status(HttpStatus.BAD_REQUEST).json({ error: err.message });
+    } catch (err: unknown) {
+      handleControllerError(res, err, HttpStatus.BAD_REQUEST);
     }
   }
 
@@ -167,15 +166,7 @@ export class UserController {
       const doctors = await this._getAllDoctorsForUserUseCase.execute();
       res.status(HttpStatus.OK).json(doctors);
     } catch (err: unknown) {
-      if (err instanceof Error) {
-        res
-          .status(HttpStatus.INTERNAL_SERVER_ERROR)
-          .json({ success: false, message: err.message });
-      } else {
-        res
-          .status(HttpStatus.INTERNAL_SERVER_ERROR)
-          .json({ success: false, message: Messages.UNAUTHORIZED });
-      }
+      handleControllerError(res, err);
     }
   }
 
@@ -189,8 +180,8 @@ export class UserController {
         return;
       }
       res.status(HttpStatus.OK).json(doctor);
-    } catch (err: any) {
-      res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: err.message });
+    } catch (err: unknown) {
+      handleControllerError(res, err);
     }
   }
 
@@ -209,9 +200,8 @@ export class UserController {
         sessionId,
         publishableKey: process.env.STRIPE_PUBLISHABLE_KEY,
       });
-    } catch (error: any) {
-     
-      res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ error: error.message });
+    } catch (err: unknown) {
+      handleControllerError(res, err);
     }
   }
 
@@ -226,8 +216,8 @@ export class UserController {
 
       const slots = await this._getBookedSlotsUseCase.execute(doctorId, date);
       res.status(HttpStatus.OK).json(slots);
-    } catch (err: any) {
-      res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ error: Messages.SLOT_FETCH_FAILED });
+    } catch (err: unknown) {
+      handleControllerError(res, err);
     }
   }
 
@@ -241,8 +231,8 @@ export class UserController {
       }
       const user = await this._getUserProfileUseCase.execute(userId);
       res.status(HttpStatus.OK).json(user);
-    } catch (err: any) {
-      res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ error: err.message });
+    } catch (err: unknown) {
+      handleControllerError(res, err);
     }
   }
 
@@ -260,8 +250,8 @@ export class UserController {
     const { bookings, totalPages } = await this._getUserBookingsUseCase.execute(userId, page, limit);
 
     res.status(HttpStatus.OK).json({ bookings, totalPages, currentPage: page });
-  } catch (err: any) {
-    res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ error: Messages.SLOT_FETCH_FAILED });
+  } catch (err: unknown) {
+      handleControllerError(res, err);
   }
 }
 
@@ -289,8 +279,8 @@ export class UserController {
         }
 
         res.status(HttpStatus.OK).json({ message: Messages.BOOKING_CANCELLED });
-      } catch (err: any) {
-        res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ error: Messages.BOOKING_FAILED});
+      } catch (err: unknown) {
+        handleControllerError(res, err);
       }
     }
 
@@ -301,8 +291,8 @@ export class UserController {
       const limit = parseInt(req.query.limit as string) || 10;
       const depts = await this._getDepartmentsUseCase.execute(page, limit);
       res.status(HttpStatus.OK).json({ departments: depts });
-    } catch (err: any) {
-      res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: err.message });
+    } catch (err: unknown) {
+      handleControllerError(res, err);
     }
   }
 
@@ -320,9 +310,8 @@ export class UserController {
 
       const walletData = await this._getUserWalletUseCase.execute(userId, page, limit);
       res.status(HttpStatus.OK).json(walletData);
-    } catch (error: any) {
-     
-      res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ error: error.message});
+    } catch (err: unknown) {
+      handleControllerError(res, err);
     }
   }
 
@@ -343,9 +332,8 @@ export class UserController {
 
       const result = await this._bookWithWalletUseCase.execute(userId, doctorId, slot, amount, date);
       res.status(HttpStatus.OK).json(result);
-    } catch (err: any) {
-     
-      res.status(HttpStatus.BAD_REQUEST).json({ error: err.message });
+    } catch (err: unknown) {
+      handleControllerError(res, err, HttpStatus.BAD_REQUEST);
     }
   }
 
@@ -363,8 +351,8 @@ export class UserController {
       const result = await this._getFilteredDoctorsUseCase.execute(filters);
           
       res.status(HttpStatus.OK).json(result);
-    } catch (err: any) {
-      res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: err.message });
+    } catch (err: unknown) {
+      handleControllerError(res, err);
     }
   }
 
@@ -380,9 +368,8 @@ export class UserController {
 
       const booking = await this._getBookingDetailsUseCase.execute(bookingId, userId);
       res.status(HttpStatus.OK).json(booking);
-    } catch (err: any) {
-      const status = err.statusCode || HttpStatus.INTERNAL_SERVER_ERROR;
-      res.status(status).json({ error: err.message });
+    }  catch (err: unknown) {
+      handleControllerError(res, err);
     }
   }
 
@@ -393,8 +380,8 @@ async getDoctorAvailabilityRules(req: Request, res: Response) {
     const rules = await this._getDoctorAvailabilityRulesUseCase.execute(doctorId);
 
     res.status(200).json(rules);
-  } catch (err: any) {
-    res.status(400).json({ error: err.message });
+  } catch (err: unknown) {
+      handleControllerError(res, err, HttpStatus.BAD_REQUEST);
   }
 }
 
@@ -404,8 +391,8 @@ async getDoctorAvailabilityExceptions(req: Request, res: Response) {
 
     const exceptions = await this._getDoctorAvailabilityExceptionsUseCase.execute({doctorId});
     res.status(200).json(exceptions);
-  } catch (err: any) {
-    res.status(400).json({ error: err.message });
+  } catch (err: unknown) {
+      handleControllerError(res, err, HttpStatus.BAD_REQUEST);
   }
 }
 
@@ -418,17 +405,14 @@ async updateUserProfile(req: AuthenticatedRequest, res: Response) {
         .json({ error: Messages.UNAUTHORIZED });
     }
 
-    const data: any = { ...req.body }; 
+    const data = { ...req.body }; 
     if (req.file) data.file = req.file; 
 
     const updatedUser = await this._updateUserProfileUseCase.execute(userId, data);
 
     return res.status(HttpStatus.OK).json({ user: updatedUser });
-  } catch (err: any) {
-    console.error(err);
-    return res.status(HttpStatus.BAD_REQUEST).json({
-      message: err.message || ErrorMessages.PROFILE_UPDATE_FAILED,
-    });
+  } catch (err: unknown) {
+      handleControllerError(res, err, HttpStatus.BAD_REQUEST);
   }
 }
 

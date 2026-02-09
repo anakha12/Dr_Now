@@ -75,7 +75,11 @@ const BookingDetails = () => {
           <Item label={Messages.DOCTOR.BOOKING_DETAILS.LABELS.BOOKING_ID} value={booking.id} icon={<FileText size={20} />} />
           <Item label={Messages.DOCTOR.BOOKING_DETAILS.LABELS.DOCTOR_NAME} value={booking.doctorName || "N/A"} icon={<User size={20} />} />
           <Item label={Messages.DOCTOR.BOOKING_DETAILS.LABELS.DEPARTMENT} value={booking.department || "N/A"} icon={<User size={20} />} />
-          <Item label={Messages.DOCTOR.BOOKING_DETAILS.LABELS.DATE} value={booking.date} icon={<CalendarDays size={20} />} />
+          <Item
+            label={Messages.DOCTOR.BOOKING_DETAILS.LABELS.DATE}
+            value={new Date(booking.date).toLocaleDateString("en-GB")} 
+            icon={<CalendarDays size={20} />}
+          />
           <Item label={Messages.DOCTOR.BOOKING_DETAILS.LABELS.TIME_SLOT} value={`${booking.slot?.from} - ${booking.slot?.to}`} icon={<Clock size={20} />} />
           <Item
             label={Messages.DOCTOR.BOOKING_DETAILS.LABELS.STATUS}

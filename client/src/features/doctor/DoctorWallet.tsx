@@ -1,13 +1,14 @@
 import { useEffect, useState } from "react";
 import { getWalletSummary } from "../../services/doctorService";
-import type { WalletSummary } from "../../types/walletSummary";
+import type { WalletTransaction } from "../../types/WalletTransaction";
 import { useNotifications } from "../../context/NotificationContext";
 import { Messages } from "../../constants/messages";
+import { handleError } from "../../utils/errorHandler";
 
 const ITEMS_PER_PAGE = 5;
 
 const DoctorWallet = () => {
-  const [transactions, setTransactions] = useState<WalletSummary[]>([]);
+  const [transactions, setTransactions] = useState<WalletTransaction[]>([]);
   const [walletBalance, setWalletBalance] = useState<number>(0);
   const [totalPages, setTotalPages] = useState<number>(1);
   const [currentPage, setCurrentPage] = useState<number>(1);
@@ -20,19 +21,16 @@ const DoctorWallet = () => {
 
   const fetchWalletData = async (page: number) => {
     try {
-      const data: WalletSummary[] = await getWalletSummary(page, ITEMS_PER_PAGE);
-      setTransactions(data);
-
-
-      const balance = data.reduce((acc, tx) => {
-        return tx.type === "credit" ? acc + tx.amount : acc - tx.amount;
-      }, 0);
-      setWalletBalance(balance);
-
-      setTotalPages(1);
-    } catch (err: any) {
-      addNotification(Messages.DOCTOR.FETCH_WALLET_FAILED, "ERROR");
-    }
+      const response = await getWalletSummary(page, ITEMS_PER_PAGE);
+      setTransactions(response.transactions);
+      setWalletBalance(response.walletBalance);
+      setTotalPages(
+        Math.ceil( response.totalTransactions / ITEMS_PER_PAGE)
+      );
+    } catch (error: unknown) {
+        const err = handleError(error, Messages.DOCTOR.PROFILE_UPDATE_FAILED);
+          addNotification(err.message, "ERROR");
+        }
   };
 
   return (
@@ -78,7 +76,7 @@ const DoctorWallet = () => {
                   >
                     ₹{tx.amount.toFixed(2)}
                   </td>
-                  <td className="p-3 text-gray-600">{tx.description || "-"}</td>
+                  <td className="p-3 text-gray-600">{tx.reason || "-"}</td>
                   <td className="p-3 text-gray-600">
                     {new Date(tx.date).toLocaleString()}
                   </td>

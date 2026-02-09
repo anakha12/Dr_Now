@@ -3,7 +3,7 @@ import { Messages } from "../../utils/Messages";
 import { HttpStatus } from "../../utils/HttpStatus";
 import { DoctorRegisterDTO } from "../dto/request/doctor-register.dto."
 import { AuthRequest } from "../middleware/authMiddleware";
-
+import { handleControllerError } from "../../utils/errorHandler";
 import { ISendDoctorOtp } from "../../application/use_cases/interfaces/doctor/ISendDoctorOtp";
 import { IVerifyDoctorOtp } from "../../application/use_cases/interfaces/doctor/IVerifyDoctorOtp";
 import { IGetDoctorProfile } from "../../application/use_cases/interfaces/doctor/IGetDoctorProfile";
@@ -11,7 +11,6 @@ import { IUpdateDoctorProfile } from "../../application/use_cases/interfaces/doc
 import { IAddDoctorAvailabilityRule } from "../../application/use_cases/interfaces/doctor/IAddDoctorAvailability";
 import { IGetDoctorAvailability } from "../../application/use_cases/interfaces/doctor/IGetDoctorAvailability";
 import { IGetDoctorBookings } from "../../application/use_cases/interfaces/doctor/IGetDoctorBookings";
-import { IRemoveDoctorSlot } from "../../application/use_cases/interfaces/doctor/IRemoveDoctorSlot";
 import { ICancelDoctorBooking } from "../../application/use_cases/interfaces/doctor/ICancelDoctorBooking";
 import { IGetAllDepartmentsUseCase } from "../../application/use_cases/interfaces/doctor/IGetAllDepartmentsUseCase";
 import { IGetDoctorWalletSummary } from "../../application/use_cases/interfaces/doctor/IGetDoctorWalletSummary";
@@ -48,7 +47,6 @@ export class DoctorController {
       private _addAvailabilityUseCase: IAddDoctorAvailabilityRule,
       private _getAvailabilityUseCase: IGetDoctorAvailability,
       private _getDoctorBookingsUseCase: IGetDoctorBookings,
-      private _removeDoctorSlotUseCase:IRemoveDoctorSlot,
       private _cancelDoctorBookingUseCase: ICancelDoctorBooking,
       private _getAllDepartmentsUseCase: IGetAllDepartmentsUseCase,
       private _getDoctorWalletSummaryUseCase: IGetDoctorWalletSummary,
@@ -73,7 +71,7 @@ export class DoctorController {
         medicalLicense: medicalLicense ? (medicalLicense as any).path : "",
         idProof: idProof ? (idProof as any).path : ""
       });
-
+  
       const errors = await validate(dto);
       if (errors.length > 0) {
         const formattedErrors = errors
@@ -86,8 +84,8 @@ export class DoctorController {
       }
       await this._sendDoctorOtp.execute(dto);
       res.status(HttpStatus.OK).json({ message: Messages.OTP_SENT(dto.email) });
-    } catch (err: any) {
-      res.status(HttpStatus.BAD_REQUEST).json({ error: err.message });
+    } catch (err) {
+      handleControllerError(res, err, HttpStatus.BAD_REQUEST);
     }
   }
 
@@ -102,8 +100,8 @@ export class DoctorController {
 
       const doctorId = await this._verifyDoctorOtp.execute(email, otp);
       res.status(HttpStatus.OK).json({ message: Messages.OTP_VERIFIED, doctorId });
-    } catch (err: any) {
-      res.status(HttpStatus.BAD_REQUEST).json({ error: err.message });
+    } catch (err) {
+      handleControllerError(res, err, HttpStatus.BAD_REQUEST);
     }
   }
 
@@ -134,8 +132,8 @@ async login(req: Request, res: Response): Promise<void> {
       maxAge:refreshTokenMaxAge, 
     });
     res.status(HttpStatus.OK).json({ message: Messages.LOGIN_SUCCESSFUL, user });
-  } catch (err: any) {
-    res.status(HttpStatus.BAD_REQUEST).json({ error: err.message });
+  } catch (err) {
+      handleControllerError(res, err, HttpStatus.BAD_REQUEST);
   }
 }
 
@@ -153,8 +151,8 @@ async login(req: Request, res: Response): Promise<void> {
       const profile = await this._getDoctorProfileUseCase.execute(doctorId);
       
       res.status(HttpStatus.OK).json(profile);
-    } catch (error: any) {
-      res.status(HttpStatus.BAD_REQUEST).json({ error: error.message });
+    } catch (err) {
+      handleControllerError(res, err, HttpStatus.BAD_REQUEST);
     }
   }
 
@@ -166,11 +164,13 @@ async login(req: Request, res: Response): Promise<void> {
         res.status(HttpStatus.UNAUTHORIZED).json({ error: Messages.UNAUTHORIZED});
         return
       }
+      const dto = { doctorId, ...req.body };
 
-      const updatedProfile = await this._updateDoctorProfileUseCase.execute(doctorId, req.body);
+      const updatedProfile = await this._updateDoctorProfileUseCase.execute(dto);
+
       res.status(HttpStatus.OK).json(updatedProfile);
-    } catch (error: any) {
-      res.status(HttpStatus.BAD_REQUEST).json({ error: error.message });
+    } catch (err) {
+      handleControllerError(res, err, HttpStatus.BAD_REQUEST);
     }
   }
 
@@ -179,8 +179,8 @@ async login(req: Request, res: Response): Promise<void> {
       const data= {...req.body, doctorId:req.user?.id }
       const result = await this._addAvailabilityUseCase.execute(data);
       res.status(HttpStatus.OK).json(result);
-    } catch (error: any) {
-      res.status(HttpStatus.BAD_REQUEST).json({ error: error.message });
+    }  catch (err) {
+      handleControllerError(res, err, HttpStatus.BAD_REQUEST);
     }
   }
 
@@ -194,8 +194,8 @@ async fetchAvailabilityRule(req: AuthRequest, res: Response): Promise<void> {
 
     const availability = await this._getAvailabilityUseCase.execute(doctorId);
     res.status(HttpStatus.OK).json(availability);
-  } catch (error: any) {
-    res.status(HttpStatus.BAD_REQUEST).json({ error: error.message });
+  } catch (err) {
+    handleControllerError(res, err, HttpStatus.BAD_REQUEST);
   }
 }
 
@@ -207,8 +207,8 @@ async editAvailabilityRule(req: AuthRequest, res: Response) {
 
     const updatedRule = await this._editAvailabilityRuleUseCase.execute( dto);
     res.status(HttpStatus.OK).json(updatedRule);
-  } catch (err: any) {
-    res.status(HttpStatus.BAD_REQUEST).json({ message: err.message });
+  } catch (err) {
+    handleControllerError(res, err, HttpStatus.BAD_REQUEST);
   }
 }
 
@@ -224,8 +224,8 @@ async editAvailabilityRule(req: AuthRequest, res: Response) {
       
       const result = await this._deleteAvailabilityRuleUseCase.execute( { dayOfWeek, doctorId });
       res.status(HttpStatus.OK).json(result);
-    } catch (err: any) {
-      res.status(HttpStatus.BAD_REQUEST).json({ message: err.message });
+    } catch (err) {
+    handleControllerError(res, err, HttpStatus.BAD_REQUEST);
     }
   }
 
@@ -236,8 +236,8 @@ async addAvailabilityException(req: AuthRequest, res: Response): Promise<void> {
 
       const result = await this._addDoctorAvailabilityExceptionUsecase.execute(data);
       res.status(HttpStatus.CREATED).json(result);
-    } catch (err: any) {
-      res.status(HttpStatus.BAD_REQUEST).json({ message: err.message });
+    } catch (err) {
+      handleControllerError(res, err, HttpStatus.BAD_REQUEST);
     }
 }
 
@@ -251,8 +251,8 @@ async fetchAvailabilityExceptions(req: AuthRequest, res: Response): Promise<void
        const dto ={ doctorId}
       const result = await this._getDoctorAvailabilityExceptionsUseCase.execute(dto);
       res.status(HttpStatus.OK).json(result);
-    } catch (err: any) {
-      res.status(HttpStatus.BAD_REQUEST).json({ message: err.message });
+    } catch (err) {
+      handleControllerError(res, err, HttpStatus.BAD_REQUEST);
     }
 }
 
@@ -270,14 +270,10 @@ async deleteAvailabilityException(req: AuthRequest, res: Response): Promise<void
     const result = await this._deleteDoctorAvailabilityExceptionUseCase.execute(dto);
 
     res.status(HttpStatus.OK).json(result);
-  } catch (err: any) {
-    res
-      .status(HttpStatus.BAD_REQUEST)
-      .json({ message: err.message });
+  } catch (err) {
+    handleControllerError(res, err, HttpStatus.BAD_REQUEST);
   }
 }
-
-
 
 async getBookings(req: AuthRequest, res: Response): Promise<void> {
   try {
@@ -295,8 +291,8 @@ async getBookings(req: AuthRequest, res: Response): Promise<void> {
     const result = await this._getDoctorBookingsUseCase.execute(doctorId, page, limit);
 
     res.status(HttpStatus.OK).json(result); 
-  } catch (err: any) {
-    res.status(HttpStatus.BAD_REQUEST).json({ error: err.message });
+  } catch (err) {
+    handleControllerError(res, err, HttpStatus.BAD_REQUEST);
   }
 }
 
@@ -320,8 +316,8 @@ async cancelBooking(req: AuthRequest, res: Response): Promise<void> {
       return;
     }
     res.status(HttpStatus.OK).json({ message: Messages.BOOKING_CANCELLED});
-  } catch (error: any) {
-    res.status(HttpStatus.BAD_REQUEST).json({ error: error.message });
+  } catch (err) {
+    handleControllerError(res, err, HttpStatus.BAD_REQUEST);
   }
 }
 
@@ -329,14 +325,15 @@ async getAllDepartments(_: Request, res: Response): Promise<void> {
   try {
     const departments = await this._getAllDepartmentsUseCase.execute();
     res.status(HttpStatus.OK).json(departments);
-  } catch (error: any) {
-    res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message:  Messages.INTERNAL_SERVER_ERROR});
+  } catch (err) {
+    handleControllerError(res, err, HttpStatus.INTERNAL_SERVER_ERROR);
   }
 }
 
 async getWalletSummary(req: AuthRequest, res: Response): Promise<void> {
   try {
     const doctorId = req.user?.id;
+    
     if (!doctorId) {
       res.status(HttpStatus.UNAUTHORIZED).json({ error: Messages.UNAUTHORIZED });
       return;
@@ -349,8 +346,8 @@ async getWalletSummary(req: AuthRequest, res: Response): Promise<void> {
     const summary = await this._getDoctorWalletSummaryUseCase.execute(doctorId, page, limit);
 
     res.status(HttpStatus.OK).json(summary);
-  } catch (error: any) {
-    res.status(HttpStatus.BAD_REQUEST).json({ error: error.message });
+  } catch (err) {
+    handleControllerError(res, err, HttpStatus.BAD_REQUEST);
   }
 }
 
@@ -364,10 +361,9 @@ async completeProfile(req: Request, res: Response): Promise<void> {
     }
     const profileData = req.body;
     const updatedProfile = await this._completeProfileUseCase.execute(doctorId, profileData);
-
     res.status(HttpStatus.OK).json({ message:  Messages.PROFILE_COMPLETED, profile: updatedProfile });
-  } catch (err: any) {
-    res.status(HttpStatus.BAD_REQUEST).json({ error: err.message });
+  } catch (err) {
+    handleControllerError(res, err, HttpStatus.BAD_REQUEST);
   }
 }
 
@@ -383,9 +379,8 @@ async getBookingDetails(req: AuthRequest, res: Response): Promise<void> {
 
     const booking = await this._getBookingDetailsDoctorUseCase.execute(bookingId, userId);
     res.status(HttpStatus.OK).json(booking);
-  } catch (err: any) {
-    const status = err.statusCode || HttpStatus.INTERNAL_SERVER_ERROR;
-    res.status(status).json({ error: err.message });
+  } catch (err: unknown) {
+    handleControllerError(res, err);
   }
 }
 

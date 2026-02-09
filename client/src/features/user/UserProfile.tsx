@@ -16,7 +16,6 @@ const UserProfile = () => {
     const fetchUser = async () => {
       try {
         const data = await getUserProfile();
-        console.log(data)
         setUser(data);
       } catch (err) {
         addNotification(Messages.USER.FETCH_FAILED, "ERROR");

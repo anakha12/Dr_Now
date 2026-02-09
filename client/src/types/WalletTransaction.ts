@@ -1,7 +1,8 @@
-export interface WalletSummary {
+
+export interface WalletTransaction {
   _id: string;
   amount: number;
   date: string;
   type: "credit" | "debit";
-  description?: string;
+  reason: string; 
 }

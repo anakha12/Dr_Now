@@ -8,7 +8,7 @@ import { useNavigate } from "react-router-dom";
 import { useNotifications } from "../../context/NotificationContext";
 import type { DoctorProfileForm } from "../../types/doctorProfileForm";
 import { Messages } from "../../constants/messages"; 
-import type { DoctorProfile } from "../../types/doctorProfile";
+import type { Department } from "../../types/department";
 
 
 const DoctorProfileComponent  = () => {
@@ -34,7 +34,7 @@ const DoctorProfileComponent  = () => {
   const [loading, setLoading] = useState(true);
   const [editMode, setEditMode] = useState(false);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
-  const [departments, setDepartments] = useState<any[]>([]);
+   const [departments, setDepartments] = useState<Department[]>([]);
   const { addNotification, confirmMessage } = useNotifications();
   const navigate = useNavigate();
 
@@ -240,7 +240,7 @@ const DoctorProfileComponent  = () => {
             >
               <option value="">Select Specialization</option>
               {departments.map((dept) => (
-                <option key={dept._id} value={dept.Departmentname}>
+                <option key={dept.id} value={dept.Departmentname}>
                   {dept.Departmentname}
                 </option>
               ))}

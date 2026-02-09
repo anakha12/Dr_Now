@@ -1,6 +1,7 @@
-  import { IBookingRepository } from "../../../domain/repositories/bookingRepository";
+import { IBookingRepository } from "../../../domain/repositories/bookingRepository";
 import { ErrorMessages } from "../../../utils/Messages";
 import { IGetBookingDetailsDoctor } from "../interfaces/doctor/IGetBookingDetailsDoctor";
+import { AppError } from "../../../utils/AppError";
 
   export class GetBookingDetailsDoctor implements IGetBookingDetailsDoctor{
     constructor(private bookingRepo: IBookingRepository) {}
@@ -8,18 +9,14 @@ import { IGetBookingDetailsDoctor } from "../interfaces/doctor/IGetBookingDetail
     async execute(bookingId: string, doctorId: string) {
 
       if (!bookingId || !doctorId) {
-        const err: any = new Error( ErrorMessages.BOOKING_ID_AND_DOCTOR_ID_REQUIRED);
-        err.statusCode = 400;
-        throw err;
+        throw new AppError(ErrorMessages.BOOKING_ID_AND_DOCTOR_ID_REQUIRED, 400);
       }
 
       const booking = await this.bookingRepo.findBookingByIdAndDoctor(bookingId, doctorId);
 
 
       if (!booking) {
-        const err: any = new Error( ErrorMessages.BOOKING_NOT_FOUND_OR_UNAUTHORIZED);
-        err.statusCode = 404;
-        throw err;
+        throw new AppError(ErrorMessages.BOOKING_NOT_FOUND_OR_UNAUTHORIZED, 404);
       }
       const totalAmount = (booking.doctorEarning ?? 0) + (booking.commissionAmount ?? 0);
 

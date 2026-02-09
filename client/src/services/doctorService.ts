@@ -5,13 +5,13 @@ import type { DoctorProfile } from "../types/doctorProfile";
 import type { Booking } from "../types/booking";
 import type { AvailabilityException } from "../types/availabilityException";
 import type { AvailabilityRule } from "../types/availabilityRule";
-import type { WalletSummary } from "../types/walletSummary";
 import type { Department } from "../types/department";
 import { handleError } from "../utils/errorHandler";
 import { Messages } from "../constants/messages";
 import { DoctorRoutes } from "../constants/apiRoutes";
 import type { DoctorLoginResponse } from "../types/auth";
 import type { DoctorBookingsResponse } from "../types/doctorBookingsResponse";
+import type { WalletSummaryResponse } from "../types/walletSummaryResponse";
 
 export const sendOtp = async (formData: FormData): Promise<{ message: string }> => {
   try {
@@ -33,10 +33,11 @@ export const registerDoctor = async (email: string, otp: string): Promise<{ toke
   }
 };
 
+
+
 export const doctorLogin = async (email: string, password: string): Promise<DoctorLoginResponse> => {
   try {
     const response = await doctorAxios.post(DoctorRoutes.LOGIN, { email, password });
-    console.log(response)
     return response.data;
   } catch (error) {
     throw handleError(error, Messages.AUTH.LOGIN_FAILED);
@@ -82,7 +83,7 @@ export const getDoctorBookings = async (
 ): Promise<DoctorBookingsResponse> => {
   try {
     const response = await doctorAxios.get(DoctorRoutes.BOOKINGS, { params: { page, limit } });
-    return response.data; // response.data is { bookings: [...], totalPages: n }
+    return response.data; 
   } catch (error) {
     throw handleError(error, Messages.DOCTOR.APPOINTMENTS.FETCH_FAILED);
   }
@@ -188,7 +189,7 @@ export const getAllDepartments = async (): Promise<Department[]> => {
   }
 };
 
-export const getWalletSummary = async (page: number, limit: number): Promise<WalletSummary[]> => {
+export const getWalletSummary = async (page: number, limit: number): Promise<WalletSummaryResponse> => {
   try {
     const response = await doctorAxios.get(DoctorRoutes.WALLET_SUMMARY, { params: { page, limit } });
     return response.data;

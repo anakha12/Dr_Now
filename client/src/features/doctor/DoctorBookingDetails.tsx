@@ -16,12 +16,13 @@ import {
   Landmark,
 } from "lucide-react";
 import { Messages } from "../../constants/messages";
+import type { Booking } from "../../types/booking";
 
 const DoctorBookingDetails = () => {
   const { id } = useParams<{ id: string }>();
   const bookingId = id!;
   const navigate = useNavigate();
-  const [booking, setBooking] = useState<any>(null);
+  const [booking, setBooking] = useState<Booking | null>(null);
   const [loading, setLoading] = useState(true);
   const { addNotification } = useNotifications();
 
@@ -84,7 +85,7 @@ const DoctorBookingDetails = () => {
           />
           <Item
             label={Messages.DOCTOR.BOOKING_DETAILS.LABELS.PATIENT_NAME}
-            value={booking.patientName}
+            value={booking.patientName ?? Messages.DOCTOR.BOOKING_DETAILS.NA}
             icon={<User size={20} />}
           />
           <Item
@@ -94,7 +95,7 @@ const DoctorBookingDetails = () => {
           />
           <Item
             label={Messages.DOCTOR.BOOKING_DETAILS.LABELS.DATE}
-            value={booking.date}
+            value={booking.date ?? ""}
             icon={<CalendarDays size={20} />}
           />
           <Item
@@ -104,7 +105,7 @@ const DoctorBookingDetails = () => {
           />
           <Item
             label={Messages.DOCTOR.BOOKING_DETAILS.LABELS.STATUS}
-            value={booking.status}
+            value={booking.status ?? ""}
             icon={<FileText size={20} />}
             color={
               booking.status === "Cancelled"
@@ -116,7 +117,7 @@ const DoctorBookingDetails = () => {
           />
           <Item
             label={Messages.DOCTOR.BOOKING_DETAILS.LABELS.TOTAL_AMOUNT}
-            value={`₹${booking.totalAmount}`}
+            value={`₹${booking.totalAmount ?? 0}`}
             icon={<CreditCard size={20} />}
           />
           <Item
