@@ -1,6 +1,7 @@
-  import { Request, Response } from "express";
-  import { Messages } from "../../utils/Messages";
-  import { HttpStatus } from "../../utils/HttpStatus";
+import { Request, Response } from "express";
+import { Messages } from "../../utils/Messages";
+import { HttpStatus } from "../../utils/HttpStatus";
+import { handleControllerError } from "../../utils/errorHandler";
 
 import { ILoginAdmin } from "../../application/use_cases/interfaces/admin/ILoginAdmin";
 import { IGetUnverifiedDoctors } from "../../application/use_cases/interfaces/admin/IGetUnverifiedDoctors";
@@ -20,7 +21,7 @@ import { plainToInstance } from "class-transformer";
 import { DepartmentRegisterDTO } from "../dto/request/department-register.dto";
 import { validate } from "class-validator";
 import { AdminLoginDTO } from "../dto/request/admin-login.dto";
-
+import { IGetDoctorByIdUseCase } from "../../application/use_cases/interfaces/admin/IGetDoctorById";
 
   export class AdminController {
     
@@ -39,6 +40,7 @@ import { AdminLoginDTO } from "../dto/request/admin-login.dto";
       private _getPendingDoctorPayoutsUseCase: IGetPendingDoctorPayoutsUseCase,
       private _getWalletSummaryUseCase: IGetWalletSummaryUseCase,
       private _payoutDoctorUseCase: IPayoutDoctorUseCase,
+      private _getDoctorByIdUseCase: IGetDoctorByIdUseCase
 
     ) {
     
@@ -72,8 +74,8 @@ import { AdminLoginDTO } from "../dto/request/admin-login.dto";
           maxAge: refreshTokenMaxAge, 
         });
         res.status(HttpStatus.OK).json({ message: Messages.LOGIN_SUCCESSFUL, user });
-      } catch (err: any) {
-        res.status(HttpStatus.UNAUTHORIZED).json({ message: err.message });
+        } catch (err: unknown) {
+        handleControllerError(res, err, HttpStatus.UNAUTHORIZED);
       }
     }
 
@@ -89,8 +91,8 @@ import { AdminLoginDTO } from "../dto/request/admin-login.dto";
           totalPages: Math.ceil(total / limit),
           currentPage: page,
         });
-      } catch (err: any) {
-        res.status(500).json({ message: err.message });
+        } catch (err: unknown) {
+        handleControllerError(res, err, HttpStatus.INTERNAL_SERVER_ERROR);
       }
     }
 
@@ -100,8 +102,8 @@ import { AdminLoginDTO } from "../dto/request/admin-login.dto";
         const doctorId = req.params.id;
         await this._verifyDoctorUseCase.execute(doctorId);
         res.status(HttpStatus.OK).json({ message: Messages.DOCTOR_VERIFIED});
-      } catch (err: any) {
-        res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: err.message });
+        } catch (err: unknown) {
+        handleControllerError(res, err, HttpStatus.INTERNAL_SERVER_ERROR);
       }
     }
 
@@ -111,8 +113,8 @@ import { AdminLoginDTO } from "../dto/request/admin-login.dto";
         const { reason } = req.body;
         await this._rejectDoctorUseCase.execute(doctorId, reason);
         res.status(HttpStatus.OK).json({ message: Messages.DOCTOR_REJECTED });
-      } catch (err: any) {
-        res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: err.message });
+        } catch (err: unknown) {
+        handleControllerError(res, err, HttpStatus.INTERNAL_SERVER_ERROR);
       }
     }
 
@@ -128,10 +130,11 @@ import { AdminLoginDTO } from "../dto/request/admin-login.dto";
           totalPages: Math.ceil(totalDoctors / limit),
           currentPage: page,
         });
-      } catch (err: any) {
-        res.status(500).json({ message: err.message });
+        } catch (err: unknown) {
+        handleControllerError(res, err, HttpStatus.INTERNAL_SERVER_ERROR);
       }
     }
+
     async toggleDoctorBlockStatus(req: Request, res: Response): Promise<void> {
       try {
         const { id, action } = req.params;
@@ -148,8 +151,8 @@ import { AdminLoginDTO } from "../dto/request/admin-login.dto";
             : Messages.DOCTOR_UNBLOCKED 
         });
 
-      } catch (err: any) {
-        res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: err.message });
+        } catch (err: unknown) {
+        handleControllerError(res, err, HttpStatus.INTERNAL_SERVER_ERROR);
       }
     }
 
@@ -161,8 +164,8 @@ import { AdminLoginDTO } from "../dto/request/admin-login.dto";
 
         const users = await this._getAllUsersUseCase.execute(page, limit, search);
         res.status(HttpStatus.OK).json(users);
-      } catch (err: any) {
-        res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: err.message });
+        } catch (err: unknown) {
+        handleControllerError(res, err, HttpStatus.INTERNAL_SERVER_ERROR);
       }
     }
 
@@ -184,34 +187,34 @@ import { AdminLoginDTO } from "../dto/request/admin-login.dto";
             : Messages.USER_UNBLOCKED 
         });
 
-      } catch (err: any) {
-        res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: err.message });
+        } catch (err: unknown) {
+        handleControllerError(res, err, HttpStatus.INTERNAL_SERVER_ERROR);
       }
     }
 
 
     async createDepartment(req: Request, res: Response) {
-    try {
-      const dto= plainToInstance(DepartmentRegisterDTO,req.body);
+      try {
+        const dto= plainToInstance(DepartmentRegisterDTO,req.body);
 
-      const errors = await validate(dto);
+        const errors = await validate(dto);
 
-      if (errors.length > 0) {
-        const formattedErrors = errors.reduce((acc, err) => {
-          if (err.constraints) {
-            acc[err.property] = Object.values(err.constraints)[0]; 
-          }
-         
-          return acc;
-        }, {} as Record<string, string>);
+        if (errors.length > 0) {
+          const formattedErrors = errors.reduce((acc, err) => {
+            if (err.constraints) {
+              acc[err.property] = Object.values(err.constraints)[0]; 
+            }
+          
+            return acc;
+          }, {} as Record<string, string>);
 
-         return res.status(400).json({ errors:formattedErrors });
+          return res.status(400).json({ errors:formattedErrors });
+        }
+        const dept = await this._createDepartmentUseCase.execute(dto);
+        res.status(HttpStatus.CREATED).json(dept);
+        } catch (err: unknown) {
+        handleControllerError(res, err, HttpStatus.BAD_REQUEST);
       }
-      const dept = await this._createDepartmentUseCase.execute(dto);
-      res.status(HttpStatus.CREATED).json(dept);
-    } catch (err: any) {
-      res.status(HttpStatus.BAD_REQUEST).json({ message: err.message });
-    }
   }
 
   async getDepartments(req: Request, res: Response) {
@@ -221,8 +224,8 @@ import { AdminLoginDTO } from "../dto/request/admin-login.dto";
       const search=(req.query.search as string)|| "";
        const { departments, totalPages } = await this._getDepartmentsUseCase.execute(page, limit, search);
       res.status(HttpStatus.OK).json({ departments, totalPages });
-    } catch (err: any) {
-      res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: err.message });
+    } catch (err: unknown) {
+      handleControllerError(res, err, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -232,8 +235,8 @@ import { AdminLoginDTO } from "../dto/request/admin-login.dto";
       const { status } = req.body;
       await this._toggleDepartmentStatusUseCase.execute(id, status);
       res.status(HttpStatus.OK).json({ message: Messages.STATUS_UPDATED(status) });
-    } catch (err: any) {
-      res.status(HttpStatus.BAD_REQUEST).json({ message: err.message });
+    } catch (err: unknown) {
+      handleControllerError(res, err, HttpStatus.BAD_REQUEST);
     }
   }
 
@@ -245,8 +248,8 @@ import { AdminLoginDTO } from "../dto/request/admin-login.dto";
       const result = await this._getPendingDoctorPayoutsUseCase.execute(page, limit);
 
       return res.status(HttpStatus.OK).json(result);
-    } catch (err: any) {
-      return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: err.message });
+    } catch (err: unknown) {
+      handleControllerError(res, err, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -255,8 +258,8 @@ import { AdminLoginDTO } from "../dto/request/admin-login.dto";
     try {
       const summary = await this._getWalletSummaryUseCase.execute();
       res.status(HttpStatus.OK).json(summary);
-    } catch (err: any) {
-      res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: err.message });
+    } catch (err: unknown) {
+      handleControllerError(res, err, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -265,8 +268,18 @@ import { AdminLoginDTO } from "../dto/request/admin-login.dto";
       const doctorId = req.params.id;
       await this._payoutDoctorUseCase.execute(doctorId);
       res.status(HttpStatus.OK).json({ message: Messages.DOCTOR_PAYOUT_SUCCESS });
-    } catch (err: any) {
-      res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: err.message });
+    } catch (err: unknown) {
+      handleControllerError(res, err, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+
+  async getDoctorById(req: Request, res: Response): Promise<void> {
+    try {
+      const { id } = req.params;
+      const doctor = await this._getDoctorByIdUseCase.execute(id);
+      res.status(200).json(doctor);
+    } catch (err: unknown) {
+      handleControllerError(res, err, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 

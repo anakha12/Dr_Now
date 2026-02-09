@@ -6,6 +6,7 @@ import { z } from "zod";
 import { useNotifications } from "../../context/NotificationContext";
 import { Messages } from "../../constants/messages";
 import { useNavigate } from "react-router-dom";
+import { handleError } from "../../utils/errorHandler"; 
 
 const profileSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
@@ -72,11 +73,11 @@ const UpdateProfile: React.FC = () => {
       addNotification(Messages.USER.PROFILE_UPDATE_SUCCESS, "SUCCESS");
       navigate("/user/profile");
 
-    } catch (err: any) {
-      addNotification(Messages.USER.UPDATE_FAILED, "ERROR")
-    }
+    } catch (error: unknown) {
+      const err = handleError(error, Messages.USER.UPDATE_FAILED);
+      addNotification(err.message, "ERROR");  
   };
-
+  }
   if (!formData) return <p>Loading...</p>;
 
   return (

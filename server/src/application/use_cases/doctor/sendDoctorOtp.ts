@@ -9,7 +9,6 @@ export class SendDoctorOtp implements ISendDoctorOtp{
   constructor(private _doctorRepository: IDoctorRepository) {}
 
   async execute(dto: DoctorRegisterDTO): Promise<void> {
-
      const otp = Math.floor(100000 + Math.random() * 900000).toString();
 
     const expireSeconds = 10 * 60

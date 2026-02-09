@@ -1,30 +1,36 @@
 import { useEffect, useState } from "react";
 import { toast } from "react-hot-toast";
 import { useNotifications } from "../../context/NotificationContext";
-
 import {
   getWalletSummary,
   getPendingDoctors,
   payoutDoctor,
 } from "../../services/adminService";
 import { Messages } from "../../constants/messages";
+import { handleError } from "../../utils/errorHandler"; 
+
+interface WalletSummary {
+  totalBalance: number;
+  totalCommission: number;
+  pendingDoctorPayouts: number;
+}
+
+interface PendingDoctor {
+  doctorId: string;
+  doctorName: string;
+  totalPendingEarnings: number;
+}
+
+interface PendingDoctorsResponse {
+  doctors: PendingDoctor[];
+  totalPages: number;
+}
 
 const ITEMS_PER_PAGE = 5;
 
 const DoctorPaymentPage = () => {
-  const [walletSummary, setWalletSummary] = useState<{
-    totalBalance: number;
-    totalCommission: number;
-    pendingDoctorPayouts: number;
-  } | null>(null);
-
-  const [pendingDoctors, setPendingDoctors] = useState<
-    {
-      doctorId: string;
-      doctorName: string;
-      totalPendingEarnings: number;
-    }[]
-  >([]);
+  const [walletSummary, setWalletSummary] = useState<WalletSummary | null>(null);
+  const [pendingDoctors, setPendingDoctors] = useState<PendingDoctor[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
 
@@ -36,34 +42,41 @@ const DoctorPaymentPage = () => {
 
   const fetchData = async () => {
     try {
-      const [walletData, doctorsData] = await Promise.all([
-        getWalletSummary(),
-        getPendingDoctors(currentPage, ITEMS_PER_PAGE),
-      ]);
+      const [walletData, doctorsData]: [WalletSummary, PendingDoctorsResponse] =
+        await Promise.all([
+          getWalletSummary(),
+          getPendingDoctors(currentPage, ITEMS_PER_PAGE),
+        ]);
+
       setWalletSummary(walletData);
       setPendingDoctors(doctorsData.doctors);
       setTotalPages(doctorsData.totalPages);
-    } catch (error: any) {
-      toast.error(error.message || Messages.DOCTOR.FETCH_WALLET_FAILED);
+    } catch (error: unknown) {
+      const err = handleError(error, Messages.DOCTOR.FETCH_WALLET_FAILED);
+      toast.error(err.message);
     }
   };
 
   const handlePayout = async (doctorId: string) => {
     const doctor = pendingDoctors.find((d) => d.doctorId === doctorId);
+    if (!doctor) return;
+
     const confirmed = await confirmMessage(
-      `Are you sure you want to pay ₹${doctor?.totalPendingEarnings} to Dr. ${doctor?.doctorName}?`
+      `Are you sure you want to pay ₹${doctor.totalPendingEarnings} to Dr. ${doctor.doctorName}?`
     );
+
     if (!confirmed) {
-      addNotification( Messages.DOCTOR.PAYOUT_CANCELLED, "INFO");
+      addNotification(Messages.DOCTOR.PAYOUT_CANCELLED, "INFO");
       return;
     }
 
     try {
       await payoutDoctor(doctorId);
-      addNotification( Messages.DOCTOR.PAYOUT_SUCCESS, "SUCCESS");
+      addNotification(Messages.DOCTOR.PAYOUT_SUCCESS, "SUCCESS");
       fetchData();
-    } catch (error: any) {
-      addNotification(error.message || Messages.DOCTOR.PAYOUT_FAILED, "ERROR");
+    } catch (error: unknown) {
+      const err = handleError(error, Messages.DOCTOR.PAYOUT_FAILED);
+      addNotification(err.message, "ERROR");
     }
   };
 
@@ -82,15 +95,23 @@ const DoctorPaymentPage = () => {
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
           <div className="bg-white rounded-lg shadow p-4">
             <h2 className="font-semibold text-gray-600">Total Balance</h2>
-            <p className="text-xl font-bold text-teal-700">₹{walletSummary.totalBalance}</p>
+            <p className="text-xl font-bold text-teal-700">
+              ₹{walletSummary.totalBalance}
+            </p>
           </div>
           <div className="bg-white rounded-lg shadow p-4">
             <h2 className="font-semibold text-gray-600">Total Commission</h2>
-            <p className="text-xl font-bold text-teal-700">₹{walletSummary.totalCommission}</p>
+            <p className="text-xl font-bold text-teal-700">
+              ₹{walletSummary.totalCommission}
+            </p>
           </div>
           <div className="bg-white rounded-lg shadow p-4">
-            <h2 className="font-semibold text-gray-600">Pending Doctor Payouts</h2>
-            <p className="text-xl font-bold text-orange-600">₹{walletSummary.pendingDoctorPayouts}</p>
+            <h2 className="font-semibold text-gray-600">
+              Pending Doctor Payouts
+            </h2>
+            <p className="text-xl font-bold text-orange-600">
+              ₹{walletSummary.pendingDoctorPayouts}
+            </p>
           </div>
         </div>
       )}
@@ -100,9 +121,15 @@ const DoctorPaymentPage = () => {
         <table className="min-w-full divide-y divide-gray-200 text-sm">
           <thead className="bg-teal-100">
             <tr>
-              <th className="px-6 py-3 text-left font-medium text-teal-800">Doctor</th>
-              <th className="px-6 py-3 text-left font-medium text-teal-800">Pending Amount</th>
-              <th className="px-6 py-3 text-center font-medium text-teal-800">Action</th>
+              <th className="px-6 py-3 text-left font-medium text-teal-800">
+                Doctor
+              </th>
+              <th className="px-6 py-3 text-left font-medium text-teal-800">
+                Pending Amount
+              </th>
+              <th className="px-6 py-3 text-center font-medium text-teal-800">
+                Action
+              </th>
             </tr>
           </thead>
           <tbody>

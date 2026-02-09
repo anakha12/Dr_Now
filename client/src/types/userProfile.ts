@@ -1,5 +1,5 @@
 export interface UserProfile {
-  id?: string;  // optional for form
+  id: string;  
   name: string;
   email: string;
   phone: string;
@@ -9,4 +9,11 @@ export interface UserProfile {
   address?: string;
   age?: number;
   image?: string;
+  
+  profileCompletion?: boolean;
+}
+
+export interface AdminUser extends UserProfile {
+  isBlocked?: boolean;
+  walletBalance?: number;
 }

@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { useNotifications } from "../../context/NotificationContext";
 import { Messages } from "../../constants/messages";
 import logger from "../../utils/logger";
+import { handleError } from "../../utils/errorHandler"; 
 
 const ForgotPassword = () => {
   const [step, setStep] = useState<"email" | "verify">("email");
@@ -22,10 +23,11 @@ const ForgotPassword = () => {
       await sendResetOtp(email);
       addNotification(Messages.FORGOT_PASSWORD.OTP_SENT, "SUCCESS");
       setStep("verify");
-    } catch (err: any) {
-      logger.error(err);
-      addNotification(err?.message || Messages.FORGOT_PASSWORD.OTP_FAILED, "ERROR");
-    }
+    } catch (error: unknown) {
+      const err = handleError(error, Messages.FORGOT_PASSWORD.OTP_FAILED);
+        logger.error(err);
+        addNotification(err.message, "ERROR");
+      }
   };
 
   const handleResetPassword = async () => {
@@ -42,10 +44,11 @@ const ForgotPassword = () => {
       await verifyResetOtp({ email, otp, newPassword });
       addNotification(Messages.FORGOT_PASSWORD.RESET_SUCCESS, "SUCCESS");
       navigate("/user/login");
-    } catch (err: any) {
-      logger.error(err);
-      addNotification(err?.message || Messages.FORGOT_PASSWORD.RESET_FAILED, "ERROR");
-    }
+    } catch (error: unknown) {
+        const err = handleError(error, Messages.FORGOT_PASSWORD.RESET_FAILED);
+        logger.error(err);
+        addNotification(err.message, "ERROR");
+      }
   };
 
   return (

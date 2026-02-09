@@ -1,8 +1,9 @@
-// controllers/stripeWebhookController.ts
+
 import { Request, Response } from "express";
 import Stripe from "stripe";
 import { StripeWebhookUseCase } from "../../application/use_cases/stripe/stripeWebhookUseCase";
-
+import { handleControllerError } from "../../utils/errorHandler";
+import { HttpStatus } from "../../utils/HttpStatus";
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string);
 
 
@@ -18,8 +19,8 @@ export class StripeWebhookController {
         sig,
         process.env.STRIPE_WEBHOOK_SECRET as string
       );
-    } catch (err: any) {
-      return res.status(400).send(`Webhook Error: ${err.message}`);
+    } catch (err: unknown) {
+      return handleControllerError(res, err, HttpStatus.BAD_REQUEST);
     }
 
     try {
@@ -28,8 +29,8 @@ export class StripeWebhookController {
         await this.stripeWebhookUseCase.handleCheckoutSession(session);
       }
       return res.json({ received: true });
-    } catch (error: any) {
-      return res.status(500).json({ success: false, error: error.message });
+    } catch (err: unknown) {
+      return handleControllerError(res, err, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   };
 }

@@ -39,11 +39,7 @@ export const loginUser = async (email: string, password: string) => {
   try {
     const response = await userAxios.post(UserRoutes.LOGIN, { email, password });
     return response.data;
-  } catch (error: any) {
-    const errData = error.response?.data || {};
-    if (errData?.error?.includes("verify")) {
-      throw { isVerificationRequired: true, email, password };
-    }
+  } catch (error) {
     throw handleError(error, Messages.AUTH.LOGIN_FAILED);
   }
 };
@@ -159,7 +155,6 @@ export const getDoctorAvailabilityExceptions = async (doctorId: string) => {
 export const getUserBookings = async (page = 1, limit = 4) => {
   try {
     const response = await userAxios.get(UserRoutes.BOOKINGS, { params: { page, limit } });
-    console.log(response)
     return response.data;
   } catch (error) {
     throw handleError(error, Messages.DOCTOR.APPOINTMENTS.FETCH_FAILED);

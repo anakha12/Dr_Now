@@ -111,6 +111,10 @@ export const Messages = {
     FETCH_FAILED_USER_AFTER_BOOK: "Failed to fetch user after Booking.",
     UPDATE_FAILED: "Profile update failed",
     PROFILE_UPDATE_SUCCESS: "Profile updated successfully",
+    FAILED_FETCH_SLOT: "Failed to fetch booked slots",
+    SELECT_DATE_SLOT: "Please select date and slot",
+    APPOINTMENT_BOOKED_WALLET: "Appointment booked using wallet!",
+    STRIPE_FAILED: "Stripe initialization failed",
   },
 
   COMMON: {

@@ -3,7 +3,7 @@ import { useNotifications } from "../../context/NotificationContext";
 
 const NotificationBell = () => {
   const { notifications } = useNotifications();
-  const unreadCount = notifications.filter((n: any) => !n.read).length;
+  const unreadCount = notifications.filter((n) => !n.read).length;
 
   return (
     <div className="relative">

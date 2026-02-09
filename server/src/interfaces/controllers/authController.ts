@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { ITokenService } from "../tokenServiceInterface";
 import { Messages } from "../../utils/Messages";
 import { HttpStatus } from "../../utils/HttpStatus";
+import { handleControllerError } from "../../utils/errorHandler";
 
 export class AuthController {
   private readonly _tokenService: ITokenService;
@@ -49,8 +50,8 @@ async refreshToken(req: Request, res: Response): Promise<void> {
     res.status(HttpStatus.OK).json({
       message: Messages.TOKEN_REFRESHED,
     });
-  } catch (err: any) {
-    res.status(HttpStatus.UNAUTHORIZED).json({ error: Messages.INVALID_OR_EXPIRED_TOKEN });
+  } catch (err: unknown) {
+      handleControllerError(res, err, HttpStatus.UNAUTHORIZED);
   }
 }
 

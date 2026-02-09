@@ -16,7 +16,6 @@ import { UpdateDoctorProfile } from "../application/use_cases/doctor/updateDocto
 import { AddDoctorAvailabilityRuleUseCase } from "../application/use_cases/doctor/addDoctorAvailability";
 import { GetDoctorAvailability } from "../application/use_cases/doctor/getDoctorAvailability";
 import { GetDoctorBookings } from "../application/use_cases/doctor/getDoctorBookings"; 
-import { RemoveDoctorSlot } from "../application/use_cases/doctor/removeDoctorSlot";
 import { CancelDoctorBooking } from "../application/use_cases/doctor/cancelDoctorBooking";
 import { GetAllDepartments } from "../application/use_cases/doctor/getAllDepartments";
 import { GetDoctorWalletSummary } from "../application/use_cases/doctor/getDoctorWalletSummary";
@@ -53,7 +52,6 @@ const updateDoctorProfile = new UpdateDoctorProfile(doctorRepository, bookingRep
 const addDoctorAvailabilityRule = new AddDoctorAvailabilityRuleUseCase(availabilityRuleRepository);
 const getDoctorAvailability = new GetDoctorAvailability(availabilityRuleRepository);
 const getDoctorBookings = new GetDoctorBookings(bookingRepository);
-const removeDoctorSlot = new RemoveDoctorSlot(doctorRepository);
 const cancelDoctorBooking = new CancelDoctorBooking(bookingRepository,userRepository,adminWalletRepository);
 const getAllDepartments = new GetAllDepartments(departmentRepository);
 const getDoctorWalletSummary = new GetDoctorWalletSummary(doctorRepository);
@@ -76,7 +74,6 @@ export const doctorController = new DoctorController(
   addDoctorAvailabilityRule,
   getDoctorAvailability,
   getDoctorBookings,
-  removeDoctorSlot,
   cancelDoctorBooking,
   getAllDepartments,
   getDoctorWalletSummary,

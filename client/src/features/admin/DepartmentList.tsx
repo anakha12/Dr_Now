@@ -9,6 +9,7 @@ import {
 import type { Department, DepartmentResponse } from "../../types/department";
 import { Messages } from "../../constants/messages";
 import { ZodError } from "zod";
+import { handleError } from "../../utils/errorHandler"; 
 
 const DepartmentList = () => {
   const [departments, setDepartments] = useState<Department[]>([]);
@@ -28,15 +29,14 @@ const DepartmentList = () => {
         itemsPerPage,
         searchQuery
       );
+
       if (data?.departments) {
         setDepartments(data.departments);
         setTotalPages(data.totalPages);
       }
-    } catch (err: any) {
-      addNotification(
-        err.message || Messages.AVAILABILITY.FETCH_DEPARTMENTS_FAILED,
-        "ERROR"
-      );
+    } catch (err: unknown) {
+      const error = handleError(err, Messages.AVAILABILITY.FETCH_DEPARTMENTS_FAILED);
+      addNotification(error.message, "ERROR");
     }
   };
 
@@ -54,20 +54,20 @@ const DepartmentList = () => {
       await toggleDepartmentStatus(id, newStatus);
       addNotification(`Department ${newStatus}`, "SUCCESS");
       fetchDepartments();
-    } catch (err: any) {
-      addNotification(err.message || "Error updating status", "ERROR");
+    } catch (err: unknown) {
+      const error = handleError(err, "Error updating status");
+      addNotification(error.message, "ERROR");
     }
   };
 
   const handleAddDepartment = async () => {
     try {
-      // Zod validation
+
       addDepartmentSchema.parse({
         Departmentname: newDeptName,
         Description: newDescription,
       });
 
-      // API call
       await addDepartment({
         Departmentname: newDeptName,
         Description: newDescription,
@@ -80,17 +80,12 @@ const DepartmentList = () => {
       fetchDepartments();
     } catch (err: unknown) {
       if (err instanceof ZodError) {
-        // Use `issues` instead of `errors`
         err.issues.forEach((issue) => {
           addNotification(issue.message, "ERROR");
         });
-      } else if (err instanceof Error) {
-        addNotification(
-          err.message || Messages.AVAILABILITY.FETCH_DEPARTMENTS_FAILED,
-          "ERROR"
-        );
       } else {
-        addNotification(Messages.AVAILABILITY.FETCH_DEPARTMENTS_FAILED, "ERROR");
+        const error = handleError(err, Messages.AVAILABILITY.FETCH_DEPARTMENTS_FAILED);
+        addNotification(error.message, "ERROR");
       }
     }
   };
@@ -218,9 +213,7 @@ const DepartmentList = () => {
                   </td>
                   <td className="px-6 py-4">
                     <button
-                      onClick={() =>
-                        handleToggleStatus(dept.id, dept.status)
-                      }
+                      onClick={() => handleToggleStatus(dept.id, dept.status)}
                       className={`px-4 py-2 rounded text-white font-medium transition shadow ${
                         dept.status === "Listed"
                           ? "bg-red-500 hover:bg-red-600"

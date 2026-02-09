@@ -5,7 +5,7 @@ import type { Event as CalendarEvent } from "react-big-calendar";
 import { format, parse, startOfWeek, getDay, isBefore, isSameDay } from "date-fns";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import { enUS } from "date-fns/locale/en-US";
-
+import { handleError } from "../../utils/errorHandler"; 
 import type { Slot } from "../../types/slot";
 import type { Doctor } from "../../types/doctor";
 import type { AvailabilityRule } from "../../types/availabilityRule";
@@ -23,6 +23,7 @@ import {
 
 import { loadStripe } from "@stripe/stripe-js";
 import { useNotifications } from "../../context/NotificationContext";
+import { Messages, NotificationDefaults } from "../../constants/messages";
 
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY!);
 
@@ -83,7 +84,7 @@ const BookAppointment = () => {
         const exceptionsData = await getDoctorAvailabilityExceptions(id);
         setExceptions(exceptionsData);
       } catch {
-        addNotification("Failed to load doctor info", "ERROR");
+        addNotification( Messages.USER.FETCH_FAILED , "ERROR");
       }
     };
 
@@ -97,10 +98,9 @@ const BookAppointment = () => {
     const fetchSlots = async () => {
       try {
         const dateStr = selectedDate.toISOString().split("T")[0];
-        console.log(dateStr)
+
         const fetchedBookedSlots = await getBookedSlots(doctor.id, dateStr);
 
-        console.log("boked slot", fetchedBookedSlots);
         setBookedSlots(fetchedBookedSlots);
 
         const dayOfWeek = selectedDate.getDay();
@@ -115,14 +115,12 @@ const BookAppointment = () => {
           if (rule) slots = generateSlotsFromTime(rule.startTime, rule.endTime, rule.slotDuration);
         }
 
-        // ❌ FIX: remove slots already booked from DB
         const bookedKeys = new Set(
           fetchedBookedSlots.map((b: any) => `${b.startTime || b.from}-${b.endTime || b.to}`)
         );
 
         slots = slots.filter(slot => !bookedKeys.has(`${slot.from}-${slot.to}`));
 
-        // ❌ Remove past slots for today
         const now = new Date();
         if (isSameDay(selectedDate, now)) {
           slots = slots.filter(slot => {
@@ -132,12 +130,10 @@ const BookAppointment = () => {
             return slotTime > now;
           });
         }
-
-        console.log("slots available", slots);
         setAvailableSlots(slots);
         setSelectedSlot(null);
       } catch (err) {
-        console.error("Failed to fetch booked slots:", err);
+        console.error( Messages.USER.FAILED_FETCH_SLOT, err);
       }
     };
 
@@ -147,9 +143,10 @@ const BookAppointment = () => {
   // ------------------- Handle booking -------------------
   const handleBook = async () => {
     if (!selectedDate || !selectedSlot || !doctor?.id) {
-      return addNotification("Please select date and slot", "ERROR");
+      return addNotification( Messages.USER.SELECT_DATE_SLOT, "ERROR");
     }
 
+    const consultFee = doctor.consultFee ?? 0;
     try {
       const user = await getUserProfile();
       const userId = user.id || user.userId;
@@ -159,10 +156,10 @@ const BookAppointment = () => {
           doctor.id,
           userId,
           selectedSlot,
-          doctor.consultFee,
+          consultFee,
           selectedDate.toISOString()
         );
-        addNotification("Appointment booked using wallet!", "SUCCESS");
+        addNotification(Messages.USER.APPOINTMENT_BOOKED_WALLET, "SUCCESS");
         navigate("/user/appointment/success");
         return;
       }
@@ -171,17 +168,18 @@ const BookAppointment = () => {
         doctor.id,
         userId,
         selectedSlot,
-        doctor.consultFee,
+        consultFee,
         selectedDate.toISOString()
       );
       const stripe = await stripePromise;
-      if (!stripe) return addNotification("Stripe initialization failed", "ERROR");
+      if (!stripe) return addNotification( Messages.USER.STRIPE_FAILED, "ERROR");
 
       await stripe.redirectToCheckout({ sessionId });
-    } catch (error: any) {
-      console.error("Booking error:", error);
-      addNotification(error?.response?.data?.message || error.message || "Something went wrong", "ERROR");
-    }
+    } catch (error: unknown) {
+      
+        const err = handleError(error, NotificationDefaults.ERROR);
+        addNotification(err.message, "ERROR");
+      }
   };
 
   if (!doctor) {

@@ -6,7 +6,7 @@ export interface Column<T> {
   className?: string;
 }
 
-export interface TableProps<T> {
+export interface TableProps<T extends { id: string }> {
   data: T[];
   columns: Column<T>[];
   rowKey?: keyof T;

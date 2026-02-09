@@ -27,7 +27,6 @@ export class CompleteDoctorProfile implements ICompleteDoctorProfile{
 
   async execute(doctorId: string, profileData: CompleteProfileDTO) {
     if (!doctorId) throw new Error( Messages.DOCTOR_ID_REQUIRED);
-
     return await this._doctorRepo.completeProfile(doctorId, profileData);
   }
 }

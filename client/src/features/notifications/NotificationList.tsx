@@ -11,7 +11,7 @@ const NotificationList = () => {
         Mark all as read
       </button>
       <ul className="space-y-2">
-        {notifications.map((n: any) => (
+        {notifications.map((n) => (
           <li
             key={n.id}
             className={`p-2 border rounded ${

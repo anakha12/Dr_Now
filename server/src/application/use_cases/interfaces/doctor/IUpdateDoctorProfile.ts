@@ -1,3 +1,8 @@
+// IUpdateDoctorProfile.ts
+import { UpdateDoctorProfileDTO } from "../../../../interfaces/dto/request/update-doctorProfile.dto";
+
 export interface IUpdateDoctorProfile {
-  execute(doctorId: string, updates: any): Promise<any>;
+  execute(dto: UpdateDoctorProfileDTO): Promise<
+    { message: string } | { success: boolean; updatedDoctor: Record<string, unknown> }
+  >;
 }

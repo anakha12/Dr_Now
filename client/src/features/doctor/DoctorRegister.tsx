@@ -78,7 +78,10 @@ const DoctorRegister = () => {
 
   const handleSendOtp = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!validateForm()) return;
+    if (!validateForm()) {
+    return;
+  }
+
 
     const formData = new FormData();
     formData.append("name", name);

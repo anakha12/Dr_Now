@@ -9,7 +9,13 @@ export interface Booking {
   };
   department?: string;
   status?: string;
+  totalAmount?: number;
   amount?: number;
   fee?: number;
+  doctorEarning?: number;      
+  commissionAmount?: number;   
+  payoutStatus?: string;       
+  cancellationReason?: string;  
   canCancel?: boolean;
+  time: string;
 }

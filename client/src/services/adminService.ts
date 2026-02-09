@@ -5,7 +5,8 @@ import type { DepartmentResponse } from "../types/department";
 import { Messages } from "../constants/messages";
 import { handleError } from "../utils/errorHandler";
 import { AdminRoutes } from "../constants/apiRoutes";
-import logger from "../utils/logger";
+import type { Doctor } from "../types/doctor";
+
 
 export const adminLogin = async (email: string, password: string) => {
   try {
@@ -28,6 +29,16 @@ export const getUnverifiedDoctors = async (page = 1, limit = 5) => {
     return response.data;
   } catch (error) {
     throw handleError(error, Messages.DOCTOR.NO_RESULTS);
+  }
+};
+
+
+export const getDoctorById = async (id: string): Promise<Doctor> => {
+  try {
+    const response = await adminAxios.get(AdminRoutes.GET_DOCTOR_BY_ID(id));
+    return response.data; 
+  } catch (error) {
+    throw handleError(error, Messages.DOCTOR.FETCH_FAILED || Messages.DOCTOR.FETCH_FAILED);
   }
 };
 
@@ -136,11 +147,7 @@ export const addDepartment = async (data: {
   try {
     const response = await adminAxios.post(AdminRoutes.ADD_DEPARTMENT, data);
     return response.data;
-  } catch (error: any) {
-    if (error.response?.data?.errors) {
-      logger.log("Validation errors:", error.response.data.errors);
-      throw error.response.data.errors;
-    }
+  } catch (error) {
     throw handleError(error, Messages.AVAILABILITY.FETCH_DEPARTMENTS_FAILED);
   }
 };
