@@ -138,29 +138,27 @@ async countFilteredDoctors(filters: {
     return this._toDomain(doctor);
   }
 
+
   async creditWallet(
     doctorId: string,
     tx: { amount: number; description: string; date: Date }
   ): Promise<void> {
-    const doctor = await DoctorModel.findById(doctorId);
-    if (!doctor) throw new Error( ErrorMessages.DOCTOR_NOT_FOUND);
-
-    doctor.walletBalance = doctor.walletBalance ?? 0;
-    doctor.totalEarned = doctor.totalEarned ?? 0;
-    doctor.walletTransactions = doctor.walletTransactions ?? [];
-
-    doctor.walletBalance += tx.amount;
-    doctor.totalEarned += tx.amount;
-
-    doctor.walletTransactions.push({
-      amount: tx.amount,
-      reason: tx.description,
-      type: "credit",
-      date: tx.date,
-    });
-
-    await doctor.save();
+    await DoctorModel.findByIdAndUpdate(
+      doctorId,
+      {
+        $inc: { walletBalance: tx.amount, totalEarned: tx.amount },
+        $push: {
+          walletTransactions: {
+            amount: tx.amount,
+            reason: tx.description,
+            type: "credit",
+            date: tx.date,
+          },
+        },
+      }
+    );
   }
+
 
 
   async checkIfAnySlotBooked(doctorId: string, date: string, slots: Slot[]): Promise<boolean> {

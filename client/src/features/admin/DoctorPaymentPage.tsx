@@ -18,7 +18,7 @@ interface WalletSummary {
 interface PendingDoctor {
   doctorId: string;
   doctorName: string;
-  totalPendingEarnings: number;
+  totalPendingAmount: number;
 }
 
 interface PendingDoctorsResponse {
@@ -62,7 +62,7 @@ const DoctorPaymentPage = () => {
     if (!doctor) return;
 
     const confirmed = await confirmMessage(
-      `Are you sure you want to pay ₹${doctor.totalPendingEarnings} to Dr. ${doctor.doctorName}?`
+      `Are you sure you want to pay ₹${doctor.totalPendingAmount} to Dr. ${doctor.doctorName}?`
     );
 
     if (!confirmed) {
@@ -143,7 +143,7 @@ const DoctorPaymentPage = () => {
               pendingDoctors.map((doc) => (
                 <tr key={doc.doctorId} className="border-b hover:bg-teal-50">
                   <td className="px-6 py-4">{doc.doctorName}</td>
-                  <td className="px-6 py-4">₹{doc.totalPendingEarnings}</td>
+                  <td className="px-6 py-4">₹{doc.totalPendingAmount}</td>
                   <td className="px-6 py-4 text-center">
                     <button
                       onClick={() => handlePayout(doc.doctorId)}

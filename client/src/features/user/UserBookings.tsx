@@ -121,7 +121,7 @@ const UserBookings = () => {
                 </div>
 
                 <div className="mt-4 flex justify-end gap-3">
-                  {booking.status !== "Cancelled" && booking.canCancel && (
+                  {booking.status !== "Cancelled" && booking.status !== "Completed"&& booking.canCancel && (
                     <button
                       onClick={() => handleCancel(booking.id)}
                       className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-semibold transition"

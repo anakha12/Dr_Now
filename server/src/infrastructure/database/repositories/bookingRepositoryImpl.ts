@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 import BookingModel, { IBooking } from "../models/booking.model";
 import { Booking } from "../../../domain/entities/booking.entity";
 import { IBookingRepository } from "../../../domain/repositories/bookingRepository";
+import { PendingDoctorPayoutResponseDTO } from "../../../interfaces/dto/response/admin/pending-doctor-payout.dto";
 
 interface IPopulatedDoctor {
   _id: mongoose.Types.ObjectId;
@@ -71,6 +72,19 @@ export class BookingRepositoryImpl implements IBookingRepository {
       .populate("userId", "name");
 
     return booking ? this._toDomain(booking) : null;
+  }
+  async getBookingsForWalletSummary(): Promise<Booking[]> {
+    const bookings = await BookingModel.find({
+      paymentStatus: "paid",
+      status: "Completed",
+    }).select("commissionAmount doctorEarning payoutStatus");
+
+    return bookings.map(b => ({
+      commissionAmount: b.commissionAmount,
+      doctorEarning: b.doctorEarning,
+      payoutStatus: b.payoutStatus,
+    } as Booking));
+
   }
 
 
@@ -145,6 +159,85 @@ export class BookingRepositoryImpl implements IBookingRepository {
 
     return bookings.map(this._toDomain);
   }
+
+  async getDoctorsWithPendingEarnings(
+  page: number,
+  limit: number
+): Promise<{
+  doctors: PendingDoctorPayoutResponseDTO[];
+  totalPages: number;
+}> {
+  const skip = (page - 1) * limit;
+
+  const result = await BookingModel.aggregate([
+    {
+      $match: {
+        status: "Completed",
+        payoutStatus: "Pending",
+        paymentStatus: "paid",
+      },
+    },
+    {
+      $group: {
+        _id: "$doctorId",
+        totalPendingAmount: { $sum: "$doctorEarning" },
+        pendingBookingsCount: { $sum: 1 },
+      },
+    },
+    {
+      $lookup: {
+        from: "doctors",
+        localField: "_id",
+        foreignField: "_id",
+        as: "doctor",
+      },
+    },
+    { $unwind: "$doctor" },
+    {
+      $project: {
+        doctorId: "$_id",
+        doctorName: "$doctor.name",
+        totalPendingAmount: 1,
+        pendingBookingsCount: 1,
+      },
+    },
+    {
+      $facet: {
+        doctors: [{ $skip: skip }, { $limit: limit }],
+        totalCount: [{ $count: "count" }],
+      },
+    },
+  ]);
+
+  const doctors = result[0]?.doctors || [];
+  const total = result[0]?.totalCount[0]?.count || 0;
+
+  return {
+    doctors,
+    totalPages: Math.ceil(total / limit),
+  };
+}
+
+async getCompletedPendingPayoutBookings(
+  doctorId: string
+): Promise<Booking[]> {
+  const bookings = await BookingModel.find({
+    doctorId,
+    status: "Completed",
+    payoutStatus: "Pending",
+    paymentStatus: "paid",
+  });
+
+  return bookings.map(this._toDomain);
+}
+
+async markPayoutAsPaid(bookingIds: string[]): Promise<void> {
+  await BookingModel.updateMany(
+    { _id: { $in: bookingIds } },
+    { $set: { payoutStatus: "Paid" } }
+  );
+}
+
 
   // -----------------------------
   // CANCEL & REFUND METHODS

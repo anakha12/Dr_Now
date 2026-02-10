@@ -5,6 +5,7 @@ import { AdminWalletTransaction } from "../../../domain/entities/adminWalletEnti
 import { IPayoutDoctorUseCase } from "../interfaces/admin/IPayoutDoctorUseCase";
 import { ErrorMessages } from "../../../utils/Messages";
 
+
 export class PayoutDoctorUseCase implements IPayoutDoctorUseCase{
   constructor(
     private _bookingRepo: IBookingRepository,
@@ -13,7 +14,7 @@ export class PayoutDoctorUseCase implements IPayoutDoctorUseCase{
   ) {}
 
   async execute(doctorId: string): Promise<void> {
-    const bookings = await this._bookingRepo.getDoctorBookings(doctorId);
+    const bookings = await this._bookingRepo.getCompletedPendingPayoutBookings(doctorId);
 
     const pendingBookings = bookings.filter(
       (b) => b.payoutStatus === "Pending" && b.status === "Completed"

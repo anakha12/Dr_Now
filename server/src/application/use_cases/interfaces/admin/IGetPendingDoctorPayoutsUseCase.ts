@@ -1,9 +1,12 @@
-export interface IGetPendingDoctorPayoutsUseCase {
+ import { PendingDoctorPayoutResponseDTO } from "../../../../interfaces/dto/response/admin/pending-doctor-payout.dto";
+ 
+ 
+ export interface IGetPendingDoctorPayoutsUseCase {
   execute(
     page: number,
     limit: number
   ): Promise<{
-    doctors: any[];
+    doctors: PendingDoctorPayoutResponseDTO[];
     totalPages: number;
   }>;
 }

@@ -1,6 +1,8 @@
 import { IAdminWalletRepository } from "../../../domain/repositories/adminWalletRepository";
 import { IBookingRepository } from "../../../domain/repositories/bookingRepository";
 import { IGetWalletSummaryUseCase } from "../interfaces/admin/IGetWalletSummaryUseCase";
+import { WalletSummaryResponseDTO } from "../../../interfaces/dto/response/admin/wallet-summary-response.dto";
+import { plainToInstance } from "class-transformer";
 
 export class GetWalletSummary implements IGetWalletSummaryUseCase{
   constructor(
@@ -10,7 +12,7 @@ export class GetWalletSummary implements IGetWalletSummaryUseCase{
 
   async execute() {
     const wallet = await this._walletRepo.getSummary();
-    const bookings = await this._bookingRepo.getPaidBookings(); 
+    const bookings = await this._bookingRepo.getBookingsForWalletSummary(); 
 
     let totalCommission = 0;
     let pendingDoctorPayouts = 0;
@@ -21,11 +23,16 @@ export class GetWalletSummary implements IGetWalletSummaryUseCase{
         pendingDoctorPayouts += booking.doctorEarning || 0;
       }
     }
-    return {
-      totalBalance: wallet.totalBalance,
-      transactionCount: wallet.transactionCount,
-      totalCommission,
-      pendingDoctorPayouts,
-    };
+    return plainToInstance(
+      WalletSummaryResponseDTO,
+      {
+        totalBalance: wallet.totalBalance,
+        transactionCount: wallet.transactionCount,
+        totalCommission,
+        pendingDoctorPayouts,
+      },
+      { excludeExtraneousValues: true }
+    );
   }
 }
+

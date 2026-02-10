@@ -23,9 +23,8 @@ import { IGetDepartmentsUser } from "../../application/use_cases/interfaces/user
 import { IGetUserWallet } from "../../application/use_cases/interfaces/user/IGetUserWallet";
 import { IGetFilteredDoctors } from "../../application/use_cases/interfaces/user/IGetFilteredDoctors";
 import { IGetDoctorAvailabilityRules } from "../../application/use_cases/interfaces/user/IGetDoctorAvailabilityRules";
-import { IGetDoctorAvailability } from "../../application/use_cases/interfaces/doctor/IGetDoctorAvailability";
 import { IGetDoctorAvailabilityExceptions } from "../../application/use_cases/interfaces/user/IGetDoctorAvailabilityExceptions";
-import { IUpdateDoctorProfile } from "../../application/use_cases/interfaces/doctor/IUpdateDoctorProfile";
+import { IUpdateUserProfileUseCase } from "../../application/use_cases/interfaces/user/IUpdateUserProfile";
 
 
 interface AuthenticatedRequest extends Request {
@@ -59,7 +58,7 @@ export class UserController {
       private _getFilteredDoctorsUseCase: IGetFilteredDoctors,
       private _getDoctorAvailabilityRulesUseCase: IGetDoctorAvailabilityRules,
       private _getDoctorAvailabilityExceptionsUseCase: IGetDoctorAvailabilityExceptions,
-      private _updateUserProfileUseCase: IUpdateDoctorProfile,
+      private _updateUserProfileUseCase: IUpdateUserProfileUseCase,
   ) {}
   
   async register(req: Request, res: Response): Promise<void> {
