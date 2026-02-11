@@ -1,5 +1,4 @@
-import { plainToInstance } from "class-transformer";
-import { validateOrReject } from "class-validator";
+
 import { IDoctorRepository } from "../../../domain/repositories/doctorRepository";
 import { IBookingRepository } from "../../../domain/repositories/bookingRepository";
 import { IUpdateDoctorProfile } from "../interfaces/doctor/IUpdateDoctorProfile";

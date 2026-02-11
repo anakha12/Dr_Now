@@ -165,7 +165,7 @@ async login(req: Request, res: Response): Promise<void> {
         return
       }
       const dto = { doctorId, ...req.body };
-
+   
       const updatedProfile = await this._updateDoctorProfileUseCase.execute(dto);
 
       res.status(HttpStatus.OK).json(updatedProfile);

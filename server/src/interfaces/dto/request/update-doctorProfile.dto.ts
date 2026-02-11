@@ -1,6 +1,17 @@
 import { Type } from "class-transformer";
-import { IsBoolean, IsEmail, IsNotEmpty, IsNumber, IsOptional, IsString, ValidateNested } from "class-validator";
+import {
+  IsBoolean,
+  IsEmail,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsString,
+  ValidateNested,
+  IsArray,
+  Min
+} from "class-validator";
 
+/* ------------------ Education ------------------ */
 class EducationDTO {
   @IsString()
   @IsNotEmpty()
@@ -15,6 +26,7 @@ class EducationDTO {
   year!: number;
 }
 
+/* ------------------ Experience ------------------ */
 class ExperienceDTO {
   @IsString()
   @IsNotEmpty()
@@ -26,13 +38,16 @@ class ExperienceDTO {
 
   @IsNumber()
   @Type(() => Number)
+  @Min(0)
   years!: number;
 }
 
+/* ------------------ Main DTO ------------------ */
 export class UpdateDoctorProfileDTO {
+
   @IsString()
   @IsNotEmpty()
-  doctorId!: string; // ✅ Added for clean architecture compliance
+  doctorId!: string;
 
   @IsString()
   @IsOptional()
@@ -51,6 +66,7 @@ export class UpdateDoctorProfileDTO {
   bio?: string;
 
   @IsNumber()
+  @Type(() => Number)
   @IsOptional()
   yearsOfExperience?: number;
 
@@ -74,27 +90,37 @@ export class UpdateDoctorProfileDTO {
   @IsOptional()
   gender?: string;
 
-  @IsString()
+
+  @IsNumber()
+  @Type(() => Number)
+  @Min(0)
   @IsOptional()
-  consultFee?: string;
+  consultFee?: number;
 
   @IsBoolean()
   @IsOptional()
   confirm?: boolean;
 
+
+  @IsArray()
   @IsOptional()
   awards?: string[];
 
+
+  @IsArray()
   @ValidateNested({ each: true })
   @Type(() => EducationDTO)
   @IsOptional()
   education?: EducationDTO[];
 
+ 
+  @IsArray()
   @ValidateNested({ each: true })
   @Type(() => ExperienceDTO)
   @IsOptional()
   experience?: ExperienceDTO[];
 
+  @IsArray()
   @IsOptional()
   affiliatedHospitals?: string[];
 }

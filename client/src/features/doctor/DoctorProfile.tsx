@@ -116,6 +116,29 @@ const DoctorProfileComponent  = () => {
     return Object.keys(newErrors).length === 0;
   };
 
+  const payload = {
+    name: form.name,
+    phone: form.phone,
+    bio: form.bio,
+    yearsOfExperience: Number(form.yearsOfExperience),
+    specialization: form.specialization,
+    gender: form.gender,
+    consultFee: Number(form.consultFee),
+    awards: form.awards,
+    education: form.education.map(e => ({
+      degree: e.degree,
+      institution: e.institution,
+      year: (e.year),
+    })),
+    experience: form.experience.map(exp => ({
+      hospital: exp.hospital,
+      role: exp.role,
+      years: (exp.years), 
+    })),
+    affiliatedHospitals: form.affiliatedHospitals,
+  };
+
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validateForm()) {
@@ -124,7 +147,7 @@ const DoctorProfileComponent  = () => {
     }
 
     try {
-      const res = await updateDoctorProfile(form);
+      const res = await updateDoctorProfile(payload);
 
       if (res?.message === "confirmation_required") {
         const confirmed = await confirmMessage(
