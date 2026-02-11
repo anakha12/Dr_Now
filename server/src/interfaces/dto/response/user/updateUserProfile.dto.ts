@@ -45,4 +45,7 @@ export class UpdateUserProfileDto {
   @Transform(({ value }) => value !== undefined ? Number(value) : undefined)
   @Expose()
   age?: number;
+
+  @IsOptional()
+  file?: Express.Multer.File;
 }

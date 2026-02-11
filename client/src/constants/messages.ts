@@ -115,7 +115,12 @@ export const Messages = {
     SELECT_DATE_SLOT: "Please select date and slot",
     APPOINTMENT_BOOKED_WALLET: "Appointment booked using wallet!",
     STRIPE_FAILED: "Stripe initialization failed",
+    
+    REGISTRATION:{
+      HEADER: "User Registration",
+    },
   },
+  
 
   COMMON: {
     CONFIRM: "Are you sure?",

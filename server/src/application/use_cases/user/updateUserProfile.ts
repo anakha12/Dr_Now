@@ -4,7 +4,7 @@ import { UpdateUserProfileDto } from "../../../interfaces/dto/response/user/upda
 import { UserEntity } from "../../../domain/entities/userEntity";
 import { plainToInstance } from "class-transformer";
 import { validateOrReject } from "class-validator";
-import { cloudinary } from "../../../config/cloudinary";
+import { cloudinary, getSignedImageURL } from "../../../config/cloudinary";
 import { Messages } from "../../../utils/Messages";
 
 export class UpdateUserProfileUseCase implements IUpdateUserProfileUseCase {
@@ -12,14 +12,18 @@ export class UpdateUserProfileUseCase implements IUpdateUserProfileUseCase {
 
   async execute(userId: string, data: UpdateUserProfileDto): Promise<UserEntity> {
     
-    if ((data as any).file) {
-      const file = (data as any).file as Express.Multer.File;
-      const result = await cloudinary.uploader.upload(file.path, {
-        folder: "users",
-        public_id: `user_${userId}_${Date.now()}`,
-      });
-      data.image = result.secure_url;
-    }
+        if (data.file) {
+          const file = data.file;
+          const result = await cloudinary.uploader.upload(file.path, {
+            folder: "users",
+            public_id: `user_${userId}_${Date.now()}`,
+            type: "authenticated",
+          });
+
+          const publicId = result.public_id;
+          const format = result.format;
+          data.image = getSignedImageURL(publicId, format, 600);
+        }
 
     const dto = plainToInstance(UpdateUserProfileDto, data);
     await validateOrReject(dto);

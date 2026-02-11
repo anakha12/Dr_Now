@@ -127,7 +127,7 @@ const UserRegister = () => {
           </div>
 
           <h2 className="text-xl font-semibold mb-5 text-center text-gray-800">
-            {Messages.DOCTOR.REGISTRATION.HEADER}
+            {Messages.USER.REGISTRATION.HEADER}
           </h2>
 
           {step === "form" ? (
