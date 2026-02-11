@@ -17,10 +17,6 @@ import { IGetPendingDoctorPayoutsUseCase } from "../../application/use_cases/int
 import { IGetWalletSummaryUseCase } from "../../application/use_cases/interfaces/admin/IGetWalletSummaryUseCase";
 import { IPayoutDoctorUseCase } from "../../application/use_cases/interfaces/admin/IPayoutDoctorUseCase";
 import { IGetAllDoctorsUseCase } from "../../application/use_cases/interfaces/admin/IGetAllDoctors";
-import { plainToInstance } from "class-transformer";
-import { DepartmentRegisterDTO } from "../dto/request/department-register.dto";
-import { validate } from "class-validator";
-import { AdminLoginDTO } from "../dto/request/admin-login.dto";
 import { IGetDoctorByIdUseCase } from "../../application/use_cases/interfaces/admin/IGetDoctorById";
 
   export class AdminController {
@@ -110,22 +106,17 @@ import { IGetDoctorByIdUseCase } from "../../application/use_cases/interfaces/ad
       }
     }
 
+
     async getAllDoctors(req: Request, res: Response): Promise<void> {
       try {
-        const page = parseInt(req.query.page as string) || 1;
-        const limit = parseInt(req.query.limit as string) || 5;
-        const search= (req.query.search as string)|| "";
-        const { doctors, totalDoctors } = await this._getAllDoctorsUseCase.execute(page, limit, search);
-
-        res.status(HttpStatus.OK).json({
-          doctors,
-          totalPages: Math.ceil(totalDoctors / limit),
-          currentPage: page,
-        });
-        } catch (err: unknown) {
+       
+        const result = await this._getAllDoctorsUseCase.execute(req.query);
+        res.status(HttpStatus.OK).json(result);
+      } catch (err: unknown) {
         handleControllerError(res, err, HttpStatus.INTERNAL_SERVER_ERROR);
       }
     }
+
 
     async toggleDoctorBlockStatus(req: Request, res: Response): Promise<void> {
       try {
@@ -148,18 +139,18 @@ import { IGetDoctorByIdUseCase } from "../../application/use_cases/interfaces/ad
       }
     }
 
-    async getAllUsers(req: Request, res: Response): Promise<void> {
-      try {
-        const page = parseInt(req.query.page as string) || 1;
-       const limit = parseInt(req.query.limit as string) || 5;
-       const search=(req.query.search as string)|| "";
+async getAllUsers(req: Request, res: Response): Promise<void> {
+  try {
 
-        const users = await this._getAllUsersUseCase.execute(page, limit, search);
-        res.status(HttpStatus.OK).json(users);
-        } catch (err: unknown) {
-        handleControllerError(res, err, HttpStatus.INTERNAL_SERVER_ERROR);
-      }
-    }
+    const result = await this._getAllUsersUseCase.execute(req.query);
+
+    res.status(HttpStatus.OK).json(result);
+
+  } catch (err: unknown) {
+    handleControllerError(res, err, HttpStatus.BAD_REQUEST);
+  }
+}
+
 
     async toggleUserBlockStatus(req: Request, res: Response): Promise<void> {
       try {

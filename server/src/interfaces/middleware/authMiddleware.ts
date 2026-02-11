@@ -2,21 +2,21 @@ import { Request, Response, NextFunction } from "express";
 import {  getJwtService } from "../../di/adminDI"; 
 import { Messages } from "../../utils/Messages";
 import { HttpStatus } from "../../utils/HttpStatus";
-
+import { Role } from "../../utils/Constance";
 export interface DecodedUser {
   id: string;
   email: string;
-  role: "admin" | "user" | "doctor";
+  role: Role.ADMIN | Role.USER | Role.DOCTOR;
 }
 
 export interface AuthRequest extends Request {
   user?: DecodedUser;
 }
 
-export const verifyToken = (requiredRole: "admin" | "user" | "doctor") => {
+export const verifyToken = (requiredRole: Role.ADMIN | Role.USER | Role.DOCTOR) => {
   return (req: AuthRequest, res: Response, next: NextFunction) => {
     const token =
-      requiredRole === "doctor"
+      requiredRole ===  Role.DOCTOR
         ? req.cookies?.accessToken
         : req.cookies?.userAccessToken;
         

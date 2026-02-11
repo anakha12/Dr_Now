@@ -3,36 +3,63 @@ import { IUserRepository } from "../../../domain/repositories/userRepository";
 import { UserEntity } from "../../../domain/entities/userEntity";
 import { WalletTransactionUser } from "../../../domain/entities/walletTransactionUserEntity";
 import { ErrorMessages, Messages } from "../../../utils/Messages";
+import { Role } from "../../../utils/Constance";
 
 export class UserRepositoryImpl implements IUserRepository {
 
-  async getPaginatedUsers(page: number, limit: number, search: string= ""): Promise<{
-    users: UserEntity[];
-    totalPages: number;
-  }> {
-    const skip = (page - 1) * limit;
-    const searchFilter = search
-    ? {
-        role: "user",
-        $or: [
-          { name: { $regex: search, $options: "i" } },
-          { email: { $regex: search, $options: "i" } },
-          { phone: { $regex: search, $options: "i" } },
-        ],
-      }
-    : { role: "user" };
-    const totalUsers = await UserModel.countDocuments(searchFilter);
-    const users = await UserModel.find(searchFilter)
-      .skip(skip)
-      .limit(limit)
-      .sort({ createdAt: -1 });
+  async getFilteredUsers(
+    filters: { search?: string; gender?: string; minAge?: number; maxAge?: number },
+    skip: number,
+    limit: number,
+    sort: Record<string, 1 | -1>
+  ): Promise<UserEntity[]> {
+    const dbFilters: Record<string, any> = { role: Role.USER }; 
 
-    return {
-      users: users.map(this._toDomain),
-      totalPages: Math.ceil(totalUsers / limit),
-    };
+    if (filters.search) {
+      dbFilters.$or = [
+        { name: { $regex: filters.search, $options: "i" } },
+        { email: { $regex: filters.search, $options: "i" } },
+        { phone: { $regex: filters.search, $options: "i" } },
+      ];
+    }
+
+    if (filters.gender) dbFilters.gender = filters.gender;
+
+    if (filters.minAge || filters.maxAge) {
+      dbFilters.age = {} as Record<string, number>;
+      if (filters.minAge !== undefined) dbFilters.age.$gte = filters.minAge;
+      if (filters.maxAge !== undefined) dbFilters.age.$lte = filters.maxAge;
+    }
+
+    const users = await UserModel.find(dbFilters)
+      .sort(sort)
+      .skip(skip)
+      .limit(limit);
+
+    return users.map(this._toDomain);
   }
 
+  async countFilteredUsers(filters: { search?: string; gender?: string; minAge?: number; maxAge?: number }): Promise<number> {
+    const dbFilters: Record<string, any> = { role: Role.USER };
+
+    if (filters.search) {
+      dbFilters.$or = [
+        { name: { $regex: filters.search, $options: "i" } },
+        { email: { $regex: filters.search, $options: "i" } },
+        { phone: { $regex: filters.search, $options: "i" } },
+      ];
+    }
+
+    if (filters.gender) dbFilters.gender = filters.gender;
+
+    if (filters.minAge || filters.maxAge) {
+      dbFilters.age = {} as Record<string, number>;
+      if (filters.minAge !== undefined) dbFilters.age.$gte = filters.minAge;
+      if (filters.maxAge !== undefined) dbFilters.age.$lte = filters.maxAge;
+    }
+
+    return UserModel.countDocuments(dbFilters);
+  }
 
  async getPaginatedWallet(
   userId: string,
@@ -80,7 +107,7 @@ export class UserRepositoryImpl implements IUserRepository {
   }
 
   async getAllUsers(): Promise<UserEntity[]> {
-    const users = await UserModel.find({ role: "user" });
+    const users = await UserModel.find({ role: Role.USER});
     return users.map(this._toDomain);
   }
 

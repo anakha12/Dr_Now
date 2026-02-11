@@ -1,4 +1,5 @@
 import mongoose,{Schema,Document} from "mongoose";
+import { Role } from "../../../utils/Constance";
 
 export interface IUSER extends Document{
     name:string,
@@ -46,7 +47,7 @@ const UserSchema: Schema =new Schema<IUSER>(
         address: { type: String, required: false },
         otp: { type: String },
         otpExpiresAt: { type: Date },
-        role: { type: String, default: "user" },
+        role: { type: String, default: Role.USER },
         uid: { type: String, required: false, unique: true, sparse: true },
 
         profileCompletion: { type: Boolean, default: false },

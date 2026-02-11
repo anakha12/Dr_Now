@@ -1,12 +1,5 @@
-import { UserEntity } from "../../../../domain/entities/userEntity";
+import { GetAllUsersResponseDTO } from "../../../../interfaces/dto/response/admin/get-all-users.response.dto";
 
 export interface IGetAllUsersUseCase {
-  execute(
-    page: number,
-    limit: number,
-    search: string
-  ): Promise<{
-    users: UserEntity[];
-    totalPages: number;
-  }>;
+  execute(query: unknown): Promise<GetAllUsersResponseDTO>;
 }

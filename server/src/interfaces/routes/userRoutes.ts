@@ -3,6 +3,8 @@ import upload from '../middleware/upload';
 import express, { Request, Response } from "express";
 import { verifyToken } from "../middleware/authMiddleware";
 import { userController, userAuthController } from "../../di/userDI"; 
+import { Role } from '../../utils/Constance';
+
 
 const router = express.Router();
 
@@ -23,16 +25,16 @@ router.get(
 );
 
 router.get("/booked-slots/:doctorId", (req: Request, res: Response) => userController.getBookedSlots(req, res));
-router.get("/user/profile", verifyToken("user"), (req, res) => userController.getUserProfile(req, res));
-router.get("/user/bookings", verifyToken("user"), (req: Request, res: Response) => userController.getUserBookings(req, res));
-router.post("/user/bookings/:id/cancel", verifyToken("user"), (req: Request, res: Response) => userController.cancelBooking(req, res));
-router.get("/departments", verifyToken("user"), (req: Request, res: Response) => userController.getDepartments(req, res));
-router.get("/user/wallet", verifyToken("user"), (req: Request, res: Response) => userController.getWalletInfo(req, res));
-router.post("/book-with-wallet", verifyToken("user"), (req: Request, res: Response) => userController.bookWithWallet(req, res));
+router.get("/user/profile", verifyToken(Role.USER), (req, res) => userController.getUserProfile(req, res));
+router.get("/user/bookings", verifyToken(Role.USER), (req: Request, res: Response) => userController.getUserBookings(req, res));
+router.post("/user/bookings/:id/cancel", verifyToken(Role.USER), (req: Request, res: Response) => userController.cancelBooking(req, res));
+router.get("/departments", verifyToken(Role.USER), (req: Request, res: Response) => userController.getDepartments(req, res));
+router.get("/user/wallet", verifyToken(Role.USER), (req: Request, res: Response) => userController.getWalletInfo(req, res));
+router.post("/book-with-wallet", verifyToken(Role.USER), (req: Request, res: Response) => userController.bookWithWallet(req, res));
 router.get("/doctors/filter", (req: Request, res: Response) => userController.getFilteredDoctors(req, res));
-router.get("/user/bookings/:id", verifyToken("user"), (req: Request, res: Response) => userController.getBookingDetails(req, res));
-router.post("/logout", verifyToken("user"), (req: Request, res: Response) => userController.logoutUserController(req, res));
-router.put("/update-profile",verifyToken("user"),upload.single("file"),(req, res) => userController.updateUserProfile(req, res));
+router.get("/user/bookings/:id", verifyToken(Role.USER), (req: Request, res: Response) => userController.getBookingDetails(req, res));
+router.post("/logout", verifyToken(Role.USER), (req: Request, res: Response) => userController.logoutUserController(req, res));
+router.put("/update-profile",verifyToken(Role.USER),upload.single("file"),(req, res) => userController.updateUserProfile(req, res));
 
 
 export default router;

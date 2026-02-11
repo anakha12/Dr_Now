@@ -7,6 +7,7 @@ import { IUserRepository } from "../../../domain/repositories/userRepository";
 import { ErrorMessages } from "../../../utils/Messages";
 import { BaseUseCase } from "../base-usecase";
 import { plainToInstance } from "class-transformer";
+import { Role } from "../../../utils/Constance";
 
 export class LoginAdmin
   extends BaseUseCase<AdminLoginDTO, AdminLoginResponseDTO>
@@ -32,7 +33,7 @@ export class LoginAdmin
    
     const isMatch = await bcrypt.compare(dto.password, user.password);
     if (!isMatch) throw new Error(ErrorMessages.INVALID_CREDENTIALS);
-    if (user.role !== "admin") throw new Error(ErrorMessages.NOT_AN_ADMIN);
+    if (user.role !== Role.ADMIN) throw new Error(ErrorMessages.NOT_AN_ADMIN);
 
   
     const accessToken = this._tokenService.generateAccessToken({
