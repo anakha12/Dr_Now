@@ -75,41 +75,25 @@ async countFilteredDoctors(filters: {
 
 
 
- async getFilteredDoctors(
-  filters: {
-    search?: string;
-    specialization?: string;
-    maxFee?: number;
-    gender?: string;
-  },
+async getFilteredDoctors(
+  filters: Record<string, unknown>,
   skip: number,
-  limit: number
+  limit: number,
+  sort: Record<string, 1 | -1>
 ): Promise<DoctorEntity[]> {
-  const query: any = {
-    isVerified: true,
-    isBlocked: false,
-  };
+  const query: any = { isVerified: true };
+  if (filters.search) query.name = { $regex: filters.search, $options: "i" };
+  if (filters.specialization) query.specialization = filters.specialization;
+  if (filters.isBlocked !== undefined) query.isBlocked = filters.isBlocked;
 
-  if (filters.search) {
-    query.name = { $regex: filters.search, $options: "i" };
-  }
+  const doctors = await DoctorModel.find(query)
+    .skip(skip)
+    .limit(limit)
+    .sort(sort)
+    .lean();
 
-  if (filters.specialization) {
-    query.specialization = filters.specialization;
-  }
-
-  if (filters.maxFee !== undefined) {
-    query.$expr = { $lte: [{ $toDouble: "$consultFee" }, filters.maxFee] };
-  }
-
-  if (filters.gender) {
-    query.gender = filters.gender;
-  }
-
-  const doctors = await DoctorModel.find(query).skip(skip).limit(limit).lean();
   return doctors.map(this._toDomain);
 }
-
 
 
   async completeProfile(doctorId: string, profileData: any): Promise<DoctorEntity> {

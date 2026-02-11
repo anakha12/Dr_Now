@@ -9,10 +9,16 @@ export interface IUserRepository {
   updateUser(id: string, updates: UpdateQuery<UserEntity>): Promise<UserEntity>;
   updateUserByEmail(email: string, user: Partial<UserEntity>): Promise<UserEntity>; 
   getAllUsers(): Promise<UserEntity[]>;
-  getPaginatedUsers(page: number, limit: number, search?: string): Promise<{
-    users: UserEntity[];
-    totalPages: number;
-  }>;
+
+  getFilteredUsers(
+    filters: Record<string, any>,
+    skip: number,
+    limit: number,
+    sort: Record<string, 1 | -1>
+  ): Promise<UserEntity[]>;
+
+  countFilteredUsers(filters: Record<string, any>): Promise<number>;
+
   updateUserProfile(userId: string, updates: Partial<UserEntity>): Promise<UserEntity>
   toggleBlockStatus(userId: string, block: boolean): Promise<UserEntity>;
   findUserById(userId: string): Promise<UserEntity | null>;

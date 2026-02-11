@@ -1,9 +1,10 @@
-import { DoctorEntity } from "../../../../domain/entities/doctorEntity";
+
+import { DoctorResponseDTO } from "../../../../interfaces/dto/response/admin/get-all-doctor.dto";
 
 export interface IGetAllDoctorsUseCase {
-  execute(
-    page: number,
-    limit: number,
-    search: string
-  ): Promise<{ doctors: DoctorEntity[]; totalDoctors: number }>;
+  execute(query: unknown): Promise<{
+    doctors: DoctorResponseDTO[];
+    totalPages: number;
+    currentPage: number;
+  }>;
 }

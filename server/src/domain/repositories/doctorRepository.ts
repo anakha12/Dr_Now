@@ -32,7 +32,8 @@ export interface IDoctorRepository {
     gender?: string;
   },
   skip: number,
-  limit: number
+  limit: number,
+  sort: Record<string, 1 | -1>
 ): Promise<DoctorEntity[]>;
 
 countFilteredDoctors(filters: {

@@ -3,7 +3,7 @@ import BookingModel, { IBooking } from "../models/booking.model";
 import { Booking } from "../../../domain/entities/booking.entity";
 import { IBookingRepository } from "../../../domain/repositories/bookingRepository";
 import { PendingDoctorPayoutResponseDTO } from "../../../interfaces/dto/response/admin/pending-doctor-payout.dto";
-
+import { Role } from "../../../utils/Constance";
 interface IPopulatedDoctor {
   _id: mongoose.Types.ObjectId;
   name: string;
@@ -189,7 +189,7 @@ export class BookingRepositoryImpl implements IBookingRepository {
         from: "doctors",
         localField: "_id",
         foreignField: "_id",
-        as: "doctor",
+        as:Role.DOCTOR,
       },
     },
     { $unwind: "$doctor" },

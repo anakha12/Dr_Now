@@ -3,6 +3,7 @@ import { ITokenService } from "../tokenServiceInterface";
 import { Messages } from "../../utils/Messages";
 import { HttpStatus } from "../../utils/HttpStatus";
 import { handleControllerError } from "../../utils/errorHandler";
+import { Role } from "../../utils/Constance";
 
 export class AuthController {
   private readonly _tokenService: ITokenService;
@@ -38,7 +39,7 @@ async refreshToken(req: Request, res: Response): Promise<void> {
     });
 
    res.cookie(
-    payloadWithoutExp.role === "doctor" ? "accessToken" : "userAccessToken",
+    payloadWithoutExp.role === Role.DOCTOR  ? "accessToken" : "userAccessToken",
     accessToken,
     {
       httpOnly: true,

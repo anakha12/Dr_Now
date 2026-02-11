@@ -1,3 +1,5 @@
+import { Role } from "../../utils/Constance";
+
 export interface Slot {
   from: string;
   to: string;
@@ -51,6 +53,6 @@ export interface DoctorEntity {
     years: number;
   }[];
   affiliatedHospitals?: string[];
-  role: "doctor"; 
+  role: Role.DOCTOR; 
   age: string;
 }

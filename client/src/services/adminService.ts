@@ -60,16 +60,41 @@ export const rejectDoctorById = async (doctorId: string, reason: string) => {
   }
 };
 
-export const getAllDoctors = async (page = 1, limit = 5, searchQuery = "") => {
+interface GetAllDoctorsParams {
+  page: number;
+  limit: number;
+  search?: string;
+  status?: string;
+  specialization?: string;
+  sort?: string;
+}
+
+export const getAllDoctors = async (
+  params: GetAllDoctorsParams
+) => {
   try {
-    const response = await adminAxios.get(AdminRoutes.ALL_DOCTORS, {
-      params: { page, limit, search: searchQuery },
-    });
+    const queryParams: any = {
+      page: params.page,
+      limit: params.limit,
+    };
+
+    if (params.search) queryParams.search = params.search;
+    if (params.status) queryParams.status = params.status;
+    if (params.specialization)
+      queryParams.specialization = params.specialization;
+    if (params.sort) queryParams.sort = params.sort;
+
+    const response = await adminAxios.get(
+      AdminRoutes.ALL_DOCTORS,
+      { params: queryParams }
+    );
+
     return response.data;
   } catch (error) {
     throw handleError(error, Messages.DOCTOR.FETCH_FAILED);
   }
 };
+
 
 export const toggleDoctorBlockStatus = async (
   doctorId: string,
@@ -85,16 +110,41 @@ export const toggleDoctorBlockStatus = async (
   }
 };
 
-export const getAllUsers = async (page = 1, limit = 5, searchQuery = "") => {
+export const getAllUsers = async (
+  page = 1,
+  limit = 5,
+  searchQuery = "",
+  gender = "",
+  status = "",
+  minAge?: number,
+  maxAge?: number,
+  sort = ""
+) => {
   try {
+    const params: any = {
+      page,
+      limit,
+    };
+
+    if (searchQuery) params.search = searchQuery;
+    if (gender) params.gender = gender;
+    if (status) params.status = status;
+    if (minAge !== undefined) params.minAge = minAge;
+    if (maxAge !== undefined) params.maxAge = maxAge;
+    if (sort) params.sort = sort;
+
     const response = await adminAxios.get(AdminRoutes.ALL_USERS, {
-      params: { page, limit, search: searchQuery },
+      params,
     });
+
     return response.data;
   } catch (error) {
     throw handleError(error, Messages.USER.FETCH_FAILED);
   }
 };
+
+
+
 
 export const toggleUserBlockStatus = async (
   userId: string,
