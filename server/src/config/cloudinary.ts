@@ -14,8 +14,23 @@ cloudinary.config({
 export const storage = new CloudinaryStorage({
   cloudinary,
   params: (req, file) => ({
+    folder: "users",         
     public_id: file.originalname.split('.')[0],
+    resource_type: "image",
+    type: "authenticated",       
   }),
 });
+
+export function getSignedImageURL(
+  publicId: string, 
+  format: string = "jpg",
+  expiresInSeconds = 300
+) {
+  return cloudinary.utils.private_download_url(publicId, format, {
+    type: "authenticated",
+    expires_at: Math.floor(Date.now() / 1000) + expiresInSeconds,
+  });
+}
+
 
 export { cloudinary };
