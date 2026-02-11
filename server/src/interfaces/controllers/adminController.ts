@@ -48,32 +48,24 @@ import { IGetDoctorByIdUseCase } from "../../application/use_cases/interfaces/ad
 
     async adminLogin(req: Request, res: Response): Promise<void> {
       try {
-        const dto=plainToInstance(AdminLoginDTO, req.body);
 
-        const { accessToken,refreshToken, user } = await this._loginAdmin.execute(dto);
-        
-        if (user.role !== "admin") {
-          res.status(HttpStatus.UNAUTHORIZED).json({ message: Messages.UNAUTHORIZED });
-          return;
-        }
+        const response = await this._loginAdmin.execute(req.body);
 
-        const accessTokenMaxAge = Number(process.env.ACCESS_TOKEN_COOKIE_MAXAGE);
-        const refreshTokenMaxAge = Number(process.env.REFRESH_TOKEN_COOKIE_MAXAGE);
-
-        res.cookie("userAccessToken", accessToken, {
-          httpOnly: true,
-          secure: false, 
-          sameSite: "lax",
-          maxAge: accessTokenMaxAge,
-        });
-
-        res.cookie("refreshToken", refreshToken, {
+        res.cookie("userAccessToken", response.accessToken, {
           httpOnly: true,
           secure: false,
           sameSite: "lax",
-          maxAge: refreshTokenMaxAge, 
+          maxAge: Number(process.env.ACCESS_TOKEN_COOKIE_MAXAGE),
         });
-        res.status(HttpStatus.OK).json({ message: Messages.LOGIN_SUCCESSFUL, user });
+
+        res.cookie("refreshToken", response.refreshToken, {
+          httpOnly: true,
+          secure: false,
+          sameSite: "lax",
+          maxAge: Number(process.env.REFRESH_TOKEN_COOKIE_MAXAGE),
+        });
+
+        res.status(HttpStatus.OK).json({ message: Messages.LOGIN_SUCCESSFUL, user: response.user });
         } catch (err: unknown) {
         handleControllerError(res, err, HttpStatus.UNAUTHORIZED);
       }
@@ -86,7 +78,7 @@ import { IGetDoctorByIdUseCase } from "../../application/use_cases/interfaces/ad
 
         const { doctors, total } = await this._getUnverifiedDoctorsUseCase.execute(page, limit);
 
-        res.status(200).json({
+        res.status(HttpStatus.OK).json({
           doctors,
           totalPages: Math.ceil(total / limit),
           currentPage: page,
@@ -125,7 +117,7 @@ import { IGetDoctorByIdUseCase } from "../../application/use_cases/interfaces/ad
         const search= (req.query.search as string)|| "";
         const { doctors, totalDoctors } = await this._getAllDoctorsUseCase.execute(page, limit, search);
 
-        res.status(200).json({
+        res.status(HttpStatus.OK).json({
           doctors,
           totalPages: Math.ceil(totalDoctors / limit),
           currentPage: page,
@@ -195,27 +187,12 @@ import { IGetDoctorByIdUseCase } from "../../application/use_cases/interfaces/ad
 
     async createDepartment(req: Request, res: Response) {
       try {
-        const dto= plainToInstance(DepartmentRegisterDTO,req.body);
-
-        const errors = await validate(dto);
-
-        if (errors.length > 0) {
-          const formattedErrors = errors.reduce((acc, err) => {
-            if (err.constraints) {
-              acc[err.property] = Object.values(err.constraints)[0]; 
-            }
-          
-            return acc;
-          }, {} as Record<string, string>);
-
-          return res.status(400).json({ errors:formattedErrors });
-        }
-        const dept = await this._createDepartmentUseCase.execute(dto);
+        const dept = await this._createDepartmentUseCase.execute(req.body);
         res.status(HttpStatus.CREATED).json(dept);
         } catch (err: unknown) {
         handleControllerError(res, err, HttpStatus.BAD_REQUEST);
       }
-  }
+    }
 
   async getDepartments(req: Request, res: Response) {
     try {
@@ -277,7 +254,7 @@ import { IGetDoctorByIdUseCase } from "../../application/use_cases/interfaces/ad
     try {
       const { id } = req.params;
       const doctor = await this._getDoctorByIdUseCase.execute(id);
-      res.status(200).json(doctor);
+      res.status(HttpStatus.OK).json(doctor);
     } catch (err: unknown) {
       handleControllerError(res, err, HttpStatus.INTERNAL_SERVER_ERROR);
     }

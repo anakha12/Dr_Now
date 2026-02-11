@@ -1,7 +1,7 @@
 import { IDoctorRepository } from "../../../domain/repositories/doctorRepository";
 import { DoctorEntity } from "../../../domain/entities/doctorEntity";
 import { IGetAllDoctorsUseCase } from "../interfaces/admin/IGetAllDoctors";
-import { plainToInstance } from "class-transformer";
+
 
 export class GetAllDoctors implements IGetAllDoctorsUseCase{
   constructor(private _doctorRepo: IDoctorRepository) {}

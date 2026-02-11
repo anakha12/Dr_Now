@@ -10,7 +10,7 @@ export class AddDoctorAvailabilityExceptionUseCase
   extends BaseUseCase<AddDoctorAvailabilityExceptionDTO, DoctorAvailabilityExceptionResponseDTO>
   implements IAddDoctorAvailabilityException
 {
-  constructor(private repo: IDoctorAvailabilityExceptionRepository) {
+  constructor(private _repo: IDoctorAvailabilityExceptionRepository) {
     super();
   }
 
@@ -29,7 +29,7 @@ export class AddDoctorAvailabilityExceptionUseCase
       dto.slotDuration
     );
 
-    const saved = await this.repo.createException(exception);
+    const saved = await this._repo.createException(exception);
 
     return plainToInstance(DoctorAvailabilityExceptionResponseDTO, saved, {
       excludeExtraneousValues: true,

@@ -8,7 +8,7 @@ import { cloudinary } from "../../../config/cloudinary";
 import { Messages } from "../../../utils/Messages";
 
 export class UpdateUserProfileUseCase implements IUpdateUserProfileUseCase {
-  constructor(private userRepository: IUserRepository) {}
+  constructor(private _userRepository: IUserRepository) {}
 
   async execute(userId: string, data: UpdateUserProfileDto): Promise<UserEntity> {
     
@@ -24,7 +24,7 @@ export class UpdateUserProfileUseCase implements IUpdateUserProfileUseCase {
     const dto = plainToInstance(UpdateUserProfileDto, data);
     await validateOrReject(dto);
 
-    const existingUser = await this.userRepository.findUserById(userId);
+    const existingUser = await this._userRepository.findUserById(userId);
     if (!existingUser) {
       throw new Error(Messages.USER_NOT_FOUND);
     }
@@ -47,6 +47,6 @@ export class UpdateUserProfileUseCase implements IUpdateUserProfileUseCase {
       profileCompletion: isFirstCompletion ? true : existingUser.profileCompletion,
     };
 
-    return this.userRepository.updateUser(userId, updates);
+    return this._userRepository.updateUser(userId, updates);
   }
 }

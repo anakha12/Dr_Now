@@ -9,7 +9,7 @@ export class AddDoctorAvailabilityRuleUseCase
   extends BaseUseCase<AddDoctorAvailabilityRuleDTO, { message: string }>
   implements IAddDoctorAvailabilityRule
 {
-  constructor(private readonly ruleRepo: IAvailabilityRuleRepository) {
+  constructor(private readonly _ruleRepo: IAvailabilityRuleRepository) {
     super();
   }
 
@@ -17,7 +17,7 @@ export class AddDoctorAvailabilityRuleUseCase
 
     const dto = await this.validateDto(AddDoctorAvailabilityRuleDTO, data);
 
-    const existingRule = await this.ruleRepo.findByDoctorAndDay(dto.doctorId, dto.dayOfWeek);
+    const existingRule = await this._ruleRepo.findByDoctorAndDay(dto.doctorId, dto.dayOfWeek);
     if (existingRule) throw new Error( Messages.RULE_ALREADY_EXISTS(dto.dayOfWeek));
   
 
@@ -29,7 +29,7 @@ export class AddDoctorAvailabilityRuleUseCase
       dto.slotDuration
     );
 
-    await this.ruleRepo.create(ruleEntity);
+    await this._ruleRepo.create(ruleEntity);
 
     return { message: Messages.RULE_ADDED };
   }

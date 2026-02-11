@@ -5,8 +5,8 @@ import { plainToInstance } from "class-transformer";
 import { DoctorListResponseDTO } from "../../../interfaces/dto/response/user/doctor-list.dto";
 export class GetFilteredDoctorsUseCase implements IGetFilteredDoctors{
   constructor(
-    private doctorRepository: IDoctorRepository,
-    private departmentRepository: IDepartmentRepository
+    private _doctorRepository: IDoctorRepository,
+    private _departmentRepository: IDepartmentRepository
   ) {}
 
   async execute(filters: {
@@ -22,9 +22,9 @@ export class GetFilteredDoctorsUseCase implements IGetFilteredDoctors{
     const skip = (page - 1) * limit;
 
     const [doctors, totalCount, specializations] = await Promise.all([
-      this.doctorRepository.getFilteredDoctors(filters, skip, limit),
-      this.doctorRepository.countFilteredDoctors(filters),
-      this.departmentRepository.getDepartments(1, 100),
+      this._doctorRepository.getFilteredDoctors(filters, skip, limit),
+      this._doctorRepository.countFilteredDoctors(filters),
+      this._departmentRepository.getDepartments(1, 100),
     ]);
 
     const totalPages = Math.ceil(totalCount / limit);

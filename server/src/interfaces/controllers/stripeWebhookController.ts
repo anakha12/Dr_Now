@@ -8,7 +8,7 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string);
 
 
 export class StripeWebhookController {
-  constructor(private readonly stripeWebhookUseCase: StripeWebhookUseCase) {}
+  constructor(private readonly _stripeWebhookUseCase: StripeWebhookUseCase) {}
 
   handleStripeWebhook = async (req: Request, res: Response) => {
     const sig = req.headers["stripe-signature"] as string;
@@ -26,7 +26,7 @@ export class StripeWebhookController {
     try {
       if (event.type === "checkout.session.completed") {
         const session = event.data.object as Stripe.Checkout.Session;
-        await this.stripeWebhookUseCase.handleCheckoutSession(session);
+        await this._stripeWebhookUseCase.handleCheckoutSession(session);
       }
       return res.json({ received: true });
     } catch (err: unknown) {
