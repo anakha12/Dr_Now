@@ -8,20 +8,20 @@ export class DeleteDoctorAvailabilityRuleUseCase
   extends BaseUseCase<{ doctorId: string; dayOfWeek: number }, { message: string }>
   implements IDeleteDoctorAvailabilityRuleUseCase
 {
-  constructor(private readonly ruleRepo: IAvailabilityRuleRepository) {
+  constructor(private readonly _ruleRepo: IAvailabilityRuleRepository) {
     super();
   }
 
   async execute(data: { doctorId: string; dayOfWeek: number }): Promise<{ message: string }> {
     const { doctorId, dayOfWeek } = data;
 
-    const existingRule = await this.ruleRepo.findByDoctorAndDay(doctorId, dayOfWeek);
+    const existingRule = await this._ruleRepo.findByDoctorAndDay(doctorId, dayOfWeek);
 
     if (!existingRule || !existingRule.id) {
       throw new Error( ErrorMessages.RULE_NOT_FOUND);
     }
 
-    await this.ruleRepo.delete(existingRule.id);
+    await this._ruleRepo.delete(existingRule.id);
 
     return { message: Messages.RULE_DELETED };
   }

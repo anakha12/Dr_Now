@@ -10,7 +10,7 @@ export class EditDoctorAvailabilityRuleUseCase
   extends BaseUseCase<EditDoctorAvailabilityRuleDTO, { message: string }>
   implements IEditDoctorAvailabilityRule
 {
-  constructor(private readonly ruleRepo: IAvailabilityRuleRepository) {
+  constructor(private readonly _ruleRepo: IAvailabilityRuleRepository) {
     super();
   }
 
@@ -19,7 +19,7 @@ export class EditDoctorAvailabilityRuleUseCase
     const dto = await this.validateDto(EditDoctorAvailabilityRuleDTO, data);
 
 
-    const existingRule = await this.ruleRepo.findByDoctorAndDay(dto.doctorId, dto.dayOfWeek);
+    const existingRule = await this._ruleRepo.findByDoctorAndDay(dto.doctorId, dto.dayOfWeek);
 
     if (!existingRule) {
 
@@ -30,7 +30,7 @@ export class EditDoctorAvailabilityRuleUseCase
         dto.endTime || "",
         dto.slotDuration || 30
       );
-      await this.ruleRepo.create(newRule);
+      await this._ruleRepo.create(newRule);
       return { message: Messages.RULE_ADDED };
     }
 
@@ -39,7 +39,7 @@ export class EditDoctorAvailabilityRuleUseCase
     existingRule.endTime = dto.endTime ?? existingRule.endTime;
     existingRule.slotDuration = dto.slotDuration ?? existingRule.slotDuration;
 
-    await this.ruleRepo.update(existingRule);
+    await this._ruleRepo.update(existingRule);
 
     return { message: Messages.RULE_UPDATED };
   }

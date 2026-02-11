@@ -1,7 +1,6 @@
 import { Request, Response } from "express";
 import { Messages } from "../../utils/Messages";
 import { HttpStatus } from "../../utils/HttpStatus";
-import { DoctorRegisterDTO } from "../dto/request/doctor-register.dto."
 import { AuthRequest } from "../middleware/authMiddleware";
 import { handleControllerError } from "../../utils/errorHandler";
 import { ISendDoctorOtp } from "../../application/use_cases/interfaces/doctor/ISendDoctorOtp";
@@ -17,10 +16,6 @@ import { IGetDoctorWalletSummary } from "../../application/use_cases/interfaces/
 import { ICompleteDoctorProfile } from "../../application/use_cases/interfaces/doctor/ICompleteDoctorProfile";
 import { IGetBookingDetails } from "../../application/use_cases/interfaces/user/IGetBookingDetails";
 import { IDoctorLogin } from "../../application/use_cases/interfaces/doctor/IDoctorLogin";
-
-
-import { plainToInstance } from "class-transformer";
-import { validate } from "class-validator";
 import { IAddDoctorAvailabilityException } from "../../application/use_cases/interfaces/doctor/IAddDoctorAvailabilityException";
 import { IGetDoctorAvailabilityExceptions } from "../../application/use_cases/interfaces/doctor/IGetDoctorAvailabilityExceptions";
 import { IDeleteDoctorAvailabilityExceptionUseCase } from "../../application/use_cases/interfaces/doctor/IDeleteDoctorAvailabilityExceptionUseCase";
@@ -61,33 +56,13 @@ export class DoctorController {
 
   async sendOtp(req: MulterRequest, res: Response): Promise<void> {
     try {
-      const profileImage = req.files?.profileImage?.[0];
-      const medicalLicense = req.files?.medicalLicense?.[0];
-      const idProof = req.files?.idProof?.[0];
-
-      const dto = plainToInstance(DoctorRegisterDTO,{
-        ...req.body,
-        profileImage: profileImage ? (profileImage as any).path : "",
-        medicalLicense: medicalLicense ? (medicalLicense as any).path : "",
-        idProof: idProof ? (idProof as any).path : ""
-      });
-  
-      const errors = await validate(dto);
-      if (errors.length > 0) {
-        const formattedErrors = errors
-          .map(err => Object.values(err.constraints || {}))
-          .flat();
-
-         res.status(HttpStatus.BAD_REQUEST).json({
-          error: formattedErrors,
-        });
-      }
-      await this._sendDoctorOtp.execute(dto);
-      res.status(HttpStatus.OK).json({ message: Messages.OTP_SENT(dto.email) });
+      await this._sendDoctorOtp.execute({ ...req.body, files: req.files });
+      res.status(HttpStatus.OK).json({ message: Messages.OTP_SENT(req.body.email) });
     } catch (err) {
       handleControllerError(res, err, HttpStatus.BAD_REQUEST);
     }
   }
+
 
 
    async verifyOtp(req: Request, res: Response): Promise<void> {
@@ -262,7 +237,7 @@ async deleteAvailabilityException(req: AuthRequest, res: Response): Promise<void
     const { exceptionId } = req.params; 
 
     if (!doctorId || !exceptionId) {
-      res.status(400).json({ message: Messages.DOCTOR_ID_REQUIRED });
+      res.status(HttpStatus.BAD_REQUEST).json({ message: Messages.DOCTOR_ID_REQUIRED });
       return;
     }
 
@@ -321,7 +296,7 @@ async cancelBooking(req: AuthRequest, res: Response): Promise<void> {
   }
 }
 
-async getAllDepartments(_: Request, res: Response): Promise<void> {
+async getAllDepartments(req: Request, res: Response): Promise<void> {
   try {
     const departments = await this._getAllDepartmentsUseCase.execute();
     res.status(HttpStatus.OK).json(departments);

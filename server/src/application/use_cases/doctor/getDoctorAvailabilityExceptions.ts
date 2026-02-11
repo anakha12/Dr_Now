@@ -10,7 +10,7 @@ export class GetDoctorAvailabilityExceptionsUseCase
   extends BaseUseCase<GetDoctorBasicsDTO, DoctorAvailabilityExceptionResponseDTO[]>
   implements IGetDoctorAvailabilityExceptions
 {
-  constructor(private repo: IDoctorAvailabilityExceptionRepository) {
+  constructor(private _repo: IDoctorAvailabilityExceptionRepository) {
     super();
   }
 
@@ -18,7 +18,7 @@ export class GetDoctorAvailabilityExceptionsUseCase
 
     await this.validateDto(GetDoctorBasicsDTO, dto);
 
-    const exceptions = await this.repo.getExceptionsForDoctor(dto.doctorId);
+    const exceptions = await this._repo.getExceptionsForDoctor(dto.doctorId);
 
     let va=exceptions.map((ex) =>
       plainToInstance(DoctorAvailabilityExceptionResponseDTO, ex, {

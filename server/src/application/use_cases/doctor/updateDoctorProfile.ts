@@ -6,6 +6,7 @@ import { AppError } from "../../../utils/AppError";
 import { UpdateDoctorProfileDTO } from "../../../interfaces/dto/request/update-doctorProfile.dto";
 import { Messages, ErrorMessages } from "../../../utils/Messages";
 import { BaseUseCase } from "../base-usecase";
+import { HttpStatus } from "../../../utils/HttpStatus";
 
 export class UpdateDoctorProfile extends BaseUseCase<
   UpdateDoctorProfileDTO,
@@ -50,7 +51,7 @@ export class UpdateDoctorProfile extends BaseUseCase<
     const updatedDoctor = await this._doctorRepository.updateDoctor(doctorId, finalUpdates);
 
     if (!updatedDoctor) {
-      throw new AppError(ErrorMessages.PROFILE_UPDATE_FAILED, 500);
+      throw new AppError(ErrorMessages.PROFILE_UPDATE_FAILED, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     return { success: true, updatedDoctor: JSON.parse(JSON.stringify(updatedDoctor)) };

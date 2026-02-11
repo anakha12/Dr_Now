@@ -12,14 +12,14 @@ export abstract class BaseUseCase<DTO extends object, Response> {
     const errors = await validate(dto, { whitelist: true });
 
     if (errors.length > 0) {
-      const messages = this.extractErrors(errors);
+      const messages = this._extractErrors(errors);
       throw new Error(messages);
     }
 
     return dto;
   }
 
-  private extractErrors(errors: ValidationError[]): string {
+  private _extractErrors(errors: ValidationError[]): string {
     const result: string[] = [];
 
     const getErrors = (errs: ValidationError[]) => {

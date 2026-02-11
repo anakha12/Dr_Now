@@ -1,9 +1,9 @@
 import express from "express";
-import { AuthController } from "../controllers/authController";
+import { userAuthController } from "../../di/userDI";
 
 const router = express.Router();
-const authController = new AuthController();
 
-router.get("/refresh-token", (req, res) => authController.refreshToken(req, res));
+
+router.get("/refresh-token", (req, res) => userAuthController.refreshToken(req, res));
 
 export default router;

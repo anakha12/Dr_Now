@@ -7,8 +7,8 @@ import { ErrorMessages } from "../../../utils/Messages";
 
 export class StripeWebhookUseCase {
   constructor(
-    private readonly bookingRepo: IBookingRepository,
-    private readonly adminWalletRepo: IAdminWalletRepository
+    private readonly _bookingRepo: IBookingRepository,
+    private readonly _adminWalletRepo: IAdminWalletRepository
   ) {}
 
   async handleCheckoutSession(session: Stripe.Checkout.Session) {
@@ -37,10 +37,10 @@ export class StripeWebhookUseCase {
     );
 
     // Save booking
-    const savedBooking = await this.bookingRepo.createBooking(booking);
+    const savedBooking = await this._bookingRepo.createBooking(booking);
 
     // Update admin wallet with commission
-    await this.adminWalletRepo.creditCommission(
+    await this._adminWalletRepo.creditCommission(
       {
         amount: commissionAmount,
         doctorId: metadata.doctorId,

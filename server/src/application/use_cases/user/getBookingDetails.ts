@@ -3,20 +3,21 @@ import { IBookingRepository } from "../../../domain/repositories/bookingReposito
 import { BookingResponseDTO } from "../../../interfaces/dto/response/user/bookings.dto";
 import { ErrorMessages } from "../../../utils/Messages";
 import { AppError } from "../../../utils/AppError";
+import { HttpStatus } from "../../../utils/HttpStatus";
 
 export class GetBookingDetails implements GetBookingDetails{
-  constructor(private bookingRepo: IBookingRepository) {}
+  constructor(private _bookingRepo: IBookingRepository) {}
 
-  async execute(bookingId: string, userId: string) {2
+  async execute(bookingId: string, userId: string) {
     
     if (!bookingId || !userId) {
-      throw new AppError(ErrorMessages.BOOKING_ID_AND_DOCTOR_ID_REQUIRED, 400);
+      throw new AppError(ErrorMessages.BOOKING_ID_AND_DOCTOR_ID_REQUIRED, HttpStatus.BAD_REQUEST);
     }
 
-    const booking = await this.bookingRepo.findBookingByIdAndUser(bookingId, userId);
+    const booking = await this._bookingRepo.findBookingByIdAndUser(bookingId, userId);
   
     if (!booking) {
-      throw new AppError(ErrorMessages.BOOKING_NOT_FOUND, 404);
+      throw new AppError(ErrorMessages.BOOKING_NOT_FOUND, HttpStatus.NOT_FOUND);
     }
 
     const totalAmount = (booking.doctorEarning ?? 0) + (booking.commissionAmount ?? 0);

@@ -378,7 +378,7 @@ async getDoctorAvailabilityRules(req: Request, res: Response) {
 
     const rules = await this._getDoctorAvailabilityRulesUseCase.execute(doctorId);
 
-    res.status(200).json(rules);
+    res.status(HttpStatus.OK).json(rules);
   } catch (err: unknown) {
       handleControllerError(res, err, HttpStatus.BAD_REQUEST);
   }
@@ -389,7 +389,7 @@ async getDoctorAvailabilityExceptions(req: Request, res: Response) {
     const { doctorId } = req.params;
 
     const exceptions = await this._getDoctorAvailabilityExceptionsUseCase.execute({doctorId});
-    res.status(200).json(exceptions);
+    res.status(HttpStatus.OK).json(exceptions);
   } catch (err: unknown) {
       handleControllerError(res, err, HttpStatus.BAD_REQUEST);
   }

@@ -5,7 +5,7 @@ import mongoose from "mongoose";
 
 export class AdminWalletRepositoryImpl implements IAdminWalletRepository {
 
-  private buildTransactionPayload(
+  private _buildTransactionPayload(
     transaction: AdminWalletTransaction,
     type: 'credit' | 'debit',
     amount: number
@@ -22,7 +22,7 @@ export class AdminWalletRepositoryImpl implements IAdminWalletRepository {
   }
 
   async creditCommission(transaction: AdminWalletTransaction, amount: number): Promise<void> {
-    const payload = this.buildTransactionPayload(transaction, "credit", amount);
+    const payload = this._buildTransactionPayload(transaction, "credit", amount);
     let wallet = await AdminWalletModel.findOne();
 
     if (wallet) {
@@ -38,7 +38,7 @@ export class AdminWalletRepositoryImpl implements IAdminWalletRepository {
   }
 
   async debitCommission(transaction: AdminWalletTransaction, amount: number): Promise<void> {
-    const payload = this.buildTransactionPayload(transaction, "debit", amount);
+    const payload = this._buildTransactionPayload(transaction, "debit", amount);
     let wallet = await AdminWalletModel.findOne();
 
     if (wallet) {

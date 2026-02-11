@@ -14,7 +14,7 @@ const Patients = () => {
   const [totalPages, setTotalPages] = useState(1);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedUser, setSelectedUser] = useState<AdminUser | null>(null); 
-  const patientsPerPage = 2;
+  const patientsPerPage = 5;
 
   const fetchPatients = async () => {
     try {
