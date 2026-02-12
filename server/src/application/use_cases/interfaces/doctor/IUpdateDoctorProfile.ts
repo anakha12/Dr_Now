@@ -1,4 +1,4 @@
-// IUpdateDoctorProfile.ts
+
 import { UpdateDoctorProfileDTO } from "../../../../interfaces/dto/request/update-doctorProfile.dto";
 
 export interface IUpdateDoctorProfile {

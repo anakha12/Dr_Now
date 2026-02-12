@@ -13,13 +13,25 @@ const UserBookings = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(true);
+
+  // Filters state
+  const [statusFilter, setStatusFilter] = useState<string>("");
+  const [dateFilter, setDateFilter] = useState<string>("");
+  const [doctorFilter, setDoctorFilter] = useState<string>("");
+  const [specializationFilter, setSpecializationFilter] = useState<string>("");
+
   const { addNotification, confirmMessage, promptInput } = useNotifications();
   const navigate = useNavigate();
 
   const fetchBookings = async (page: number) => {
     setLoading(true);
     try {
-      const res = await getUserBookings(page, ITEMS_PER_PAGE);
+      const res = await getUserBookings(page, ITEMS_PER_PAGE, {
+        status: statusFilter,
+        date: dateFilter,
+        doctorName: doctorFilter,
+        specialization: specializationFilter,
+      });
       setBookings(res.bookings);
       setTotalPages(res.totalPages);
     } catch (error) {
@@ -31,7 +43,7 @@ const UserBookings = () => {
 
   useEffect(() => {
     fetchBookings(currentPage);
-  }, [currentPage]);
+  }, [currentPage, statusFilter, dateFilter, doctorFilter, specializationFilter]);
 
   const handleCancel = async (bookingId: string) => {
     const confirmed = await confirmMessage(Messages.DOCTOR.APPOINTMENTS.CONFIRM_CANCEL);
@@ -55,13 +67,8 @@ const UserBookings = () => {
     }
   };
 
-  const handlePrev = () => {
-    if (currentPage > 1) setCurrentPage((prev) => prev - 1);
-  };
-
-  const handleNext = () => {
-    if (currentPage < totalPages) setCurrentPage((prev) => prev + 1);
-  };
+  const handlePrev = () => currentPage > 1 && setCurrentPage((prev) => prev - 1);
+  const handleNext = () => currentPage < totalPages && setCurrentPage((prev) => prev + 1);
 
   const statusColor = (status: string) => {
     switch (status) {
@@ -83,6 +90,55 @@ const UserBookings = () => {
       >
         My Bookings
       </motion.h1>
+
+      {/* Filters */}
+      <div className="flex flex-wrap gap-4 mb-8 justify-center items-end">
+        <div>
+          <label className="block text-sm font-medium text-gray-700">Status</label>
+          <select
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+            className="mt-1 block w-full border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+          >
+            <option value="">All</option>
+            <option value="Upcoming">Upcoming</option>
+            <option value="Completed">Completed</option>
+            <option value="Cancelled">Cancelled</option>
+          </select>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700">Date</label>
+          <input
+            type="date"
+            value={dateFilter}
+            onChange={(e) => setDateFilter(e.target.value)}
+            className="mt-1 block w-full border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700">Doctor Name</label>
+          <input
+            type="text"
+            placeholder="Doctor Name"
+            value={doctorFilter}
+            onChange={(e) => setDoctorFilter(e.target.value)}
+            className="mt-1 block w-full border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700">Specialization</label>
+          <input
+            type="text"
+            placeholder="Specialization"
+            value={specializationFilter}
+            onChange={(e) => setSpecializationFilter(e.target.value)}
+            className="mt-1 block w-full border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+          />
+        </div>
+      </div>
 
       {loading ? (
         <p className="text-center text-gray-600">Loading...</p>
@@ -121,7 +177,7 @@ const UserBookings = () => {
                 </div>
 
                 <div className="mt-4 flex justify-end gap-3">
-                  {booking.status !== "Cancelled" && booking.status !== "Completed"&& booking.canCancel && (
+                  {booking.status !== "Cancelled" && booking.status !== "Completed" && booking.canCancel && (
                     <button
                       onClick={() => handleCancel(booking.id)}
                       className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-semibold transition"

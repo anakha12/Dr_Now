@@ -25,6 +25,7 @@ import { IGetFilteredDoctors } from "../../application/use_cases/interfaces/user
 import { IGetDoctorAvailabilityRules } from "../../application/use_cases/interfaces/user/IGetDoctorAvailabilityRules";
 import { IGetDoctorAvailabilityExceptions } from "../../application/use_cases/interfaces/user/IGetDoctorAvailabilityExceptions";
 import { IUpdateUserProfileUseCase } from "../../application/use_cases/interfaces/user/IUpdateUserProfile";
+import { GetUserBookingsRequestDTO } from "../../interfaces/dto/request/user-booking-user.dto";
 
 
 interface AuthenticatedRequest extends Request {
@@ -235,24 +236,35 @@ export class UserController {
     }
   }
 
-  async getUserBookings(req: AuthenticatedRequest, res: Response): Promise<void> {
+async getUserBookings(req: AuthenticatedRequest, res: Response): Promise<void> {
   try {
+    
     const userId = req.user?.id;
+
     if (!userId) {
       res.status(HttpStatus.UNAUTHORIZED).json({ error: Messages.UNAUTHORIZED });
       return;
     }
+    const query = req.query;
+    const dto: GetUserBookingsRequestDTO = {
+      userId,
+      page: Number(query.page) || 1,
+      limit: Number(query.limit) || 10,
+      status: query.status as string | undefined,
+      date: query.date as string | undefined,
+      doctorName: query.doctorName as string | undefined,
+      specialization: query.specialization as string | undefined,
+    };
 
-    const page = parseInt(req.query.page as string) || 1;
-    const limit = parseInt(req.query.limit as string) || 4;
+    const { bookings, totalPages, currentPage } =
+      await this._getUserBookingsUseCase.execute(dto);
 
-    const { bookings, totalPages } = await this._getUserBookingsUseCase.execute(userId, page, limit);
-
-    res.status(HttpStatus.OK).json({ bookings, totalPages, currentPage: page });
+    res.status(HttpStatus.OK).json({ bookings, totalPages, currentPage });
   } catch (err: unknown) {
-      handleControllerError(res, err);
+    handleControllerError(res, err);
   }
 }
+
 
 
     async cancelBooking(req: AuthenticatedRequest, res: Response): Promise<void> {

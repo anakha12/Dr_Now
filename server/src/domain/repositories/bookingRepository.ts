@@ -1,5 +1,7 @@
 import { Booking } from "../entities/booking.entity";
 import { PendingDoctorPayoutResponseDTO } from "../../interfaces/dto/response/admin/pending-doctor-payout.dto"
+import { BookingWithExtras } from "../types/BookingWithExtras";
+
 
 export interface IBookingRepository {
   createBooking(booking: Booking): Promise<Booking>;
@@ -18,6 +20,15 @@ export interface IBookingRepository {
     page: number,
     limit: number
   ): Promise<{ bookings: Booking[]; total: number }>;
+
+findUserBookingsWithFilters(
+  userId: string,
+  filters: { status?: string; date?: string; doctorName?: string; specialization?: string },
+  page: number,
+  limit: number
+): Promise<{ bookings: BookingWithExtras[]; total: number }>;
+
+
 
   getDoctorBookings(
     doctorId: string,

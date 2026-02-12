@@ -1,4 +1,4 @@
-// src/interfaces/dto/request/edit-doctor-availability-rule.dto.ts
+
 import { IsInt, IsOptional, IsString, Min, IsUUID } from "class-validator";
 
 export class EditDoctorAvailabilityRuleDTO {

@@ -1,4 +1,4 @@
-// src/application/usecases/doctor/deleteDoctorAvailabilityRule.usecase.ts
+
 import { BaseUseCase } from "../base-usecase";
 import { IDeleteDoctorAvailabilityRuleUseCase } from "../interfaces/doctor/IDeleteDoctorAvailabilityRuleUseCase";
 import { IAvailabilityRuleRepository } from "../../../domain/repositories/IAvailabilityRuleRepository";

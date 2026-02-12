@@ -4,6 +4,8 @@ import { Booking } from "../../../domain/entities/booking.entity";
 import { IBookingRepository } from "../../../domain/repositories/bookingRepository";
 import { PendingDoctorPayoutResponseDTO } from "../../../interfaces/dto/response/admin/pending-doctor-payout.dto";
 import { Role } from "../../../utils/Constance";
+import { BookingWithExtras } from "../../../domain/types/BookingWithExtras";
+
 interface IPopulatedDoctor {
   _id: mongoose.Types.ObjectId;
   name: string;
@@ -141,6 +143,74 @@ export class BookingRepositoryImpl implements IBookingRepository {
       total,
     };
   }
+
+async findUserBookingsWithFilters(
+  userId: string,
+  filters: { status?: string; date?: string; doctorName?: string; specialization?: string },
+  page: number,
+  limit: number
+): Promise<{ bookings: BookingWithExtras[]; total: number }> {
+  const skip = (page - 1) * limit;
+
+
+  const query: any = { userId: new mongoose.Types.ObjectId(userId) };
+
+  if (filters.status) query.status = filters.status;
+  if (filters.date) {
+    const start = new Date(filters.date);
+    start.setHours(0, 0, 0, 0); 
+
+    const end = new Date(filters.date);
+    end.setHours(23, 59, 59, 999); 
+
+    query.date = { $gte: start.toISOString(), $lte: end.toISOString() };
+  }
+
+
+  const aggregatePipeline: any[] = [
+    { $match: query },
+    { $lookup: { from: "doctors", localField: "doctorId", foreignField: "_id", as: "doctor" } },
+    { $unwind: "$doctor" },
+  ];
+
+  if (filters.doctorName) {
+    aggregatePipeline.push({ $match: { "doctor.name": { $regex: filters.doctorName, $options: "i" } } });
+  }
+
+  if (filters.specialization) {
+    aggregatePipeline.push({ $match: { "doctor.specialization": { $regex: filters.specialization, $options: "i" } } });
+  }
+
+  const [bookingsRaw, total] = await Promise.all([
+    BookingModel.aggregate([
+      ...aggregatePipeline,
+      { $sort: { date: -1, startTime: 1 } },
+      { $skip: skip },
+      { $limit: Number(limit) }, 
+    ]),
+    BookingModel.aggregate([...aggregatePipeline, { $count: "total" }]),
+  ]);
+
+const bookings: BookingWithExtras[] = bookingsRaw.map((b: any) => {
+  const domainBooking = this._toDomain(b);
+
+  return {
+    ...domainBooking,
+    id: domainBooking.id ?? b._id.toString(), 
+    doctorName: b.doctor?.name,
+    department: b.doctor?.specialization,
+    patientName: b.userId?.name,
+    slot: { from: b.startTime, to: b.endTime },
+    createdAt: b.createdAt,
+  };
+});
+
+
+  return { bookings, total: total[0]?.total || 0 };
+}
+
+
+
 
   async findBookingsByDoctorAndDate(
     doctorId: string,

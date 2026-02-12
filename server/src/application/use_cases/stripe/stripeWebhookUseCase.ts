@@ -1,4 +1,4 @@
-// application/use_cases/stripe/stripeWebhookUseCase.ts
+
 import { Stripe } from "stripe";
 import { IBookingRepository } from "../../../domain/repositories/bookingRepository";
 import { Booking } from "../../../domain/entities/booking.entity";
@@ -22,7 +22,7 @@ export class StripeWebhookUseCase {
     const commissionAmount = parseFloat((fee * commissionRate).toFixed(2));
     const doctorEarning = parseFloat((fee - commissionAmount).toFixed(2));
 
-    // Create Booking entity
+
     const booking = new Booking(
       metadata.doctorId,
       metadata.userId,
@@ -36,10 +36,10 @@ export class StripeWebhookUseCase {
       commissionAmount
     );
 
-    // Save booking
+
     const savedBooking = await this._bookingRepo.createBooking(booking);
 
-    // Update admin wallet with commission
+
     await this._adminWalletRepo.creditCommission(
       {
         amount: commissionAmount,
