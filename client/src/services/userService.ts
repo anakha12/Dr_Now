@@ -151,15 +151,21 @@ export const getDoctorAvailabilityExceptions = async (doctorId: string) => {
     throw handleError(error, Messages.AVAILABILITY.FETCH_EXCEPTIONS_FAILED);
   }
 };
-
-export const getUserBookings = async (page = 1, limit = 4) => {
+export const getUserBookings = async (
+  page = 1,
+  limit = 4,
+  filters: { status?: string; date?: string; doctorName?: string; specialization?: string } = {}
+) => {
   try {
-    const response = await userAxios.get(UserRoutes.BOOKINGS, { params: { page, limit } });
+    const response = await userAxios.get(UserRoutes.BOOKINGS, {
+      params: { page, limit, ...filters },
+    });
     return response.data;
   } catch (error) {
     throw handleError(error, Messages.DOCTOR.APPOINTMENTS.FETCH_FAILED);
   }
 };
+
 
 export const logoutUser = async () => {
   try {

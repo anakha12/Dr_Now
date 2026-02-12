@@ -17,7 +17,6 @@ export class BookingResponseDTO {
   @Expose()
   date!: string;
 
-  // Map DB fields into slot { from, to }
   @Expose()
   @Transform(({ obj }) => ({ from: obj.startTime, to: obj.endTime }))
   slot!: { from: string; to: string };
@@ -37,7 +36,7 @@ export class BookingResponseDTO {
   @Expose()
   createdAt!: Date;
 
-  // Computed getters
+
   @Expose()
   get time(): string {
     return `${this.slot.from} - ${this.slot.to}`;

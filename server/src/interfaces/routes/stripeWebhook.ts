@@ -1,4 +1,4 @@
-// interfaces/routes/stripeWebhook.ts
+
 import express from "express";
 import bodyParser from "body-parser";
 import { BookingRepositoryImpl } from "../../infrastructure/database/repositories/bookingRepositoryImpl";

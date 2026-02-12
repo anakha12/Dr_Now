@@ -1,4 +1,4 @@
-// application/dto/slot.dto.ts
+
 import { IsString, IsBoolean } from "class-validator";
 
 export class SlotDto {
