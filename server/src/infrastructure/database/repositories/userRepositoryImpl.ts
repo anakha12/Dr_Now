@@ -1,11 +1,21 @@
-import UserModel from "../models/userModel";
+import UserModel, {IUSER} from "../models/userModel";
 import { IUserRepository } from "../../../domain/repositories/userRepository";
 import { UserEntity } from "../../../domain/entities/userEntity";
 import { WalletTransactionUser } from "../../../domain/entities/walletTransactionUserEntity";
 import { ErrorMessages, Messages } from "../../../utils/Messages";
 import { Role } from "../../../utils/Constance";
+import { BaseRepository } from "../../../domain/repositories/baseRepository";
+import { Document, Types } from "mongoose";
 
-export class UserRepositoryImpl implements IUserRepository {
+type UserDoc = IUSER & Document;
+
+export class UserRepositoryImpl
+  extends BaseRepository< UserDoc>
+  implements IUserRepository
+{
+  constructor() {
+    super(UserModel); 
+  }
 
   async getFilteredUsers(
     filters: { search?: string; gender?: string; minAge?: number; maxAge?: number },
@@ -102,7 +112,7 @@ export class UserRepositoryImpl implements IUserRepository {
   }
 
   async findUserById(userId: string): Promise<UserEntity | null> {
-    const user = await UserModel.findById(userId);
+    const user = await this.findById(userId); 
     return user ? this._toDomain(user) : null;
   }
 
@@ -126,12 +136,19 @@ export class UserRepositoryImpl implements IUserRepository {
     return user ? this._toDomain(user) : null;
   }
 
-  async createUser(userData: UserEntity): Promise<UserEntity> {
-    const newUser = new UserModel(userData);
-    const savedUser = await newUser.save();
-    return this._toDomain(savedUser);
-  }
 
+async createUser(userData: UserEntity): Promise<UserEntity> {
+  const mappedData: Partial<UserDoc> = {
+    ...userData,
+    walletTransactions: userData.walletTransactions?.map(tx => ({
+      ...tx,
+      bookingId: tx.bookingId ? new Types.ObjectId(tx.bookingId) : undefined,
+    })),
+  };
+
+  const newUser = await this.create(mappedData);
+  return this._toDomain(newUser);
+}
   async updateUserByEmail(email: string, updates: Partial<UserEntity>): Promise<UserEntity> {
     const updatedUser = await UserModel.findOneAndUpdate({ email }, updates, { new: true });
     if (!updatedUser) throw new Error( ErrorMessages.USER_NOT_FOUND );
@@ -139,8 +156,16 @@ export class UserRepositoryImpl implements IUserRepository {
   }
 
   async updateUser(id: string, updates: Partial<UserEntity>): Promise<UserEntity> {
-    const updatedUser = await UserModel.findByIdAndUpdate(id, updates, { new: true });
-    if (!updatedUser) throw new Error( ErrorMessages.USER_NOT_FOUND );
+
+    const mappedUpdates: Partial<UserDoc> = {
+      ...updates,
+      walletTransactions: updates.walletTransactions?.map(tx => ({
+        ...tx,
+        bookingId: tx.bookingId ? new Types.ObjectId(tx.bookingId) : undefined,
+      })),
+    };
+    const updatedUser = await this.updateById(id, mappedUpdates); 
+    if (!updatedUser) throw new Error(ErrorMessages.USER_NOT_FOUND);
     return this._toDomain(updatedUser);
   }
 
