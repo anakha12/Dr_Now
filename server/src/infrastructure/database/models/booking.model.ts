@@ -52,4 +52,11 @@ const BookingSchema: Schema = new Schema<IBooking>(
   { timestamps: true }
 );
 
+
+BookingSchema.index(
+  { doctorId: 1, date: 1, startTime: 1 }, 
+  { unique: true }
+);
+
+
 export default mongoose.model<IBooking>('Booking', BookingSchema);
