@@ -39,7 +39,16 @@ export class StripeWebhookUseCase {
     );
 
 
-    const savedBooking = await this._bookingRepo.createBooking(booking);
+    let savedBooking;
+    try {
+      savedBooking = await this._bookingRepo.createBooking(booking);
+    } catch (err: any) {
+     
+      if (err.code === 11000) {
+        throw new Error("This slot is already booked. Please choose another time.");
+      }
+      throw err; 
+    }
 
 
     await this._adminWalletRepo.creditCommission(

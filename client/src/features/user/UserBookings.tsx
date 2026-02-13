@@ -5,6 +5,7 @@ import { cancelUserBooking, getUserBookings } from "../../services/userService";
 import { useNotifications } from "../../context/NotificationContext";
 import type { Booking } from "../../types/booking";
 import { Messages } from "../../constants/messages";
+import { getLogger } from "loglevel";
 
 const ITEMS_PER_PAGE = 4;
 
@@ -36,6 +37,7 @@ const UserBookings = () => {
       setTotalPages(res.totalPages);
     } catch (error) {
       addNotification(Messages.DOCTOR.APPOINTMENTS.FETCH_FAILED, "ERROR");
+      
     } finally {
       setLoading(false);
     }
