@@ -8,6 +8,9 @@ import { Messages, NotificationDefaults } from "../../constants/messages";
 import { ZodError } from "zod";
 import { userRegisterSchema } from "../../validation/userSchema"; 
 import logger from "../../utils/logger";
+import { useDispatch } from "react-redux";
+import { setUserAuth } from "../../redux/slices/authSlice";
+import { userAxios } from "../../services/axiosInstances";
 
 const UserRegister = () => {
   const [email, setEmail] = useState("");
@@ -22,6 +25,7 @@ const UserRegister = () => {
   const [fadeIn, setFadeIn] = useState(false);
 
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const { addNotification } = useNotifications();
 
   const handleSendOtp = async () => {
@@ -80,7 +84,10 @@ const UserRegister = () => {
         email: user.email || "",
         uid: user.uid,
       });
-      localStorage.setItem("token", response.token);
+       localStorage.setItem("token", response.token);
+      localStorage.setItem("user", JSON.stringify(response.user));
+      dispatch(setUserAuth({ isAuthenticated: true, user: response.user }));
+      userAxios.defaults.headers.common["Authorization"] = `Bearer ${response.token}`;
       addNotification(Messages.DOCTOR.REGISTRATION.OTP_SENT, "SUCCESS");
       navigate("/user/dashboard");
     } catch (err) {

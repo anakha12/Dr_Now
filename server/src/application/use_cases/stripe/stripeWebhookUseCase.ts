@@ -5,6 +5,8 @@ import { Booking } from "../../../domain/entities/booking.entity";
 import { IAdminWalletRepository } from "../../../domain/repositories/adminWalletRepository";
 import { ErrorMessages } from "../../../utils/Messages";
 
+
+const Max_limit=5;
 export class StripeWebhookUseCase {
   constructor(
     private readonly _bookingRepo: IBookingRepository,

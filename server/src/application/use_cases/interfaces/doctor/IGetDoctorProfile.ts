@@ -1,5 +1,6 @@
-import { DoctorEntity } from "../../../../domain/entities/doctorEntity";
+
+import { DoctorProfileResponseDTO } from "../../../../interfaces/dto/response/doctor/doctor-profile-response.dto";
 
 export interface IGetDoctorProfile {
-  execute(id: string): Promise<DoctorEntity>;
+  execute(id: string): Promise<DoctorProfileResponseDTO>;
 }

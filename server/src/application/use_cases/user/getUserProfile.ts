@@ -8,7 +8,9 @@ import { ErrorMessages } from "../../../utils/Messages";
 export class GetUserProfile implements IGetUserProfile {
   constructor(private _userRepository: IUserRepository) {}
 
-  async execute(userId: string) {
+  async execute(
+    userId: string
+  ): Promise<FullUserProfileResponseDTO | BasicUserProfileResponseDTO> {
     const user = await this._userRepository.findUserById(userId);
     if (!user) throw new Error(ErrorMessages.USER_NOT_FOUND);
 

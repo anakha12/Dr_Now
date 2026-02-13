@@ -10,7 +10,7 @@ export class GetWalletSummary implements IGetWalletSummaryUseCase{
     private _bookingRepo: IBookingRepository
   ) {}
 
-  async execute() {
+   async execute(): Promise<WalletSummaryResponseDTO> {
     const wallet = await this._walletRepo.getSummary();
     const bookings = await this._bookingRepo.getBookingsForWalletSummary(); 
 

@@ -190,7 +190,7 @@ async getAllUsers(req: Request, res: Response): Promise<void> {
       const page = parseInt(req.query.page as string) || 1;
       const limit = parseInt(req.query.limit as string) || 10;
       const search=(req.query.search as string)|| "";
-       const { departments, totalPages } = await this._getDepartmentsUseCase.execute(page, limit, search);
+       const { departments, totalPages } = await this._getDepartmentsUseCase.execute({page, limit, search});
       res.status(HttpStatus.OK).json({ departments, totalPages });
     } catch (err: unknown) {
       handleControllerError(res, err, HttpStatus.INTERNAL_SERVER_ERROR);

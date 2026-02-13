@@ -1,18 +1,14 @@
 
-import { DepartmentEntity } from "../../../../domain/entities/department.entity";
-import { DoctorListResponseDTO } from "../../../../interfaces/dto/response/user/doctor-details.dto";
+import { GetFilteredDoctorsRequestDTO } from "../../../../interfaces/dto/request/filtered-doctor-user.dto";
+import { DoctorListResponseDTO } from "../../../../interfaces/dto/response/user/doctor-list.dto"
+import { DepartmentResponseDTO } from "../../../../interfaces/dto/response/admin/department-response.dto";
 
 export interface IGetFilteredDoctors {
-  execute(filters: {
-    search?: string;
-    specialization?: string;
-    maxFee?: number;
-    gender?: string;
-    page: number;
-    limit: number;
-  }): Promise<{
+  execute(
+    dto: GetFilteredDoctorsRequestDTO
+  ): Promise<{
     doctors: DoctorListResponseDTO[];
-    specializations: DepartmentEntity[];
+    specializations: DepartmentResponseDTO[];
     pagination: {
       currentPage: number;
       totalPages: number;

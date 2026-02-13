@@ -24,14 +24,14 @@ export interface IUserRepository {
   findUserById(userId: string): Promise<UserEntity | null>;
   updateUserWalletAndTransactions(userId: string, amount: number, transaction: WalletTransactionUser): Promise<void>;
   getPaginatedWallet(
-  userId: string,
-  page: number,
-  limit: number
-): Promise<{
-  walletBalance: number;
-  walletTransactions: WalletTransactionUser[];
-  totalTransactions: number;
-}>;
-
+    userId: string,
+    page: number,
+    limit: number
+  ): Promise<{
+    walletBalance: number;
+    walletTransactions: WalletTransactionUser[];
+    totalTransactions: number;
+  }>;
+   findByEmailOrUid(email: string, uid: string): Promise<UserEntity | null>;
 
 }

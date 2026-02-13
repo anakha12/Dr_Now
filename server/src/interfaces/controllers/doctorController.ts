@@ -14,7 +14,7 @@ import { ICancelDoctorBooking } from "../../application/use_cases/interfaces/doc
 import { IGetAllDepartmentsUseCase } from "../../application/use_cases/interfaces/doctor/IGetAllDepartmentsUseCase";
 import { IGetDoctorWalletSummary } from "../../application/use_cases/interfaces/doctor/IGetDoctorWalletSummary";
 import { ICompleteDoctorProfile } from "../../application/use_cases/interfaces/doctor/ICompleteDoctorProfile";
-import { IGetBookingDetails } from "../../application/use_cases/interfaces/user/IGetBookingDetails";
+import { IGetBookingDetailsDoctor } from "../../application/use_cases/interfaces/doctor/IGetBookingDetailsDoctor";
 import { IDoctorLogin } from "../../application/use_cases/interfaces/doctor/IDoctorLogin";
 import { IAddDoctorAvailabilityException } from "../../application/use_cases/interfaces/doctor/IAddDoctorAvailabilityException";
 import { IGetDoctorAvailabilityExceptions } from "../../application/use_cases/interfaces/doctor/IGetDoctorAvailabilityExceptions";
@@ -46,7 +46,7 @@ export class DoctorController {
       private _getAllDepartmentsUseCase: IGetAllDepartmentsUseCase,
       private _getDoctorWalletSummaryUseCase: IGetDoctorWalletSummary,
       private _completeProfileUseCase: ICompleteDoctorProfile,
-      private _getBookingDetailsDoctorUseCase: IGetBookingDetails,
+      private _getBookingDetailsDoctorUseCase: IGetBookingDetailsDoctor,
       private _addDoctorAvailabilityExceptionUsecase: IAddDoctorAvailabilityException,
       private _getDoctorAvailabilityExceptionsUseCase: IGetDoctorAvailabilityExceptions,
       private _deleteDoctorAvailabilityExceptionUseCase: IDeleteDoctorAvailabilityExceptionUseCase,
@@ -352,7 +352,7 @@ async getBookingDetails(req: AuthRequest, res: Response): Promise<void> {
       return;
     }
 
-    const booking = await this._getBookingDetailsDoctorUseCase.execute(bookingId, userId);
+    const booking = await this._getBookingDetailsDoctorUseCase.execute({bookingId,  doctorId: userId!});
     res.status(HttpStatus.OK).json(booking);
   } catch (err: unknown) {
     handleControllerError(res, err);

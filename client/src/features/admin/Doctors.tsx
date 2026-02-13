@@ -36,8 +36,8 @@ const Doctors = () => {
   const [loading, setLoading] = useState(false);
 
   const doctorsPerPage = 5;
+  
   const { addNotification } = useNotifications();
-
   useEffect(() => {
       const fetchDepartments = async () => {
         try {

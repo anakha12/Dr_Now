@@ -3,43 +3,62 @@ import { IDepartmentRepository } from "../../../domain/repositories/departmentRe
 import { IGetFilteredDoctors } from "../interfaces/user/IGetFilteredDoctors";
 import { plainToInstance } from "class-transformer";
 import { DoctorListResponseDTO } from "../../../interfaces/dto/response/user/doctor-list.dto";
-export class GetFilteredDoctorsUseCase implements IGetFilteredDoctors{
+import { GetFilteredDoctorsRequestDTO } from "../../../interfaces/dto/request/filtered-doctor-user.dto";
+import { DepartmentResponseDTO  } from "../../../interfaces/dto/response/user/department.dto";
+import { BaseUseCase } from "../base-usecase";
+
+
+export class GetFilteredDoctorsUseCase
+  extends BaseUseCase<
+    GetFilteredDoctorsRequestDTO,
+    {
+      doctors: DoctorListResponseDTO[];
+      specializations: DepartmentResponseDTO[];
+      pagination: { currentPage: number; totalPages: number; totalItems: number };
+    }
+  >
+  implements IGetFilteredDoctors
+{
   constructor(
     private _doctorRepository: IDoctorRepository,
     private _departmentRepository: IDepartmentRepository
-  ) {}
+  ) {
+    super()
+  }
 
-  async execute(filters: {
-    search?: string;
-    specialization?: string;
-    maxFee?: number;
-    gender?: string;
-    page?: number;
-    limit?: number;
-  }) {
-    const page = filters.page || 1;
-    const limit = filters.limit || 6;
-    const skip = (page - 1) * limit;
+  async execute(
+    dto: GetFilteredDoctorsRequestDTO
+  ): Promise<{
+    doctors: DoctorListResponseDTO[];
+    specializations: DepartmentResponseDTO[];
+    pagination: { currentPage: number; totalPages: number; totalItems: number };
+  }> {
+   
+    const filters = await this.validateDto(GetFilteredDoctorsRequestDTO, dto);
 
+    const skip = (filters.page - 1) * filters.limit;
+
+   
     const [doctors, totalCount, specializations] = await Promise.all([
-      this._doctorRepository.getFilteredDoctors(filters, skip, limit),
+      this._doctorRepository.getFilteredDoctors(filters, skip, filters.limit, { createdAt: -1 }),
       this._doctorRepository.countFilteredDoctors(filters),
       this._departmentRepository.getDepartments(1, 100),
     ]);
 
-    const totalPages = Math.ceil(totalCount / limit);
-   
-    const doctorDTOs=plainToInstance(DoctorListResponseDTO, doctors)
-   
+    const totalPages = Math.ceil(totalCount / filters.limit);
+
+  
+    const doctorDTOs = plainToInstance(DoctorListResponseDTO, doctors);
+    const departmentDTOs = plainToInstance(DepartmentResponseDTO, specializations);
+
     return {
-      doctors : doctorDTOs,
-      specializations,
+      doctors: doctorDTOs,
+      specializations: departmentDTOs,
       pagination: {
-        currentPage: page,
+        currentPage: filters.page,
         totalPages,
         totalItems: totalCount,
       },
     };
   }
 }
-

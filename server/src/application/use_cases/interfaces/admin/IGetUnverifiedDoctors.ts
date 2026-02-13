@@ -1,11 +1,5 @@
-import { DoctorEntity } from "../../../../domain/entities/doctorEntity";
+import { GetUnverifiedDoctorsResponseDTO } from "../../../../interfaces/dto/response/admin/unverified-doctor-response.dto";
 
 export interface IGetUnverifiedDoctors {
-  execute(
-    page: number,
-    limit: number
-  ): Promise<{
-    doctors: DoctorEntity[];
-    total: number;
-  }>;
+  execute(page: number, limit: number): Promise<GetUnverifiedDoctorsResponseDTO>;
 }

@@ -14,7 +14,7 @@ const UserBookings = () => {
   const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(true);
 
-  // Filters state
+
   const [statusFilter, setStatusFilter] = useState<string>("");
   const [dateFilter, setDateFilter] = useState<string>("");
   const [doctorFilter, setDoctorFilter] = useState<string>("");
@@ -53,7 +53,9 @@ const UserBookings = () => {
       Messages.DOCTOR.APPOINTMENTS.PROMPT_CANCEL_REASON,
       Messages.DOCTOR.APPOINTMENTS.PROMPT_CANCEL_PLACEHOLDER
     );
+    console.log(reason, "reason")
     if (!reason || reason.trim() === "") {
+      console.log("hii")
       addNotification(Messages.DOCTOR.APPOINTMENTS.CANCEL_REASON_REQUIRED, "WARNING");
       return;
     }

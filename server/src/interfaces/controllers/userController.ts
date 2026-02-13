@@ -66,7 +66,7 @@ export class UserController {
     try {
       const { email, password, otp } = req.body;    
       await this._verifyUserOtp.execute(email, otp);
-      const userData = { email, password } as any;
+      const userData = { email, password, otp };
       await this._registerUser.execute(userData);
       res.status(HttpStatus.CREATED).json({ message: Messages.USER_REGISTERED_SUCCESSFULLY });
     } catch (err: unknown) {
@@ -76,8 +76,8 @@ export class UserController {
 
   async sendOtp(req: Request, res: Response): Promise<void> {
     try {
-
-      const result = await this._sendUserOtp.execute(req.body);
+      console.log(req.body)
+       await this._sendUserOtp.execute(req.body);
       res.status(HttpStatus.OK).json({ message: Messages.OTP_SENT });
     } catch (err: unknown) {
       handleControllerError(res, err, HttpStatus.INTERNAL_SERVER_ERROR);
@@ -86,7 +86,7 @@ export class UserController {
 
  async login(req: Request, res: Response): Promise<void> {
   try {
-    const { email, password } = req.body;
+    
     const { accessToken, refreshToken, user } = await this._userLogin.execute(req.body);
 
     const accessTokenMaxAge= Number(process.env.ACCESS_TOKEN_COOKIE_MAXAGE);
@@ -129,6 +129,7 @@ export class UserController {
 
   async googleLogin(req: Request, res: Response): Promise<void> {
     try {
+
       const { email, name, uid } = req.body;
       if (!email || !uid) {
         res.status(HttpStatus.BAD_REQUEST).json({ error: Messages.MISSING_GOOGLE_INFO });
@@ -187,14 +188,8 @@ export class UserController {
 
   async createCheckoutSession(req: Request, res: Response): Promise<void> {
     try {
-      const { doctorId, userId, slot, fee, date } = req.body;
-      const { sessionId } = await this._createStripeSessionUseCase.execute(
-        doctorId,
-        userId,
-        slot,
-        fee,
-        date
-      );
+      const inputDto = req.body;
+      const { sessionId } = await this._createStripeSessionUseCase.execute(inputDto);
 
       res.status(HttpStatus.OK).json({
         sessionId,
@@ -282,7 +277,7 @@ async getUserBookings(req: AuthenticatedRequest, res: Response): Promise<void> {
           return;
         }
 
-        const result = await this._cancelUserBookingUseCase.execute(bookingId, userId, req.body.reason);
+        const result = await this._cancelUserBookingUseCase.execute({bookingId, userId, reason});
 
         if (!result.success) {
           res.status(HttpStatus.BAD_REQUEST).json({ error: result.message });

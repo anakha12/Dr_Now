@@ -7,7 +7,11 @@ import { ErrorMessages } from "../../../utils/Messages";
 export class GetUserWalletUseCase implements IGetUserWallet{
   constructor(private _userRepository: IUserRepository) {}
 
-  async execute(userId: string, page: number, limit: number) {
+  async execute(
+    userId: string,
+    page: number,
+    limit: number
+  ): Promise<UserWalletResponseDTO> {
     
     const user = await this._userRepository.getPaginatedWallet(userId, page, limit);
     if (!user) throw new Error( ErrorMessages.USER_NOT_FOUND);

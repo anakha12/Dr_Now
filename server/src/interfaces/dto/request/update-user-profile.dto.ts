@@ -1,7 +1,11 @@
+
 import { IsOptional, IsString, IsNumber, IsDateString, IsEnum } from "class-validator";
 import { Expose, Transform } from "class-transformer";
 
-export class UpdateUserProfileDto {
+export class UpdateUserProfileRequestDTO {
+  @IsString()
+  userId!: string; // required
+
   @IsOptional()
   @IsString()
   @Expose()
@@ -39,10 +43,11 @@ export class UpdateUserProfileDto {
 
   @IsOptional()
   @Expose()
-  image?: string; 
+  image?: string;
+
   @IsOptional()
   @IsNumber()
-  @Transform(({ value }) => value !== undefined ? Number(value) : undefined)
+  @Transform(({ value }) => (value !== undefined ? Number(value) : undefined))
   @Expose()
   age?: number;
 
