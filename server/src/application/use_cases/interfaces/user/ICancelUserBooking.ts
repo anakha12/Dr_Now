@@ -1,3 +1,8 @@
+import { CancelBookingRequestDTO } from "../../../../interfaces/dto/request/cancel-booking.request.dto";
+import { CancelBookingResponseDTO } from "../../../../interfaces/dto/response/user/cancel-booking.dto";
+
 export interface ICancelUserBooking {
-  execute(bookingId: string, userId: string, reason: string): Promise<{ success: boolean; message?: string }>;
+  execute(
+    data: CancelBookingRequestDTO
+  ): Promise<CancelBookingResponseDTO>;
 }

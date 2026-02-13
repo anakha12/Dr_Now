@@ -1,12 +1,6 @@
-import { DepartmentEntity } from "../../../../domain/entities/department.entity";
+import { GetDepartmentsRequestDTO } from "../../../../interfaces/dto/request/get-departments-admin.dto";
+import { GetDepartmentsResponseDTO } from "../../../../interfaces/dto/response/admin/get-departments.dto";
 
 export interface IGetDepartmentsUseCase {
-  execute(
-    page: number,
-    limit: number,
-    search: string
-  ): Promise<{
-    departments: DepartmentEntity[];
-    totalPages: number;
-  }>;
+  execute(dto: GetDepartmentsRequestDTO): Promise<GetDepartmentsResponseDTO>;
 }

@@ -1,36 +1,62 @@
+import { BaseUseCase } from "../base-usecase";
 import { IUserRepository } from "../../../domain/repositories/userRepository";
+import { GoogleLoginRequestDTO } from "../../../interfaces/dto/request/google-login.dto";
+import { GoogleLoginUserResponseDTO } from "../../../interfaces/dto/response/user/google-login-user.dto";
+import { plainToInstance } from "class-transformer";
 import jwt from "jsonwebtoken";
-import { UserEntity } from "../../../domain/entities/userEntity";
 import { IGoogleLoginUser } from "../interfaces/user/IGoogleLoginUser";
 
-
-interface GoogleUserPayload {
+interface CreateUserDTO {
   email: string;
-  name?: string;
   uid: string;
+  name?: string;
+  password: string;
 }
 
-export class GoogleLoginUser implements IGoogleLoginUser{
-  constructor(private _userRepository: IUserRepository) {}
+export class GoogleLoginUser
+  extends BaseUseCase<GoogleLoginRequestDTO, GoogleLoginUserResponseDTO>
+  implements IGoogleLoginUser
+{
+  constructor(private _userRepository: IUserRepository) {
+    super();
+  }
 
-  async execute(googleUser: GoogleUserPayload): Promise<{ token: string; user: any }> {
-    let user = await this._userRepository.findByEmail(googleUser.email);
+  async execute(dto: GoogleLoginRequestDTO): Promise<GoogleLoginUserResponseDTO> {
+    const validatedDto = await this.validateDto(GoogleLoginRequestDTO, dto);
 
+   
+    let user = await this._userRepository.findByEmailOrUid(validatedDto.email, validatedDto.uid);
+
+   
     if (!user) {
-      user = await this._userRepository.createUser({
-        email: googleUser.email,
-        uid: googleUser.uid,
-        name: googleUser.name,
+      const createDto: CreateUserDTO = {
+        email: validatedDto.email,
+        uid: validatedDto.uid,
+        name: validatedDto.name,
         password: "", 
-        } as UserEntity);
+      };
+
+      user = await this._userRepository.createUser(createDto);
+    } else {
+     
+      if (!user.uid) {
+        await this._userRepository.updateUserByEmail(user.email, { uid: validatedDto.uid });
+      }
     }
 
+    
     const payload = { userId: user.id, email: user.email };
-    const token = jwt.sign(payload, process.env.JWT_SECRET!, {
-        expiresIn: "1h",
-    });
+    const token = jwt.sign(payload, process.env.JWT_SECRET!, { expiresIn: "1h" });
 
+    const response = {
+      token,
+      user: {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+      },
+    };
 
-    return { token, user: { email: user.email, id: user.id, name: user.name } };
+    return plainToInstance(GoogleLoginUserResponseDTO, response);
   }
 }

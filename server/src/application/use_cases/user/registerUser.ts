@@ -1,26 +1,35 @@
+// src/application/usecases/user/register-user.usecase.ts
+import { BaseUseCase } from "../base-usecase";
 import { IUserRepository } from "../../../domain/repositories/userRepository";
-import { UserEntity } from "../../../domain/entities/userEntity";
+import { RegisterUserRequestDTO } from "../../../interfaces/dto/request/register-user.dto";
+import { RegisterUserResponseDTO } from "../../../interfaces/dto/response/user/register-user.dto";
+import { plainToInstance } from "class-transformer";
 import bcrypt from "bcrypt";
-import { IRegisterUser } from "../interfaces/user/IRegisterUser";
 import { ErrorMessages, Messages } from "../../../utils/Messages";
 
-export class RegisterUser implements IRegisterUser{
-  constructor(private _userRepository: IUserRepository) {}
+export class RegisterUser extends BaseUseCase<
+  RegisterUserRequestDTO,
+  RegisterUserResponseDTO
+> {
+  constructor(private _userRepository: IUserRepository) {
+    super();
+  }
 
-  async execute(userData: UserEntity): Promise<UserEntity> {
-    const { email, password } = userData;
+  async execute(dto: RegisterUserRequestDTO): Promise<RegisterUserResponseDTO> {
 
-    const existing = await this._userRepository.findByEmail(email);
-    if (!existing) throw new Error( ErrorMessages.USER_NOT_FOUND);
+    const validatedDto = await this.validateDto(RegisterUserRequestDTO, dto);
 
-    if (!password) throw new Error( Messages.PASSWORD_REQUIRED);
+    const { email, password } = validatedDto;
+
+
+    const existingUser = await this._userRepository.findByEmail(email);
+    if (!existingUser) throw new Error(ErrorMessages.USER_NOT_FOUND);
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    const updatedUser = await this._userRepository.updateUserByEmail(email, {
-      password: hashedPassword
-    });
+    await this._userRepository.updateUserByEmail(email, { password: hashedPassword });
 
-    return updatedUser;
+    const response = { message: Messages.USER_REGISTERED_SUCCESSFULLY };
+    return plainToInstance(RegisterUserResponseDTO, response);
   }
 }

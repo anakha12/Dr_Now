@@ -3,19 +3,40 @@ import { IUserRepository } from "../../../domain/repositories/userRepository";
 import { IAdminWalletRepository } from "../../../domain/repositories/adminWalletRepository";
 import { ICancelUserBooking } from "../interfaces/user/ICancelUserBooking";
 import { ErrorMessages, Messages } from "../../../utils/Messages";
+import { CancelBookingRequestDTO } from "../../../interfaces/dto/request/cancel-booking.request.dto";
+import { CancelBookingResponseDTO } from "../../../interfaces/dto/response/user/cancel-booking.dto";
+import { BaseUseCase } from "../base-usecase";
 
-export class CancelUserBookingUseCase implements ICancelUserBooking{
+export class CancelUserBookingUseCase
+  extends BaseUseCase<CancelBookingRequestDTO, CancelBookingResponseDTO>
+  implements ICancelUserBooking {
+
   constructor(
     private _bookingRepository: IBookingRepository,
     private _userRepository: IUserRepository,
     private _adminWalletRepository: IAdminWalletRepository
-  ) {}
+  ) {
+    super();
+  }
 
-  async execute(bookingId: string, userId: string, reason?: string) {
+  async execute(
+    input: CancelBookingRequestDTO
+  ): Promise<CancelBookingResponseDTO> {
+
+    const dto = await this.validateDto(
+      CancelBookingRequestDTO,
+      input
+    );
+
+    const { bookingId, userId, reason } = dto;
+
     const booking = await this._bookingRepository.findBookingById(bookingId);
-    if (!booking) return { success: false, message: ErrorMessages.BOOKING_NOT_FOUND };
 
-    if (booking.userId.toString() !== userId.toString()) {
+    if (!booking) {
+      return { success: false, message: ErrorMessages.BOOKING_NOT_FOUND };
+    }
+
+    if (booking.userId.toString() !== userId) {
       return { success: false, message: Messages.UNAUTHORIZED };
     }
 
@@ -24,19 +45,22 @@ export class CancelUserBookingUseCase implements ICancelUserBooking{
     }
 
     const appointmentDateTime = new Date(`${booking.date}T${booking.startTime}`);
-    const now = new Date();
-    if (now > appointmentDateTime) {
+
+    if (new Date() > appointmentDateTime) {
       return { success: false, message: ErrorMessages.CANNOT_CANCEL_PAST };
     }
 
- 
-    await this._bookingRepository.cancelBooking(bookingId, reason!);
+    await this._bookingRepository.cancelBooking(bookingId, reason);
 
-    const refundAmount = (booking.doctorEarning || 0) + (booking.commissionAmount || 0);
+    const refundAmount =
+      (booking.doctorEarning || 0) +
+      (booking.commissionAmount || 0);
 
     const user = await this._userRepository.findUserById(booking.userId);
-    if (!user) return { success: false, message: Messages.USER_NOT_FOUND };
 
+    if (!user) {
+      return { success: false, message: Messages.USER_NOT_FOUND };
+    }
 
     await this._userRepository.updateUser(user.id!, {
       $inc: { walletBalance: refundAmount },
@@ -51,7 +75,6 @@ export class CancelUserBookingUseCase implements ICancelUserBooking{
       },
     });
 
- 
     await this._adminWalletRepository.debitCommission(
       {
         type: "debit",
@@ -63,7 +86,10 @@ export class CancelUserBookingUseCase implements ICancelUserBooking{
       refundAmount
     );
 
-    await this._bookingRepository.updateRefundStatus(bookingId, "Refunded");
+    await this._bookingRepository.updateRefundStatus(
+      bookingId,
+      "Refunded"
+    );
 
     return { success: true };
   }

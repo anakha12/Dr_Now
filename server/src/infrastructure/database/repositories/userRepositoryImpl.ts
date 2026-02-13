@@ -17,6 +17,20 @@ export class UserRepositoryImpl
     super(UserModel); 
   }
 
+
+async findByEmailOrUid(email: string, uid: string): Promise<UserEntity | null> {
+  const user = await UserModel.findOne({
+    $or: [
+      { uid },   
+      { email }, 
+    ],
+  });
+
+  return user ? this._toDomain(user) : null;
+}
+
+
+
   async getFilteredUsers(
     filters: { search?: string; gender?: string; minAge?: number; maxAge?: number },
     skip: number,
@@ -140,6 +154,7 @@ export class UserRepositoryImpl
 async createUser(userData: UserEntity): Promise<UserEntity> {
   const mappedData: Partial<UserDoc> = {
     ...userData,
+     uid: userData.uid,
     walletTransactions: userData.walletTransactions?.map(tx => ({
       ...tx,
       bookingId: tx.bookingId ? new Types.ObjectId(tx.bookingId) : undefined,

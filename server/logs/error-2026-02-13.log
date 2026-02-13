@@ -1,0 +1,8 @@
+[2026-02-13 10:59:34] error: Redis Client Error: Error: read ECONNRESET
+[2026-02-13 14:06:27] error: Redis Client Error: Error: read ECONNRESET
+[2026-02-13 14:06:29] error: Redis Client Error: Error: getaddrinfo ENOTFOUND redis-11106.c9.us-east-1-2.ec2.cloud.redislabs.com
+[2026-02-13 14:06:30] error: Redis Client Error: Error: getaddrinfo ENOTFOUND redis-11106.c9.us-east-1-2.ec2.cloud.redislabs.com
+[2026-02-13 14:06:30] error: Redis Client Error: Error: getaddrinfo ENOTFOUND redis-11106.c9.us-east-1-2.ec2.cloud.redislabs.com
+[2026-02-13 14:06:32] error: Redis Client Error: Error: getaddrinfo ENOTFOUND redis-11106.c9.us-east-1-2.ec2.cloud.redislabs.com
+[2026-02-13 14:06:33] error: Redis Client Error: Error: getaddrinfo ENOTFOUND redis-11106.c9.us-east-1-2.ec2.cloud.redislabs.com
+[2026-02-13 14:06:36] error: Redis Client Error: Error: getaddrinfo ENOTFOUND redis-11106.c9.us-east-1-2.ec2.cloud.redislabs.com

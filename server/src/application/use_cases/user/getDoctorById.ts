@@ -6,7 +6,7 @@ import { DoctorDetailsResponseDTO } from "../../../interfaces/dto/response/user/
 export class GetDoctorById implements IGetDoctorById{
   constructor(private _doctorRepo: IDoctorRepository) {}
 
-  async execute(id: string) {
+  async execute(id: string): Promise<DoctorDetailsResponseDTO > {
     
     const doctorDetails = await this._doctorRepo.findById(id);
     

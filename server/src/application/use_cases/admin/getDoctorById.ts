@@ -7,7 +7,7 @@ import { Messages } from "../../../utils/Messages";
 export class GetDoctorByIdUseCase implements IGetDoctorByIdUseCase {
   constructor(private _doctorRepo: IDoctorRepository) {}
 
-  async execute(id: string) {
+  async execute(id: string): Promise<DoctorDetailsResponseDTO> {
     const doctor = await this._doctorRepo.getDoctorById(id);
     if (!doctor) throw new Error( Messages.DOCTOR_NOT_FOUND);
 

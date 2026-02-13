@@ -8,8 +8,11 @@ import { HttpStatus } from "../../../utils/HttpStatus";
 export class GetBookingDetails implements GetBookingDetails{
   constructor(private _bookingRepo: IBookingRepository) {}
 
-  async execute(bookingId: string, userId: string) {
-    
+  async execute(
+    bookingId: string,
+    userId: string
+  ): Promise<BookingResponseDTO> {
+      
     if (!bookingId || !userId) {
       throw new AppError(ErrorMessages.BOOKING_ID_AND_DOCTOR_ID_REQUIRED, HttpStatus.BAD_REQUEST);
     }
@@ -20,16 +23,11 @@ export class GetBookingDetails implements GetBookingDetails{
       throw new AppError(ErrorMessages.BOOKING_NOT_FOUND, HttpStatus.NOT_FOUND);
     }
 
-    const totalAmount = (booking.doctorEarning ?? 0) + (booking.commissionAmount ?? 0);
-    
-    const bookingDTOs=plainToInstance(BookingResponseDTO, booking,
-      { excludeExtraneousValues: true }
-    )
-  
-  return {
-      ...bookingDTOs,
-      totalAmount
-    };
-  }
+    return plainToInstance(
+    BookingResponseDTO,
+    booking,
+    { excludeExtraneousValues: true }
+  );
 }
 
+}

@@ -1,12 +1,41 @@
+import { BaseUseCase } from "../base-usecase";
 import { IDepartmentRepository } from "../../../domain/repositories/departmentRepository";
-import { DepartmentEntity } from "../../../domain/entities/department.entity";
-import { IGetDepartmentsUseCase } from "../interfaces/admin/IGetDepartmentsUseCase";
+import { GetDepartmentsRequestDTO } from "../../../interfaces/dto/request/get-departments-admin.dto";
+import { GetDepartmentsResponseDTO } from "../../../interfaces/dto/response/admin/get-departments.dto";
+import { DepartmentResponseDTO } from "../../../interfaces/dto/response/admin/department-response.dto";
+import { plainToInstance } from "class-transformer";
+
+export class GetDepartmentsUseCase extends BaseUseCase<
+  GetDepartmentsRequestDTO,
+  GetDepartmentsResponseDTO
+> {
+  constructor(private _departmentRepo: IDepartmentRepository) {
+    super();
+  }
+
+  async execute(dto: GetDepartmentsRequestDTO): Promise<GetDepartmentsResponseDTO> {
+
+    const validatedDto = await this.validateDto(GetDepartmentsRequestDTO, dto);
 
 
-export class GetDepartmentsUseCase implements IGetDepartmentsUseCase{
-  constructor(private _departmentRepo: IDepartmentRepository) {}
+    const { departments, totalPages } = await this._departmentRepo.getPaginatedDepartments(
+      validatedDto.page,
+      validatedDto.limit,
+      validatedDto.search || ""
+    );
 
-  async execute(page: number, limit: number, search: string): Promise<{ departments: DepartmentEntity[], totalPages: number }> {
-    return await this._departmentRepo.getPaginatedDepartments(page, limit, search);
+
+    const departmentsDto: DepartmentResponseDTO[] = departments.map(dep =>
+      plainToInstance(DepartmentResponseDTO, {
+        id: dep.id,
+        Departmentname: dep.Departmentname || dep.Description || "",
+        Description: dep.Description || "",
+      })
+    );
+
+    return plainToInstance(GetDepartmentsResponseDTO, {
+      departments: departmentsDto,
+      totalPages,
+    });
   }
 }

@@ -8,7 +8,14 @@ const NotificationContext = createContext<NotificationContextType | null>(null);
 export const NotificationProvider = ({ children }: { children: ReactNode }) => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [confirmState, setConfirmState] = useState<{ message: string; resolve: (val: boolean) => void } | null>(null);
-  const [inputPromptState, setInputPromptState] = useState<{ message: string; placeholder?: string; resolve: (val: string | null) => void } | null>(null);
+  const [inputPromptState, setInputPromptState] = useState<{
+    message: string;
+    placeholder?: string;
+    value: string;  
+    resolve: (val: string | null) => void;
+  } | null>(null);
+
+
 
   const addNotification = (message: string, type: NotificationType = "INFO") => {
     const newNotification: Notification = {
@@ -29,7 +36,10 @@ export const NotificationProvider = ({ children }: { children: ReactNode }) => {
     new Promise((resolve) => setConfirmState({ message, resolve }));
 
   const promptInput = (message: string, placeholder = ""): Promise<string | null> =>
-    new Promise((resolve) => setInputPromptState({ message, placeholder, resolve }));
+  new Promise((resolve) =>
+    setInputPromptState({ message, placeholder, value: "", resolve })
+  );
+
 
   const markAllAsRead = () => setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
 
@@ -92,19 +102,27 @@ export const NotificationProvider = ({ children }: { children: ReactNode }) => {
             <input
               type="text"
               placeholder={inputPromptState.placeholder}
+              value={inputPromptState.value}
+              onChange={(e) =>
+                setInputPromptState((prev) =>
+                  prev ? { ...prev, value: e.target.value } : null
+                )
+              }
               className="w-full px-4 py-2 border border-gray-300 rounded-lg mb-4"
               autoFocus
-              onKeyDown={(e) => e.key === "Enter" && handleInputSubmit((e.target as HTMLInputElement).value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  handleInputSubmit(inputPromptState.value);
+                }
+              }}
             />
+
             <div className="flex justify-end gap-4">
               <button onClick={() => handleInputSubmit(null)} className="px-4 py-2 rounded bg-gray-300 hover:bg-gray-400">
                 {Messages.COMMON.CANCEL}
               </button>
               <button
-                onClick={() => {
-                  const input = document.querySelector<HTMLInputElement>("input");
-                  handleInputSubmit(input?.value || null);
-                }}
+                onClick={() => handleInputSubmit(inputPromptState.value)}
                 className="px-4 py-2 rounded bg-blue-600 hover:bg-blue-700 text-white"
               >
                 {Messages.COMMON.SUBMIT}
