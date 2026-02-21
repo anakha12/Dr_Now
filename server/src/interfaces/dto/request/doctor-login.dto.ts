@@ -6,6 +6,6 @@ export class DoctorLoginDTO {
   email!: string;
 
   @IsString()
-//   @MinLength(6)
+  @MinLength(6)
   password!: string;
 }

@@ -6,7 +6,6 @@ import { IAdminWalletRepository } from "../../../domain/repositories/adminWallet
 import { ErrorMessages } from "../../../utils/Messages";
 
 
-const Max_limit=5;
 export class StripeWebhookUseCase {
   constructor(
     private readonly _bookingRepo: IBookingRepository,

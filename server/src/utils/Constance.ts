@@ -4,6 +4,12 @@ export enum Role {
   DOCTOR = 'doctor'
 }
 
+export enum ChatRole {
+  USER = "user",
+  DOCTOR = "doctor",
+}
+
+
 export const EmailSubjects = {
   DOCTOR_REJECTED: "Doctor Application Rejected",
   DOCTOR_VERIFIED: "Doctor Verification Successful",

@@ -5,7 +5,8 @@ import { cancelUserBooking, getUserBookings } from "../../services/userService";
 import { useNotifications } from "../../context/NotificationContext";
 import type { Booking } from "../../types/booking";
 import { Messages } from "../../constants/messages";
-import { getLogger } from "loglevel";
+import logger from "../../utils/logger";
+import { connectSocket, socket } from "../../services/socket";
 
 const ITEMS_PER_PAGE = 4;
 
@@ -24,6 +25,10 @@ const UserBookings = () => {
   const { addNotification, confirmMessage, promptInput } = useNotifications();
   const navigate = useNavigate();
 
+  useEffect(() => {
+    connectSocket();
+  }, []);
+
   const fetchBookings = async (page: number) => {
     setLoading(true);
     try {
@@ -37,6 +42,7 @@ const UserBookings = () => {
       setTotalPages(res.totalPages);
     } catch (error) {
       addNotification(Messages.DOCTOR.APPOINTMENTS.FETCH_FAILED, "ERROR");
+      logger.error(error)
       
     } finally {
       setLoading(false);
@@ -55,9 +61,9 @@ const UserBookings = () => {
       Messages.DOCTOR.APPOINTMENTS.PROMPT_CANCEL_REASON,
       Messages.DOCTOR.APPOINTMENTS.PROMPT_CANCEL_PLACEHOLDER
     );
-    console.log(reason, "reason")
+
     if (!reason || reason.trim() === "") {
-      console.log("hii")
+   
       addNotification(Messages.DOCTOR.APPOINTMENTS.CANCEL_REASON_REQUIRED, "WARNING");
       return;
     }
@@ -68,7 +74,17 @@ const UserBookings = () => {
       fetchBookings(currentPage);
     } catch (err) {
       addNotification(Messages.DOCTOR.APPOINTMENTS.CANCEL_FAILED, "ERROR");
+      logger.error(err)
     }
+  };
+
+  const handleStartChat = (bookingId: string, doctorId: string) => {
+    socket.emit("startChat", {
+      bookingId,
+      doctorId,
+    });
+
+    navigate(`/user/chat/${bookingId}`);
   };
 
   const handlePrev = () => currentPage > 1 && setCurrentPage((prev) => prev - 1);
@@ -187,6 +203,14 @@ const UserBookings = () => {
                       className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-semibold transition"
                     >
                       Cancel
+                    </button>
+                  )}
+                  {booking.status !== "Cancelled" && (
+                    <button
+                      onClick={() => handleStartChat(booking.id, booking.doctorId)}
+                      className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition"
+                    >
+                      Chat
                     </button>
                   )}
                   <button

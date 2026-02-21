@@ -56,13 +56,13 @@ const cancelDoctorBooking = new CancelDoctorBooking(bookingRepository,userReposi
 const getAllDepartments = new GetAllDepartments(departmentRepository);
 const getDoctorWalletSummary = new GetDoctorWalletSummary(doctorRepository);
 const completeDoctorProfile = new CompleteDoctorProfile(doctorRepository);
-const getBookingDetailsDoctor = new GetBookingDetailsDoctor(bookingRepository);
+const getBookingDetailsDoctor = new GetBookingDetailsDoctor(bookingRepository );
 const addDoctorAvailabilityException = new AddDoctorAvailabilityExceptionUseCase(doctorAvailabilityExceptionRepository);
 const getDoctorAvailabilityExceptions = new GetDoctorAvailabilityExceptionsUseCase( doctorAvailabilityExceptionRepository)
 const deleteAvailabilityException = new DeleteDoctorAvailabilityExceptionUseCase(doctorAvailabilityExceptionRepository );
 const editAvailabilityRuleUseCase = new EditDoctorAvailabilityRuleUseCase(availabilityRuleRepository)
 const deleteAvailabilityRule = new DeleteDoctorAvailabilityRuleUseCase(availabilityRuleRepository);
-const getDoctorAvailabilityExceptionsUseCase = new GetDoctorAvailabilityExceptionsUseCase(doctorAvailabilityExceptionRepository);
+
 
 
 export const doctorController = new DoctorController(

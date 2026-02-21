@@ -23,7 +23,7 @@ export class SendUserOtp
     const expireSeconds = 10 * 60;
 
     const existingUser = await this._userRepository.findByEmail(dto.email);
-    const existingDoctor= await this._doctorRepository.findByEmail(dto.email);
+     await this._doctorRepository.findByEmail(dto.email);
     
 
     await redisClient.setEx(dto.email, expireSeconds, otp);

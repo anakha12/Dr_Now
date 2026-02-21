@@ -6,6 +6,8 @@ import { useDispatch } from "react-redux";
 import { userLogout } from "../../redux/slices/authSlice";
 import logger from "../../utils/logger";
 import { persistor } from "../../redux/store"; 
+import { socket } from "../../services/socket";
+
 
 const UserLayout = () => {
   const [user, setUser] = useState<{ name: string } | null>(null);
@@ -19,6 +21,7 @@ const UserLayout = () => {
         setUser(profile); 
       } catch (err) {
         setUser(null);
+        logger.error(err)
       }
     };
     fetchUser();
@@ -26,6 +29,7 @@ const UserLayout = () => {
 
   const handleLogout = () => {
       logger.log("Logout clicked");
+      socket.disconnect(); 
       dispatch(userLogout());
       persistor.purge(); 
       navigate("/user/login");

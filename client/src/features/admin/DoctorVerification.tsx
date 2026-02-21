@@ -8,6 +8,7 @@ import {
 import type { Doctor } from "../../types/doctor";
 import { Messages } from "../../constants/messages";
 import { useNotifications } from "../../context/NotificationContext";
+import logger from "../../utils/logger";
 
 const ITEMS_PER_PAGE = 5;
 
@@ -23,6 +24,7 @@ const DoctorVerification = () => {
         const data = await getUnverifiedDoctors(currentPage, ITEMS_PER_PAGE);
         setDoctors(data.doctors);
       } catch (err) {
+        logger.error(err);
         addNotification(Messages.DOCTOR.FETCH_FAILED);
       } finally {
         setLoading(false);

@@ -2,7 +2,7 @@
 import DoctorAvailabilityExceptionModel, { IDoctorAvailabilityException } from "../../database/models/availabilityException.model";
 import { IDoctorAvailabilityExceptionRepository } from "../../../domain/repositories/IDoctorAvailabilityExceptionRepository ";
 import { DoctorAvailabilityException } from "../../../domain/entities/doctorAvailabilityException.entity";
-import mongoose from "mongoose";
+
 
 export class DoctorAvailabilityExceptionRepositoryImpl 
   implements IDoctorAvailabilityExceptionRepository {

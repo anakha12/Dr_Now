@@ -1,27 +1,36 @@
-import { Exclude, Expose } from "class-transformer";
+import { Exclude, Expose, Type } from "class-transformer";
+
+class SlotDTO {
+  @Expose()
+  from!: string;
+
+  @Expose()
+  to!: string;
+}
 
 @Exclude()
 export class BookingDetailsDoctorResponseDTO {
+
   @Expose()
   id!: string;
 
   @Expose()
-  userId!: string;
+  patientName!: string;  
 
   @Expose()
-  doctorId!: string;
+  department!: string;    
 
   @Expose()
   date!: string;
 
   @Expose()
-  startTime!: string;
+  @Type(() => SlotDTO)
+  slot!: SlotDTO;         
+  @Expose()
+  status!: 'Upcoming' | 'Cancelled' | 'Completed';
 
   @Expose()
-  endTime!: string;
-
-  @Expose()
-  status!: string;
+  totalAmount!: number;
 
   @Expose()
   doctorEarning!: number;
@@ -30,5 +39,11 @@ export class BookingDetailsDoctorResponseDTO {
   commissionAmount!: number;
 
   @Expose()
-  totalAmount!: number;
+  payoutStatus!: 'Pending' | 'Paid';
+
+  @Expose()
+  cancellationReason?: string;
+
+   @Expose()
+  createdAt!: string; 
 }

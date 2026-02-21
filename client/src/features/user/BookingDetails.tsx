@@ -7,6 +7,7 @@ import { useNotifications } from "../../context/NotificationContext";
 import { Messages } from "../../constants/messages";
 import logger from "../../utils/logger";
 
+
 const BookingDetails = () => {
   const { id: bookingId } = useParams();
   const navigate = useNavigate();
@@ -88,9 +89,17 @@ const BookingDetails = () => {
             icon={<FileText size={20} />}
           />
           <Item label={Messages.DOCTOR.BOOKING_DETAILS.LABELS.PAYMENT_STATUS} value={booking.paymentStatus} icon={<CreditCard size={20} />} />
-          <Item label={Messages.DOCTOR.BOOKING_DETAILS.LABELS.TOTAL_AMOUNT} value={`₹${booking.totalAmount}`} icon={<CreditCard size={20} />} />
-          <Item label={Messages.DOCTOR.BOOKING_DETAILS.LABELS.BOOKED_ON} value={new Date(booking.createdAt).toLocaleString()} icon={<CalendarDays size={20} />} />
+          <Item
+            label={Messages.DOCTOR.BOOKING_DETAILS.LABELS.TOTAL_AMOUNT}
+            value={`₹${(booking.doctorEarning ?? 0) + (booking.commissionAmount ?? 0)}`}
+            icon={<CreditCard size={20} />}
+          />
 
+          {/* <Item
+            label={Messages.DOCTOR.BOOKING_DETAILS.LABELS.BOOKED_ON}
+            value={booking.date ? format(new Date(booking.date), "yyyy-MM-dd") : "N/A"}
+            icon={<CalendarDays size={20} />}
+          /> */}
           {/* Go Back Button */}
           <button
             onClick={() => navigate("/user/bookings")}

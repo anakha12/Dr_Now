@@ -6,7 +6,8 @@ import { Messages } from "../constants/messages";
 import { handleError } from "../utils/errorHandler";
 import { AdminRoutes } from "../constants/apiRoutes";
 import type { Doctor } from "../types/doctor";
-
+import type { GetAllDoctorsQueryParams }from "../types/getAllDoctor";
+import type { GetAllUsersQueryParams } from "../types/getAllUsers";
 
 export const adminLogin = async (email: string, password: string) => {
   try {
@@ -73,7 +74,7 @@ export const getAllDoctors = async (
   params: GetAllDoctorsParams
 ) => {
   try {
-    const queryParams: any = {
+    const queryParams: GetAllDoctorsQueryParams = {
       page: params.page,
       limit: params.limit,
     };
@@ -121,7 +122,7 @@ export const getAllUsers = async (
   sort = ""
 ) => {
   try {
-    const params: any = {
+    const params: GetAllUsersQueryParams = {
       page,
       limit,
     };

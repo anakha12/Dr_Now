@@ -51,7 +51,7 @@ export interface IDoctor extends Document {
   experience?: {
     hospital: string;
     role: string;
-    years: String ;
+    years: string ;
   }[];
   affiliatedHospitals?: string[];
   role: Role;

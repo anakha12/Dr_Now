@@ -10,6 +10,7 @@ import type { Slot } from "../../types/slot";
 import type { Doctor } from "../../types/doctor";
 import type { AvailabilityRule } from "../../types/availabilityRule";
 import type { AvailabilityException } from "../../types/availabilityException";
+import logger from "../../utils/logger";
 
 import {
   getDoctorById,
@@ -38,7 +39,7 @@ const BookAppointment = () => {
   const [exceptions, setExceptions] = useState<AvailabilityException[]>([]);
   const [availableSlots, setAvailableSlots] = useState<Slot[]>([]);
   const [selectedSlot, setSelectedSlot] = useState<Slot | null>(null);
-  const [bookedSlots, setBookedSlots] = useState<any[]>([]);
+  const [bookedSlots, setBookedSlots] = useState<Slot[]>([]);
   const [paymentMethod, setPaymentMethod] = useState<"stripe" | "wallet">("stripe");
 
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -97,12 +98,13 @@ const BookAppointment = () => {
 
     const fetchSlots = async () => {
       try {
-        const dateStr = selectedDate.toISOString().split("T")[0];
-
+        
+      const dateStr = format(selectedDate, "yyyy-MM-dd");
+        
         const fetchedBookedSlots = await getBookedSlots(doctor.id, dateStr);
-
+      
         setBookedSlots(fetchedBookedSlots);
-
+        logger.log(bookedSlots)
         const dayOfWeek = selectedDate.getDay();
         const exception = exceptions.find((ex) => isSameDay(new Date(ex.date), selectedDate));
 
@@ -119,7 +121,10 @@ const BookAppointment = () => {
           fetchedBookedSlots.map((b: any) => `${b.startTime || b.from}-${b.endTime || b.to}`)
         );
 
-        slots = slots.filter(slot => !bookedKeys.has(`${slot.from}-${slot.to}`));
+        slots = slots.map(slot => ({
+          ...slot,
+          booked: bookedKeys.has(`${slot.from}-${slot.to}`)
+        }));
 
         const now = new Date();
         if (isSameDay(selectedDate, now)) {
@@ -146,6 +151,10 @@ const BookAppointment = () => {
       return addNotification( Messages.USER.SELECT_DATE_SLOT, "ERROR");
     }
 
+    if (selectedSlot.booked) {
+      return addNotification("This slot is already booked", "ERROR");
+    }
+
     const consultFee = doctor.consultFee ?? 0;
     try {
       const user = await getUserProfile();
@@ -157,7 +166,7 @@ const BookAppointment = () => {
           userId,
           selectedSlot,
           consultFee,
-          selectedDate.toISOString()
+           format(selectedDate, "yyyy-MM-dd")
         );
         addNotification(Messages.USER.APPOINTMENT_BOOKED_WALLET, "SUCCESS");
         navigate("/user/appointment/success");
@@ -169,7 +178,7 @@ const BookAppointment = () => {
         userId,
         selectedSlot,
         consultFee,
-        selectedDate.toISOString()
+         format(selectedDate, "yyyy-MM-dd")
       );
       const stripe = await stripePromise;
       if (!stripe) return addNotification( Messages.USER.STRIPE_FAILED, "ERROR");
@@ -266,24 +275,43 @@ const BookAppointment = () => {
           />
         </div>
 
-        {/* Available Slots */}
+            {/* Available slot */}  
         {selectedDate && (
           <div>
-            <h4 className="font-semibold mb-2">Available Slots for {selectedDate.toDateString()}</h4>
+            <h4 className="font-semibold mb-2">
+              Available Slots for {selectedDate.toDateString()}
+            </h4>
+
             <div className="flex flex-wrap gap-2">
               {availableSlots.length > 0 ? (
                 availableSlots.map((slot, idx) => {
                   const isSelected =
-                    selectedSlot?.from === slot.from && selectedSlot?.to === slot.to;
+                    selectedSlot?.from === slot.from &&
+                    selectedSlot?.to === slot.to;
+
                   return (
                     <button
                       key={idx}
-                      onClick={() => setSelectedSlot(slot)}
-                      className={`px-4 py-2 rounded-lg border text-sm font-medium transition ${
-                        isSelected
-                          ? "bg-teal-600 text-white border-teal-700"
-                          : "bg-white text-gray-700 border-gray-300 hover:bg-teal-50"
-                      }`}
+
+                      // ✅ Prevent selecting booked slot
+                      onClick={() => {
+                        if (!slot.booked) {
+                          setSelectedSlot(slot);
+                        }
+                      }}
+
+          
+                      disabled={slot.booked}
+
+                      className={`px-4 py-2 rounded-lg border text-sm font-medium transition
+                        ${
+                          slot.booked
+                            ? "bg-gray-200 text-gray-400 border-gray-300 cursor-not-allowed"
+                            : isSelected
+                            ? "bg-teal-600 text-white border-teal-700"
+                            : "bg-white text-gray-700 border-gray-300 hover:bg-teal-50"
+                        }
+                      `}
                     >
                       {slot.from} - {slot.to}
                     </button>
@@ -297,6 +325,7 @@ const BookAppointment = () => {
             </div>
           </div>
         )}
+
 
         {/* Confirm Button */}
         <button

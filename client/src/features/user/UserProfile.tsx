@@ -6,6 +6,7 @@ import { useNotifications } from "../../context/NotificationContext";
 import { Messages } from "../../constants/messages";
 import { useNavigate } from "react-router-dom";
 import { User as UserIcon,  Phone, Edit3, Calendar, MapPin, Droplet } from "lucide-react";
+import logger from "../../utils/logger";
 
 const UserProfile = () => {
   const [user, setUser] = useState<User | null>(null);
@@ -19,11 +20,12 @@ const UserProfile = () => {
         setUser(data);
       } catch (err) {
         addNotification(Messages.USER.FETCH_FAILED, "ERROR");
+        logger.error(err)
       }
     };
 
     fetchUser();
-  }, []);
+  }, [addNotification]);
 
   if (!user) {
     return <p className="text-gray-500">{Messages.USER.FETCH_FAILED}</p>;

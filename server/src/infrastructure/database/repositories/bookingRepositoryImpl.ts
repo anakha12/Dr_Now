@@ -12,9 +12,16 @@ interface IPopulatedDoctor {
   specialization: string;
 }
 
-type IBookingWithPopulatedDoctor = Omit<IBooking, "doctorId"> & {
+interface IPopulatedUser {
+  _id: mongoose.Types.ObjectId;
+  name: string;
+}
+
+type IBookingWithPopulatedDoctorAndUser = Omit<IBooking, "doctorId" | "userId"> & {
   doctorId: mongoose.Types.ObjectId | IPopulatedDoctor;
+  userId: mongoose.Types.ObjectId | IPopulatedUser;
 };
+
 
 export class BookingRepositoryImpl implements IBookingRepository {
   async createBooking(booking: Booking): Promise<Booking> {
@@ -210,8 +217,6 @@ const bookings: BookingWithExtras[] = bookingsRaw.map((b: any) => {
 }
 
 
-
-
   async findBookingsByDoctorAndDate(
     doctorId: string,
     date: string
@@ -337,11 +342,11 @@ async markPayoutAsPaid(bookingIds: string[]): Promise<void> {
   // -----------------------------
   // Mapper from persistence to domain
   // -----------------------------
-  private _toDomain(booking: IBookingWithPopulatedDoctor): Booking {
+private _toDomain(booking: IBookingWithPopulatedDoctorAndUser): Booking {
+  // Doctor
   let doctorId: string;
   let doctorName: string | undefined;
   let department: string | undefined;
-  let patientName: string | undefined;
 
   if (booking.doctorId instanceof mongoose.Types.ObjectId) {
     doctorId = booking.doctorId.toString();
@@ -351,33 +356,38 @@ async markPayoutAsPaid(bookingIds: string[]): Promise<void> {
     department = booking.doctorId.specialization;
   }
 
-  if ((booking as any).userId?.name) {
-    patientName = (booking as any).userId.name;
+  // User / Patient
+  let patientId: string;
+  let patientName: string | undefined;
+
+  if (booking.userId instanceof mongoose.Types.ObjectId) {
+    patientId = booking.userId.toString();
+  } else {
+    patientId = booking.userId._id.toString();
+    patientName = booking.userId.name;
   }
 
-  const entity = new Booking(
-    doctorId,
-    booking.userId.toString(),
-    booking.date,
-    booking.startTime,
-    booking.endTime,
-    booking.status,
-    booking.paymentStatus,
-    booking.transactionId,
-    booking.doctorEarning,
-    booking.commissionAmount,
-    booking.payoutStatus,
-    booking.refundStatus,
-    booking.cancellationReason,
-    booking._id.toString()
-  );
+  return new Booking(
+  doctorId,               
+  patientId,              
+  booking.date,        
+  booking.startTime,     
+  booking.endTime,       
+  booking.status,         
+  booking.paymentStatus,  
+  booking.transactionId,  
+  booking.doctorEarning,  
+  booking.commissionAmount,
+  booking.payoutStatus, 
+  booking.refundStatus,   
+  booking.cancellationReason, 
+  patientName,        
+  department,            
+  booking._id.toString(), 
+  doctorName             
+);
 
-  (entity as any).doctorName = doctorName;
-  (entity as any).department = department;
-  (entity as any).patientName = patientName;
-  (entity as any).slot = { from: booking.startTime, to: booking.endTime };
-
-  return entity;
 }
+
 
 }

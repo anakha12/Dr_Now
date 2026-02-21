@@ -2,6 +2,7 @@ import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { userLogout } from "../../redux/slices/authSlice";
 import { profileSidebarItems } from "../../constants/sidebar";
+import { socket } from "../../services/socket";
 
 const ProfileLayout = () => {
   const navigate = useNavigate();
@@ -12,6 +13,7 @@ const ProfileLayout = () => {
 
   const handleSidebarClick = (key: string) => {
     if (key === "logout") {
+      socket.disconnect(); 
       dispatch(userLogout());
       navigate("/user/login");
     } else {

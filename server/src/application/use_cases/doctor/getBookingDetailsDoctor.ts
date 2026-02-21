@@ -18,32 +18,41 @@ export class GetBookingDetailsDoctor
 
   async execute(dto: { bookingId: string; doctorId: string }): Promise<BookingDetailsDoctorResponseDTO> {
 
-    const { bookingId, doctorId } = await this.validateDto(GetBookingDetailsDoctorDTO,dto);
+    const { bookingId, doctorId } = await this.validateDto(GetBookingDetailsDoctorDTO, dto);
 
     if (!bookingId || !doctorId) {
-      throw new AppError(ErrorMessages.BOOKING_ID_AND_DOCTOR_ID_REQUIRED, HttpStatus.BAD_REQUEST);
+      throw new AppError(
+        ErrorMessages.BOOKING_ID_AND_DOCTOR_ID_REQUIRED,
+        HttpStatus.BAD_REQUEST
+      );
     }
-
 
     const booking = await this._bookingRepo.findBookingByIdAndDoctor(bookingId, doctorId);
 
     if (!booking) {
-      throw new AppError(ErrorMessages.BOOKING_NOT_FOUND_OR_UNAUTHORIZED, HttpStatus.NOT_FOUND);
+      throw new AppError(
+        ErrorMessages.BOOKING_NOT_FOUND_OR_UNAUTHORIZED,
+        HttpStatus.NOT_FOUND
+      );
     }
 
     const totalAmount = (booking.doctorEarning ?? 0) + (booking.commissionAmount ?? 0);
 
     return plainToInstance(BookingDetailsDoctorResponseDTO, {
       id: booking.id,
-      userId: booking.userId,
-      doctorId: booking.doctorId,
+      patientName: booking.patientName ?? "",
+      department: booking.department ?? "",
       date: booking.date,
-      startTime: booking.startTime,
-      endTime: booking.endTime,
+      slot: {
+        from: booking.startTime,
+        to: booking.endTime,
+      },
       status: booking.status,
       doctorEarning: booking.doctorEarning,
       commissionAmount: booking.commissionAmount,
       totalAmount,
+      payoutStatus: booking.payoutStatus,
+      cancellationReason: booking.cancellationReason,
     });
   }
 }

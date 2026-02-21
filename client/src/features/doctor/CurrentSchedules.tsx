@@ -44,7 +44,8 @@ const CurrentSchedules = () => {
   const [activeDay, setActiveDay] = useState(1);
   const { addNotification, confirmMessage } = useNotifications();
 
-  // --- Rule Modal ---
+  // --- Rule Modal ---cd ..
+  
   const [showRuleModal, setShowRuleModal] = useState(false);
   const [editingRule, setEditingRule] = useState<AvailabilityRule | null>(null);
   const [ruleForm, setRuleForm] = useState<AvailabilityRule>({
