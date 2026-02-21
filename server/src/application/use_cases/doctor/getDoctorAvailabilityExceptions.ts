@@ -20,12 +20,6 @@ export class GetDoctorAvailabilityExceptionsUseCase
 
     const exceptions = await this._repo.getExceptionsForDoctor(dto.doctorId);
 
-    let va=exceptions.map((ex) =>
-      plainToInstance(DoctorAvailabilityExceptionResponseDTO, ex, {
-        excludeExtraneousValues: true,
-      })
-    );
-
     return exceptions.map((ex) =>
       plainToInstance(DoctorAvailabilityExceptionResponseDTO, ex, {
         excludeExtraneousValues: true,

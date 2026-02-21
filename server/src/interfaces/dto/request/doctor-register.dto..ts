@@ -1,4 +1,4 @@
-import { IsEmail, IsNotEmpty, IsString, IsNumber, Min, Max, IsOptional } from "class-validator";
+import { IsEmail, IsNotEmpty, IsString, IsNumber } from "class-validator";
 import { Transform } from "class-transformer";
 
 export class DoctorRegisterDTO {

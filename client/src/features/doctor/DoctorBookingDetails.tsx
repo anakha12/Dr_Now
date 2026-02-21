@@ -5,6 +5,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { getDoctorBookingDetails } from "../../services/doctorService";
 import { motion } from "framer-motion";
 import { useNotifications } from "../../context/NotificationContext";
+import logger from "../../utils/logger";
 import {
   CalendarDays,
   User,
@@ -33,6 +34,7 @@ const DoctorBookingDetails = () => {
         setBooking(res);
       } catch (error) {
         addNotification(Messages.DOCTOR.BOOKING_DETAILS.FETCH_FAILED, "ERROR");
+        logger.error(error)
       } finally {
         setLoading(false);
       }

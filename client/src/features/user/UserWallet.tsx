@@ -3,6 +3,7 @@ import { useNotifications } from "../../context/NotificationContext";
 import { getUserWallet } from "../../services/userService";
 import type { Transaction } from "../../types/transaction";
 import { Messages } from "../../constants/messages";
+import logger from "../../utils/logger";
 
 const ITEMS_PER_PAGE = 3;
 
@@ -24,6 +25,7 @@ const UserWallet = () => {
         setTotalTransactions(data.totalTransactions || 0);
       } catch (err) {
         addNotification(Messages.WALLET.FETCH_FAILED, "ERROR");
+        logger.error(err)
       }
     };
 

@@ -14,7 +14,10 @@ export class Booking {
     public payoutStatus: 'Pending' | 'Paid' = 'Pending',
     public refundStatus: 'NotRequired' | 'Refunded' = 'NotRequired',
     public cancellationReason?: string,
-    public id?: string 
+    public patientName?: string,    
+    public department?: string,
+    public id?: string,
+    public doctorName?: string
   ) {}
 
 

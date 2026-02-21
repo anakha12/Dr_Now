@@ -4,6 +4,8 @@ import { getDoctorBookings, cancelDoctorBooking } from "../../services/doctorSer
 import { useNotifications } from "../../context/NotificationContext";
 import { Messages } from "../../constants/messages";
 import type { Booking } from "../../types/booking";
+import { format } from "date-fns";
+
 
 const DoctorAppointments = () => {
   const [bookings, setBookings] = useState<Booking[]>([]);
@@ -77,7 +79,10 @@ const DoctorAppointments = () => {
               bookings.map((b) => (
                 <tr key={b.id} className="border-t">
                   <td className="p-3">{b.patientName}</td>
-                  <td className="p-3">{b.date}</td>
+                  <td className="p-3">
+                    {b.date ? format(new Date(b.date), "yyyy-MM-dd") : "N/A"}
+                  </td>
+
                   <td className="p-3">{`${b.slot?.from} - ${b.slot?.to}`}</td>
                   <td className="p-3">
                     <span

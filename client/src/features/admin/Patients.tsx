@@ -6,6 +6,8 @@ import type { Column } from "../../types/table";
 import { Messages } from "../../constants/messages";
 import type { AdminUser } from "../../types/userProfile";
 import PatientDetails from "./PatientDetails";
+import logger from "../../utils/logger";
+
 
 const Patients = () => {
   const [patients, setPatients] = useState<AdminUser[]>([]);
@@ -37,6 +39,7 @@ const Patients = () => {
       setTotalPages(data.totalPages);
     } catch (error) {
       toast.error(Messages.USER.FETCH_FAILED);
+      logger.error(error)
     } finally {
       setLoading(false);
     }

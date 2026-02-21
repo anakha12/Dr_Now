@@ -1,4 +1,4 @@
-import { IsEmail, IsNotEmpty, MinLength, Matches, IsOptional } from "class-validator";
+import { IsEmail, IsNotEmpty, MinLength, IsOptional } from "class-validator";
 
 export class UserRegisterDTO {
   @IsNotEmpty({ message: "Username is required" })

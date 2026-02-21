@@ -21,7 +21,7 @@ function createAuthSlice<T extends object>(name: string) {
     reducers: {
       setAuth: (
         state,
-        action: PayloadAction<{ isAuthenticated: boolean; user?: T }>
+        action: PayloadAction<{ isAuthenticated: boolean; user: T }> // <-- removed optional
       ) => {
         state.isAuthenticated = action.payload.isAuthenticated;
         state.user = action.payload.user as Draft<T>;
@@ -38,6 +38,7 @@ function createAuthSlice<T extends object>(name: string) {
 
   return slice;
 }
+
 
 // --- Doctor ---
 const doctorSlice = createAuthSlice<Doctor>("doctorAuth");

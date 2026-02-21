@@ -1,4 +1,4 @@
-import { Booking } from "../../../../domain/entities/booking.entity";
+import { DoctorBookingListResponseDTO } from "../../../../interfaces/dto/response/doctor/doctor-booking-response.dto"; 
 
 export interface IGetDoctorBookings {
   execute(
@@ -6,7 +6,7 @@ export interface IGetDoctorBookings {
     page: number,
     limit: number
   ): Promise<{
-    bookings: Booking[];
+    bookings: DoctorBookingListResponseDTO[];
     totalPages: number;
   }>;
 }

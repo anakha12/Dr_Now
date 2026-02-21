@@ -21,9 +21,7 @@ export class LoginAdmin
   }
 
   async execute(dto: AdminLoginDTO): Promise<AdminLoginResponseDTO> {
-    
-    const validatedDto  = await this.validateDto(AdminLoginDTO, dto);
-
+   await this.validateDto(AdminLoginDTO, dto);
     
     const user = await this._userRepository.findByEmail(dto.email);
     if (!user) throw new Error(ErrorMessages.USER_NOT_FOUND);

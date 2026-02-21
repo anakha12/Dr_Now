@@ -3,7 +3,8 @@ import dotenv from "dotenv";
 dotenv.config(); 
 import express from "express";
 import mongoose from "mongoose";
-
+import http from "http";
+import { Server as SocketIOServer } from "socket.io";
 import userRoutes from "./interfaces/routes/userRoutes";
 import adminRoutes from "./interfaces/routes/adminRoutes";
 import doctorRoutes from "./interfaces/routes/doctorRoutes";  
@@ -14,13 +15,15 @@ import { fileURLToPath } from "url";
 import cookieParser from "cookie-parser";
 import { AppMessages } from "./utils/Messages";
 import logger from "./utils/Logger";
+import { initSocketServer } from "./infrastructure/socket/socketServer";
+import { chatSocketService } from "./di/chat.di";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 
 const app = express();  
-
+const server = http.createServer(app)
 
 app.use("/api/stripe", webhookRoutes); 
 
@@ -31,6 +34,16 @@ app.use(
     credentials: true, 
   })
 );
+
+const io=new SocketIOServer(server, {
+  cors: {
+    origin: "http://localhost:5173",
+    credentials: true
+  }
+});
+
+
+initSocketServer(io,chatSocketService);
 app.use(cookieParser());
 app.use(express.json()); 
 app.use('/uploads', express.static(path.join(__dirname, '..', 'uploads')));
@@ -46,6 +59,6 @@ app.use("/api/doctor", doctorRoutes);
 
 
 const port = Number(process.env.PORT);
-app.listen(port, () => {
+server.listen(port, () => {
   logger.info(AppMessages.SERVER_RUNNING(port));
 });

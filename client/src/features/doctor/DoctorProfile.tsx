@@ -9,6 +9,7 @@ import { useNotifications } from "../../context/NotificationContext";
 import type { DoctorProfileForm } from "../../types/doctorProfileForm";
 import { Messages } from "../../constants/messages"; 
 import type { Department } from "../../types/department";
+import logger from "../../utils/logger";
 
 
 const DoctorProfileComponent  = () => {
@@ -64,6 +65,7 @@ const DoctorProfileComponent  = () => {
       } catch (error) {
         setLoading(false);
         addNotification(Messages.DOCTOR.FETCH_FAILED, "ERROR");
+        logger.error(error)
       }
     };
 

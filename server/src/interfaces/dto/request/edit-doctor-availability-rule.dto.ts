@@ -1,5 +1,5 @@
 
-import { IsInt, IsOptional, IsString, Min, IsUUID } from "class-validator";
+import { IsInt, IsOptional, IsString, Min } from "class-validator";
 
 export class EditDoctorAvailabilityRuleDTO {
   @IsString()

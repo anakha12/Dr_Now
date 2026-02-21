@@ -19,11 +19,11 @@ import BookingDetails from "../features/user/BookingDetails";
 import UpdateProfile from "../features/user/UpdateProfile";
 import { useSelector } from "react-redux";
 import type { RootState } from "../redux/store";
+import ChatPage from "../features/user/ChatPage";
 
 const UserRoutes = () => {
   const location = useLocation();
   const isAuthenticated = useSelector((state: RootState) => state.userAuth.isAuthenticated);
-
   return (
     <Routes>
       <Route path="/user/login" element={<UserLogin />} />
@@ -50,6 +50,7 @@ const UserRoutes = () => {
           <Route path="bookings" element={<UserBookings />} />
           <Route path="wallet" element={<UserWallet />} />
           <Route path="update-profile" element={<UpdateProfile />} /> 
+          <Route path="chat/:bookingId" element={<ChatPage />} />
         </Route>
       </Route>
     </Routes>

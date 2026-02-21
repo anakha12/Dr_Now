@@ -23,7 +23,7 @@ export class AdminWalletRepositoryImpl implements IAdminWalletRepository {
 
   async creditCommission(transaction: AdminWalletTransaction, amount: number): Promise<void> {
     const payload = this._buildTransactionPayload(transaction, "credit", amount);
-    let wallet = await AdminWalletModel.findOne();
+    const wallet = await AdminWalletModel.findOne();
 
     if (wallet) {
       wallet.totalBalance += amount;
@@ -39,7 +39,7 @@ export class AdminWalletRepositoryImpl implements IAdminWalletRepository {
 
   async debitCommission(transaction: AdminWalletTransaction, amount: number): Promise<void> {
     const payload = this._buildTransactionPayload(transaction, "debit", amount);
-    let wallet = await AdminWalletModel.findOne();
+    const wallet = await AdminWalletModel.findOne();
 
     if (wallet) {
       wallet.totalBalance -= amount;

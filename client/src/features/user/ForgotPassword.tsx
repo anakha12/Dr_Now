@@ -8,7 +8,7 @@ import { handleError } from "../../utils/errorHandler";
 
 const ForgotPassword = () => {
   const [step, setStep] = useState<"email" | "verify">("email");
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState(""); 
   const [otp, setOtp] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const navigate = useNavigate();

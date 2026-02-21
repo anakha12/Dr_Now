@@ -1,4 +1,4 @@
-import { IsOptional, IsInt, Min, IsString, IsEnum, IsIn } from "class-validator";
+import { IsOptional, IsInt, Min, IsString, IsEnum } from "class-validator";
 import { Type } from "class-transformer";
 import { UserSort, Gender } from "../../../utils/Constance";
 

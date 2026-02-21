@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { handleControllerError } from "../../utils/errorHandler";
 import { HttpStatus } from "../../utils/HttpStatus";
-import { ErrorMessages, Messages } from "../../utils/Messages";
+import { Messages } from "../../utils/Messages";
 import { ILoginUser } from "../../application/use_cases/interfaces/user/ILoginUser";
 import { IBookWithWallet } from "../../application/use_cases/interfaces/user/IBookWithWallet";
 import { IRegisterUser } from "../../application/use_cases/interfaces/user/IRegisterUser";

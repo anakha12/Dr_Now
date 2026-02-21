@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { FaStethoscope, FaEye, FaEyeSlash } from "react-icons/fa";
@@ -7,8 +6,10 @@ import { ZodError } from "zod";
 import toast, { Toaster } from "react-hot-toast";
 import type { LoginFormProps } from "../types/loginFormProps";
 import { Messages } from "../constants/messages";
+import type { AppDispatch } from "../redux/store"; 
 
-const LoginForm: React.FC<LoginFormProps> = ({
+// Add generic <TUser>
+const LoginForm = <TUser,>({
   title,
   subTitle,
   schema,
@@ -16,13 +17,13 @@ const LoginForm: React.FC<LoginFormProps> = ({
   setAuth,
   redirectPath,
   placeholders = { email: "Email", password: "Password" },
-}) => {
+}: LoginFormProps<TUser>) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
 
   const navigate = useNavigate();
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<AppDispatch>();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -31,21 +32,20 @@ const LoginForm: React.FC<LoginFormProps> = ({
       schema.parse({ email, password });
 
       const res = await loginService(email, password);
-      toast.success( Messages.AUTH.LOGIN_SUCCESS);
 
-      dispatch(setAuth({ isAuthenticated: true, user: res.user }));
+      dispatch(setAuth({ isAuthenticated: true, user: res.user })); 
 
+      toast.success(Messages.AUTH.LOGIN_SUCCESS);
       setTimeout(() => navigate(redirectPath), 1200);
     } catch (err: unknown) {
       if (err instanceof ZodError) {
-        err.issues.forEach(issue => toast.error(issue.message));
+        err.issues.forEach((issue) => toast.error(issue.message));
       } else if (err instanceof Error) {
         toast.error(err.message || Messages.AUTH.LOGIN_FAILED);
       } else {
         toast.error(Messages.AUTH.LOGIN_FAILED);
       }
     }
-
   };
 
   return (
