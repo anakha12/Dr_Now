@@ -30,7 +30,6 @@ async findByEmailOrUid(email: string, uid: string): Promise<UserEntity | null> {
 }
 
 
-
   async getFilteredUsers(
     filters: { search?: string; gender?: string; minAge?: number; maxAge?: number },
     skip: number,
