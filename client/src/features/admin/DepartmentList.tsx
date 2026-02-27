@@ -96,7 +96,7 @@ const DepartmentList = () => {
     }, 400);
 
     return () => clearTimeout(delayDebounce);
-  }, [currentPage, searchQuery, fetchDepartments]);
+  }, [currentPage, searchQuery]);
 
   return (
     <div className="max-w-4xl mx-auto p-4">

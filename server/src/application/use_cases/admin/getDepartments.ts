@@ -30,6 +30,7 @@ export class GetDepartmentsUseCase extends BaseUseCase<
         id: dep.id,
         Departmentname: dep.Departmentname || dep.Description || "",
         Description: dep.Description || "",
+        status: dep.status, 
       })
     );
 

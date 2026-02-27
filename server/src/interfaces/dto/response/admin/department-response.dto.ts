@@ -11,4 +11,6 @@ export class DepartmentResponseDTO {
   @Expose()
   Description!: string;
   
+  @Expose()
+  status!: "Listed" | "Unlisted";
 }

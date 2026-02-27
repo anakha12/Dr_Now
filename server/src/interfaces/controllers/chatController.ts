@@ -4,16 +4,14 @@ import { HttpStatus } from "../../utils/HttpStatus";
 import { handleControllerError } from "../../utils/errorHandler";
 
 export class ChatController {
-
+  
   constructor(
     private _sendMessageUseCase: ISendMessageUseCase
   ) {}
 
   async sendMessage(req: Request, res: Response): Promise<void> {
     try {
-
       const response = await this._sendMessageUseCase.execute(req.body);
-
       res.status(HttpStatus.CREATED).json({
         success: true,
         data: response,
