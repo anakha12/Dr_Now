@@ -32,7 +32,7 @@ const UserLayout = () => {
       socket.disconnect(); 
       dispatch(userLogout());
       persistor.purge(); 
-      navigate("/user/login");
+      navigate("/login");
   };
   
   return (
@@ -64,7 +64,7 @@ const UserLayout = () => {
               </div>
             ) : (
               <Link
-                to="/user/login"
+                to="/login"
                 className="bg-teal-600 text-white px-4 py-2 rounded-full hover:bg-teal-700"
               >
                 Login

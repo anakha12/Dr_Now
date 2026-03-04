@@ -6,12 +6,14 @@ import { doctorLoginSchema } from "../../validation/doctorSchema";
 const DoctorLogin = () => {
   return (
     <LoginForm
-      title="Doctor Login"
+      title=""
       subTitle="Doctor Portal"
       schema={doctorLoginSchema}
       loginService={doctorLogin}
       setAuth={setDoctorAuth}
       redirectPath="/doctor/dashboard"
+      registerPath="/doctor/register"
+      registerText="Join as a Doctor"
       placeholders={{ email: "Doctor Email", password: "Password" }}
     />
   );

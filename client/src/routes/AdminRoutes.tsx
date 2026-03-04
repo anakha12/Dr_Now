@@ -9,6 +9,7 @@ import DepartmentList from "../features/admin/DepartmentList";
 import DoctorPaymentPage from "../features/admin/DoctorPaymentPage";
 import { useSelector } from "react-redux";
 import type { RootState } from "../redux/store";
+import NotFound from "../features/NotFound";
 
 const AdminRoutes = () => {
   const location = useLocation();
@@ -29,7 +30,9 @@ const AdminRoutes = () => {
         <Route path="patients" element={<Patients />} />
         <Route path="departments" element={<DepartmentList/>}/>
         <Route path="doctor-payment" element={<DoctorPaymentPage/>}/>
+        <Route path="*" element={<NotFound />} />
       </Route>
+      <Route path="*" element={<NotFound />} />
     </Routes>
   );
 };

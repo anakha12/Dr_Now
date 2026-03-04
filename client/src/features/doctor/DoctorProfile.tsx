@@ -166,7 +166,7 @@ const DoctorProfileComponent  = () => {
 
         addNotification(Messages.DOCTOR.PROFILE_UPDATE_WITH_CONFIRM, "SUCCESS");
         setTimeout(() => {
-          navigate("/user/login");
+          navigate("/login");
         }, 1500);
       } else {
         addNotification(Messages.DOCTOR.PROFILE_UPDATE_SUCCESS, "SUCCESS");

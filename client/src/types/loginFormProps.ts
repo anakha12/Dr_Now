@@ -17,6 +17,10 @@ export interface LoginFormProps<TUser> {
     email?: string;
     password?: string;
   };
+  registerPath?: string;  
+  registerText?: string;
+  googleLogin?: () => void;
+  showGoogleLogin?: boolean;
 }
 
 export interface LoginResponse<TUser> {

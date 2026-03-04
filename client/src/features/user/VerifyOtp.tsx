@@ -42,7 +42,7 @@ const VerifyOtp = () => {
         isDonner: isDonner ? "true" : "false",
       });
       addNotification(Messages.DOCTOR.REGISTRATION.REGISTRATION_SUCCESS, "SUCCESS");
-      setTimeout(() => navigate("/user/login"), 1500);
+      setTimeout(() => navigate("/login"), 1500);
     } catch (error: unknown) {
         const err = handleError(error, Messages.DOCTOR.REGISTRATION.INVALID_OTP);
         addNotification(err.message, "ERROR");
