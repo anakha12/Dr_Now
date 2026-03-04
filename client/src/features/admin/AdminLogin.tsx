@@ -7,7 +7,7 @@ import { AdminRoutes } from "../../constants/routes";
 const AdminLogin = () => {
   return (
     <LoginForm
-      title="Admin Login"
+      title=""
       subTitle="Admin Panel Login"
       schema={adminLoginSchema}
       loginService={adminLogin}

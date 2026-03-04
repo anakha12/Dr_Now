@@ -43,7 +43,7 @@ const ForgotPassword = () => {
     try {
       await verifyResetOtp({ email, otp, newPassword });
       addNotification(Messages.FORGOT_PASSWORD.RESET_SUCCESS, "SUCCESS");
-      navigate("/user/login");
+      navigate("/login");
     } catch (error: unknown) {
         const err = handleError(error, Messages.FORGOT_PASSWORD.RESET_FAILED);
         logger.error(err);

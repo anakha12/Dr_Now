@@ -12,7 +12,7 @@ export const adminAxios = createAxiosInstance({
 export const userAxios = createAxiosInstance({
   baseURL: import.meta.env.VITE_USER_API_URL,
   refreshEndpoint: "/refresh-token",
-  redirectPath: "/user/login",
+  redirectPath: "/login",
   skipInterceptorUrls: ["/protected"],
 });
   

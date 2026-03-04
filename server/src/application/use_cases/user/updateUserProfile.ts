@@ -8,7 +8,7 @@ import { cloudinary, getSignedImageURL } from "../../../config/cloudinary";
 import { Messages } from "../../../utils/Messages";
 
 export class UpdateUserProfileUseCase implements IUpdateUserProfileUseCase {
-  constructor(private _userRepository: IUserRepository) {}
+  constructor(private _userRepository: IUserRepository) { }
 
   async execute(
     userId: string,
@@ -19,6 +19,9 @@ export class UpdateUserProfileUseCase implements IUpdateUserProfileUseCase {
     await validateOrReject(validatedDto);
 
 
+    const existingUser = await this._userRepository.findUserById(userId);
+    if (!existingUser) throw new Error(Messages.USER_NOT_FOUND);
+    
     if (validatedDto.file) {
       const result = await cloudinary.uploader.upload(validatedDto.file.path, {
         folder: "users",
@@ -29,8 +32,6 @@ export class UpdateUserProfileUseCase implements IUpdateUserProfileUseCase {
     }
 
 
-    const existingUser = await this._userRepository.findUserById(userId);
-    if (!existingUser) throw new Error(Messages.USER_NOT_FOUND);
 
     const isFirstCompletion =
       !existingUser.profileCompletion &&

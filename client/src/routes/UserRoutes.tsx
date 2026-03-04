@@ -26,7 +26,7 @@ const UserRoutes = () => {
   const isAuthenticated = useSelector((state: RootState) => state.userAuth.isAuthenticated);
   return (
     <Routes>
-      <Route path="/user/login" element={<UserLogin />} />
+      <Route path="/login" element={<UserLogin />} />
       <Route path="/user/register" element={<UserRegister />} />
       <Route path="/user/verify-otp" element={<VerifyOtp />} />
       <Route path="/user/forgot-password" element={<ForgotPassword />} />
@@ -34,7 +34,7 @@ const UserRoutes = () => {
       <Route
         path="/user"
         element={
-          isAuthenticated ? <UserLayout /> : <Navigate to="/user/login" state={{ from: location}}/>
+          isAuthenticated ? <UserLayout /> : <Navigate to="/login" state={{ from: location}}/>
         }
       >
         <Route path="dashboard" element={<Dashboard />} />

@@ -15,7 +15,7 @@ const ProfileLayout = () => {
     if (key === "logout") {
       socket.disconnect(); 
       dispatch(userLogout());
-      navigate("/user/login");
+      navigate("/login");
     } else {
       navigate(`/user/${key}`);
     }
