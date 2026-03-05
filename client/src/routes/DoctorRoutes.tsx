@@ -14,6 +14,7 @@ import DoctorBookingDetails from "../features/doctor/DoctorBookingDetails";
 import { useSelector } from "react-redux";
 import type { RootState } from "../redux/store";
 import NotFound from "../features/NotFound";
+import DoctorChatPage from "../features/doctor/DoctorChatPage";
 
 
 const DoctorRoutes = () => {
@@ -48,6 +49,7 @@ const DoctorRoutes = () => {
         <Route path="appointments" element={<DoctorAppointments />} />
         <Route path="wallet" element={<DoctorWallet />} />
         <Route path="/bookings/:id" element={<DoctorBookingDetails />} />
+        <Route path="/chat/:bookingId" element={<DoctorChatPage />} />
         <Route path="*" element={<NotFound />} />
       </Route>
       <Route path="*" element={<NotFound />} />
