@@ -97,22 +97,35 @@ const DoctorAppointments = () => {
                       {b.status}
                     </span>
                   </td>
-                  <td className="p-3 flex gap-2">
-                    {b.status !== "Cancelled" && b.status !== "Completed" && (
+                  <td className="p-3 flex gap-2 flex-wrap">
+                      {/* Cancel Button */}
+                      {b.status !== "Cancelled" && b.status !== "Completed" && (
+                        <button
+                          onClick={() => handleCancel(b.id)}
+                          className="text-sm px-3 py-1 bg-rose-500 text-white rounded hover:bg-rose-600 transition"
+                        >
+                          Cancel
+                        </button>
+                      )}
+
+                      {/* View Details */}
                       <button
-                        onClick={() => handleCancel(b.id)}
-                        className="text-sm px-3 py-1 bg-rose-500 text-white rounded hover:bg-rose-600"
+                        onClick={() => navigate(`/doctor/bookings/${b.id}`)}
+                        className="text-sm px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 transition"
                       >
-                        Cancel
+                        View Details
                       </button>
-                    )}
-                    <button
-                      onClick={() => navigate(`/doctor/bookings/${b.id}`)}
-                      className="text-sm px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600"
-                    >
-                      View Details
-                    </button>
-                  </td>
+
+                      {/* Chat Button */}
+                      {b.status !== "Cancelled" && (
+                        <button
+                          onClick={() => navigate(`/doctor/chat/${b.id}`)}
+                          className="text-sm px-3 py-1 bg-teal-600 text-white rounded hover:bg-teal-700 transition"
+                        >
+                          Chat
+                        </button>
+                      )}
+                    </td>
                 </tr>
               ))
             )}

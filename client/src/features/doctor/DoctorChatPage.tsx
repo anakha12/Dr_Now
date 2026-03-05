@@ -4,16 +4,18 @@ import { socket, connectSocket } from "../../services/socket";
 import type { ChatMessage } from "../../types/chatMessage";
 import { useNotifications } from "../../context/NotificationContext";
 
-const ChatPage = () => {
+const DoctorChatPage = () => {
   const { bookingId } = useParams<{ bookingId: string }>();
 
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
+
   const [isCalling, setIsCalling] = useState(false);
   const [incomingCall, setIncomingCall] = useState(false);
   const { addNotification, confirmMessage } = useNotifications();
 
   const bottomRef = useRef<HTMLDivElement>(null);
+
   const localVideoRef = useRef<HTMLVideoElement>(null);
   const remoteVideoRef = useRef<HTMLVideoElement>(null);
 
@@ -62,31 +64,28 @@ const ChatPage = () => {
       setMessages((prev) => [...prev, msg]);
     });
 
-    // ---------------- RECEIVE OFFER ----------------
+    // -------- RECEIVE OFFER --------
 
     socket.on("video-offer", ({ offer }) => {
-      console.log("Incoming call...");
+      console.log("Incoming call from patient");
+
       offerRef.current = offer;
       setIncomingCall(true);
     });
 
-    // ---------------- RECEIVE ANSWER ----------------
+    // -------- RECEIVE ANSWER --------
 
     socket.on("video-answer", async ({ answer }) => {
       await peerConnection.current?.setRemoteDescription(answer);
     });
 
-    // ---------------- ICE ----------------
+    // -------- ICE --------
 
     socket.on("ice-candidate", async ({ candidate }) => {
-      try {
-        await peerConnection.current?.addIceCandidate(candidate);
-      } catch (err) {
-        console.error("ICE error", err);
-      }
+      await peerConnection.current?.addIceCandidate(candidate);
     });
 
-    // ---------------- CALL ENDED ----------------
+    // -------- CALL ENDED --------
 
   socket.on("call-ended", async () => {
     addNotification("The other user left the call", "WARNING"); 
@@ -115,7 +114,7 @@ const ChatPage = () => {
     setInput("");
   };
 
-  // ---------------- CREATE PEER ----------------
+  // ---------------- WEBRTC ----------------
 
   const createPeerConnection = async () => {
     const stream = await navigator.mediaDevices.getUserMedia({
@@ -138,6 +137,10 @@ const ChatPage = () => {
     peerConnection.current.ontrack = (event) => {
       if (remoteVideoRef.current) {
         remoteVideoRef.current.srcObject = event.streams[0];
+
+        remoteVideoRef.current.onloadedmetadata = () => {
+          remoteVideoRef.current?.play();
+        };
       }
     };
 
@@ -199,17 +202,15 @@ const ChatPage = () => {
   return (
     <div className="flex flex-col h-full">
 
-      {/* HEADER */}
-
       <div className="flex justify-between p-4 border-b bg-white">
-        <h2 className="font-semibold text-lg">Chat</h2>
+        <h2 className="font-semibold text-lg">Doctor Chat</h2>
 
         {!isCalling ? (
           <button
             onClick={handleStartCall}
             className="bg-green-600 text-white px-4 py-2 rounded"
           >
-             Start Call
+           Start Call
           </button>
         ) : (
           <button
@@ -221,11 +222,12 @@ const ChatPage = () => {
         )}
       </div>
 
-      {/* INCOMING CALL */}
+      {/* Incoming call UI */}
 
       {incomingCall && (
         <div className="bg-yellow-100 p-4 flex justify-between items-center">
           <p className="font-semibold">📞 Incoming Call...</p>
+
           <button
             onClick={handleAcceptCall}
             className="bg-green-600 text-white px-4 py-2 rounded"
@@ -234,8 +236,6 @@ const ChatPage = () => {
           </button>
         </div>
       )}
-
-      {/* VIDEO */}
 
       {isCalling && (
         <div className="flex gap-4 p-4 bg-black">
@@ -256,7 +256,7 @@ const ChatPage = () => {
         </div>
       )}
 
-      {/* CHAT */}
+      {/* Messages */}
 
       <div className="flex-1 overflow-y-auto p-4 bg-white">
         {messages.map((msg) => (
@@ -264,10 +264,11 @@ const ChatPage = () => {
             <b>{msg.senderRole}:</b> {msg.message}
           </div>
         ))}
+
         <div ref={bottomRef} />
       </div>
 
-      {/* INPUT */}
+      {/* Input */}
 
       <div className="flex">
         <input
@@ -275,6 +276,7 @@ const ChatPage = () => {
           onChange={(e) => setInput(e.target.value)}
           className="flex-1 border px-4 py-2"
         />
+
         <button
           onClick={sendMessage}
           className="bg-teal-600 text-white px-4 py-2"
@@ -286,4 +288,4 @@ const ChatPage = () => {
   );
 };
 
-export default ChatPage;
+export default DoctorChatPage;
