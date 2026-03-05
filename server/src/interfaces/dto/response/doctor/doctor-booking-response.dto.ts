@@ -1,11 +1,49 @@
 import { Expose, Type } from "class-transformer";
 
-class SlotDTO {
+class MedicineDTO {
+  @Expose()
+
+
+  @Expose()
+  name!: string;
+
+  @Expose()
+  dose!: string;
+
+  @Expose()
+  frequency!: string;
+
+  @Expose()
+  duration!: string;
+
+  @Expose()
+  notes!: string;
+}
+
+export class SlotDTO {
   @Expose()
   from!: string;
 
   @Expose()
   to!: string;
+}
+
+export class PrescriptionDTO {
+  @Expose()
+  doctorName!: string;
+
+  @Expose()
+  date!: string;
+
+  @Expose()
+  @Type(() => MedicineDTO)
+  medicines!: MedicineDTO[];  
+
+  @Expose()
+  notes!: string;
+
+  @Expose()
+  _id!: string; 
 }
 
 export class DoctorBookingListResponseDTO {
@@ -20,10 +58,15 @@ export class DoctorBookingListResponseDTO {
 
   @Expose()
   patientName!: string;
+
   @Expose()
   department!: string; 
 
   @Expose()
   @Type(() => SlotDTO)
   slot!: SlotDTO;
+
+  @Expose()
+  @Type(() => PrescriptionDTO)
+  prescription?: PrescriptionDTO | null;
 }

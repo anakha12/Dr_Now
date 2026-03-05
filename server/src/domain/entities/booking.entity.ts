@@ -1,3 +1,4 @@
+import { IPrescription  } from "../../infrastructure/database/models/booking.model";
 
 export class Booking {
   constructor(
@@ -17,7 +18,8 @@ export class Booking {
     public patientName?: string,    
     public department?: string,
     public id?: string,
-    public doctorName?: string
+    public doctorName?: string,
+    public prescription?: IPrescription | null 
   ) {}
 
 

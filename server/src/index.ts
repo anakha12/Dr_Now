@@ -7,6 +7,7 @@ import http from "http";
 import { Server as SocketIOServer } from "socket.io";
 import userRoutes from "./interfaces/routes/userRoutes";
 import adminRoutes from "./interfaces/routes/adminRoutes";
+import prescriptionRoutes from "./interfaces/routes/prescriptionRoutes";
 import doctorRoutes from "./interfaces/routes/doctorRoutes";  
 import webhookRoutes from "./interfaces/routes/stripeWebhook";
 import cors from "cors";
@@ -56,6 +57,7 @@ mongoose.connect(process.env.MONGO_URI || "mongodb://127.0.0.1:27017/drnow")
 app.use("/api/users", userRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/doctor", doctorRoutes);
+app.use("/api/doctor", prescriptionRoutes);
 
 
 const port = Number(process.env.PORT);

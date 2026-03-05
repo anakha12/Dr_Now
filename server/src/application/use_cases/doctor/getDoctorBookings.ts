@@ -21,6 +21,7 @@ async execute(
     patientName: b.patientName || "Unknown",
     department: b.department || "N/A",
     slot: b.startTime && b.endTime ? { from: b.startTime, to: b.endTime } : undefined,
+    prescription: b.prescription ?? null,
   }));
 
   return {

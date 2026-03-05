@@ -43,6 +43,8 @@ export const DoctorRoutes = {
 
   DEPARTMENTS: "/departments",
   WALLET_SUMMARY: "/wallet-summary",
+  COMPLETE_BOOKING: (bookingId: string) => `/bookings/${bookingId}/complete`,
+  ADD_PRESCRIPTION: (bookingId: string) => `/bookings/${bookingId}/prescription`,
 };
 
 export const UserRoutes = {

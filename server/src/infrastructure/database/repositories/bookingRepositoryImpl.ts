@@ -313,6 +313,20 @@ async markPayoutAsPaid(bookingIds: string[]): Promise<void> {
   );
 }
 
+async updateBookingStatus(
+  booking: Booking
+): Promise<Booking> {
+  const updated = await BookingModel.findByIdAndUpdate(
+    booking.id,
+    { status: booking.status }, 
+    { new: true }
+  ).populate("doctorId", "name specialization")
+   .populate("userId", "name");
+
+  if (!updated) throw new Error("Booking not found");
+
+  return this._toDomain(updated);
+}
 
   // -----------------------------
   // CANCEL & REFUND METHODS
@@ -343,7 +357,7 @@ async markPayoutAsPaid(bookingIds: string[]): Promise<void> {
   // Mapper from persistence to domain
   // -----------------------------
 private _toDomain(booking: IBookingWithPopulatedDoctorAndUser): Booking {
-  // Doctor
+
   let doctorId: string;
   let doctorName: string | undefined;
   let department: string | undefined;
@@ -356,7 +370,7 @@ private _toDomain(booking: IBookingWithPopulatedDoctorAndUser): Booking {
     department = booking.doctorId.specialization;
   }
 
-  // User / Patient
+
   let patientId: string;
   let patientName: string | undefined;
 
@@ -384,7 +398,8 @@ private _toDomain(booking: IBookingWithPopulatedDoctorAndUser): Booking {
   patientName,        
   department,            
   booking._id.toString(), 
-  doctorName             
+  doctorName,
+  booking.prescription ?? null              
 );
 
 }

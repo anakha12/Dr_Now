@@ -52,4 +52,5 @@ findUserBookingsWithFilters(
   markPayoutAsPaid(
     bookingIds: string[]
   ): Promise<void>;
+  updateBookingStatus(booking: Booking): Promise<Booking>;
 }

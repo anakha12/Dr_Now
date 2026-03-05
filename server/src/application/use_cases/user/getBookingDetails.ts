@@ -18,7 +18,7 @@ export class GetBookingDetails implements GetBookingDetails{
     }
 
     const booking = await this._bookingRepo.findBookingByIdAndUser(bookingId, userId);
-  
+    console.log(booking)
     if (!booking) {
       throw new AppError(ErrorMessages.BOOKING_NOT_FOUND, HttpStatus.NOT_FOUND);
     }

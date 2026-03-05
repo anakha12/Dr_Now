@@ -11,6 +11,7 @@ export class ChatController {
 
   async sendMessage(req: Request, res: Response): Promise<void> {
     try {
+
       const response = await this._sendMessageUseCase.execute(req.body);
       res.status(HttpStatus.CREATED).json({
         success: true,

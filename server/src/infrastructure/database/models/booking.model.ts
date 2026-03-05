@@ -1,5 +1,20 @@
 import mongoose, { Schema, Document } from 'mongoose';
 
+export interface IMedicine {
+  name: string;
+  dose: string;
+  frequency: string;
+  duration: string;
+  notes?: string;
+}
+
+export interface IPrescription {
+  doctorName: string;
+  date: string;
+  medicines: IMedicine[];
+  notes?: string;
+}
+
 export interface IBooking extends Document {
   _id: mongoose.Types.ObjectId; 
   doctorId: mongoose.Types.ObjectId;
@@ -15,7 +30,23 @@ export interface IBooking extends Document {
   payoutStatus?: 'Pending' | 'Paid';
   refundStatus?: 'NotRequired' | 'Refunded';
   cancellationReason?: string;
+  prescription?: IPrescription;
 }
+
+const MedicineSchema: Schema = new Schema({
+  name: { type: String, required: true },
+  dose: { type: String, required: true },
+  frequency: { type: String, required: true },
+  duration: { type: String, required: true },
+  notes: { type: String },
+});
+
+const PrescriptionSchema: Schema = new Schema({
+  doctorName: { type: String, required: true },
+  date: { type: String, required: true },
+  medicines: { type: [MedicineSchema], required: true },
+  notes: { type: String },
+});
 
 const BookingSchema: Schema = new Schema<IBooking>(
   {
@@ -47,7 +78,8 @@ const BookingSchema: Schema = new Schema<IBooking>(
       enum: ['NotRequired', 'Refunded'],
       default: 'NotRequired',
     },
-    cancellationReason: { type: String, default: '' }
+    cancellationReason: { type: String, default: '' },
+    prescription: { type: PrescriptionSchema },
   },
   { timestamps: true }
 );

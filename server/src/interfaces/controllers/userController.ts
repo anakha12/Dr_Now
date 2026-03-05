@@ -76,7 +76,6 @@ export class UserController {
 
   async sendOtp(req: Request, res: Response): Promise<void> {
     try {
-      console.log(req.body)
        await this._sendUserOtp.execute(req.body);
       res.status(HttpStatus.OK).json({ message: Messages.OTP_SENT });
     } catch (err: unknown) {

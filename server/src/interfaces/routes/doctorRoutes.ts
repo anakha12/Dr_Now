@@ -37,5 +37,6 @@ router.put("/complete-profile/:doctorId", (req, res) => doctorController.complet
 router.get("/bookings/:bookingId", verifyToken(Role.DOCTOR), (req, res) => doctorController.getBookingDetails(req, res));
 router.post("/availability-exceptions",verifyToken(Role.DOCTOR),(req, res) => doctorController.addAvailabilityException(req, res));
 router.get("/availability-exceptions",verifyToken(Role.DOCTOR),(req, res) => doctorController.fetchAvailabilityExceptions(req, res));
+router.patch("/bookings/:bookingId/complete",verifyToken(Role.DOCTOR),(req, res) => doctorController.markBookingAsCompleted(req, res));
 
 export default router;
