@@ -19,4 +19,18 @@ export interface Booking {
   cancellationReason?: string;  
   canCancel?: boolean;
   time: string;
+  prescription?: Prescription;
 }
+export type Prescription = {
+  doctorName: string;
+  date: string;
+  medicines: {
+    name: string;
+    dose: string;
+    frequency: string;
+    duration: string;
+    notes?: string;
+  }[];
+  notes?: string;
+   registrationNumber?: string;
+};

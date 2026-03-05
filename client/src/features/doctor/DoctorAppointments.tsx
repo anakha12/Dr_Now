@@ -125,6 +125,29 @@ const DoctorAppointments = () => {
                           Chat
                         </button>
                       )}
+
+                      {/* Add / View Prescription Buttons */}
+                        {b.status === "Completed" && (
+                          b.prescription ? (
+                            <button
+                              onClick={() =>
+                                navigate(`/doctor/bookings/${b.id}/prescription/view`, {
+                                  state: { prescription: b.prescription, patientName: b.patientName, department: b.department }
+                                })
+                              }
+                              className="text-sm px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
+                            >
+                              View Prescription
+                            </button>
+                          ) : (
+                            <button
+                              onClick={() => navigate(`/doctor/bookings/${b.id}/prescription`)}
+                              className="text-sm px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700 transition"
+                            >
+                              Add Prescription
+                            </button>
+                          )
+                        )}
                     </td>
                 </tr>
               ))

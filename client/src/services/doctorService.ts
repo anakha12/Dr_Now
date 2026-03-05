@@ -1,4 +1,4 @@
-// src/services/doctorService.ts
+
 
 import { doctorAxios } from "./axiosInstances";
 import type { DoctorProfile } from "../types/doctorProfile";
@@ -21,6 +21,16 @@ export const sendOtp = async (formData: FormData): Promise<{ message: string }> 
     return response.data;
   } catch (error) {
     throw handleError(error, Messages.DOCTOR.REGISTRATION.OTP_FAILED);
+  }
+};
+
+
+export const completeBooking = async (bookingId: string): Promise<{ message: string }> => {
+  try {
+    const response = await doctorAxios.patch(DoctorRoutes.COMPLETE_BOOKING(bookingId));
+    return response.data;
+  } catch (error) {
+    throw handleError(error, "Failed to mark booking as completed");
   }
 };
 
@@ -195,5 +205,20 @@ export const getWalletSummary = async (page: number, limit: number): Promise<Wal
     return response.data;
   } catch (error) {
     throw handleError(error, Messages.WALLET.FETCH_FAILED);
+  }
+};
+
+export const addPrescriptionToBooking = async (
+  bookingId: string,
+  prescription: any 
+): Promise<{ message: string }> => {
+  try {
+    const response = await doctorAxios.patch(
+      DoctorRoutes.ADD_PRESCRIPTION(bookingId),
+      { ...prescription }
+    );
+    return response.data;
+  } catch (error) {
+    throw handleError(error, "Failed to save prescription");
   }
 };

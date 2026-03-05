@@ -2,11 +2,10 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { getBookingDetails } from "../../services/userService";
 import { motion } from "framer-motion";
-import { CalendarDays, User, CreditCard, Clock, FileText, ArrowLeft } from "lucide-react";
+import { CalendarDays, User, CreditCard, Clock, FileText, ArrowLeft, FileText as PrescriptionIcon } from "lucide-react";
 import { useNotifications } from "../../context/NotificationContext";
 import { Messages } from "../../constants/messages";
 import logger from "../../utils/logger";
-
 
 const BookingDetails = () => {
   const { id: bookingId } = useParams();
@@ -78,7 +77,7 @@ const BookingDetails = () => {
           <Item label={Messages.DOCTOR.BOOKING_DETAILS.LABELS.DEPARTMENT} value={booking.department || "N/A"} icon={<User size={20} />} />
           <Item
             label={Messages.DOCTOR.BOOKING_DETAILS.LABELS.DATE}
-            value={new Date(booking.date).toLocaleDateString("en-GB")} 
+            value={new Date(booking.date).toLocaleDateString("en-GB")}
             icon={<CalendarDays size={20} />}
           />
           <Item label={Messages.DOCTOR.BOOKING_DETAILS.LABELS.TIME_SLOT} value={`${booking.slot?.from} - ${booking.slot?.to}`} icon={<Clock size={20} />} />
@@ -95,15 +94,28 @@ const BookingDetails = () => {
             icon={<CreditCard size={20} />}
           />
 
-          {/* <Item
-            label={Messages.DOCTOR.BOOKING_DETAILS.LABELS.BOOKED_ON}
-            value={booking.date ? format(new Date(booking.date), "yyyy-MM-dd") : "N/A"}
-            icon={<CalendarDays size={20} />}
-          /> */}
+          {/* Navigate to Prescription Page */}
+          {booking.prescription && (
+            <button
+              onClick={() =>
+                navigate("/user/prescription", {
+                  state: {
+                    prescription: booking.prescription,
+                    patientName: booking.userName || "Patient",
+                    department: booking.department || "N/A",
+                  },
+                })
+              }
+              className="flex items-center gap-2 text-blue-700 hover:text-blue-900 font-medium mt-4"
+            >
+              <PrescriptionIcon size={18} /> View Prescription
+            </button>
+          )}
+
           {/* Go Back Button */}
           <button
             onClick={() => navigate("/user/bookings")}
-            className="flex items-center gap-2 text-sm text-blue-700 hover:text-blue-900 font-medium transition"
+            className="flex items-center gap-2 text-sm text-blue-700 hover:text-blue-900 font-medium mt-4"
           >
             <ArrowLeft size={18} /> {Messages.DOCTOR.BOOKING_DETAILS.BACK_BUTTON}
           </button>

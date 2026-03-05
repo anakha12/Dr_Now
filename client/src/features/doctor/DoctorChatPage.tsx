@@ -3,6 +3,7 @@ import { useParams } from "react-router-dom";
 import { socket, connectSocket } from "../../services/socket";
 import type { ChatMessage } from "../../types/chatMessage";
 import { useNotifications } from "../../context/NotificationContext";
+import { completeBooking } from "../../services/doctorService";
 
 const DoctorChatPage = () => {
   const { bookingId } = useParams<{ bookingId: string }>();
@@ -187,15 +188,21 @@ const DoctorChatPage = () => {
 
   // ---------------- END CALL ----------------
 
-  const handleEndCall = async () => {
-    if (!bookingId) return;
-
+const handleEndCall = async () => {
+  if (!bookingId) return;
+  try {
     const confirmed = await confirmMessage("Are you sure you want to end the call?");
-    if (confirmed) {
-      socket.emit("end-call", { bookingId });
-      cleanupCall();
-    }
-  };
+    if (!confirmed) return;
+     await completeBooking(bookingId);
+    socket.emit("end-call", { bookingId });
+    cleanupCall();
+  } catch (err) {
+    console.error("Error completing booking:", err);
+    addNotification("Failed to mark booking as completed", "ERROR");
+    socket.emit("end-call", { bookingId });
+    cleanupCall();
+  }
+};
 
   // ---------------- UI ----------------
 

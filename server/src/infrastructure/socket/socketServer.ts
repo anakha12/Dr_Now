@@ -9,7 +9,7 @@ export const initSocketServer = (
   io.use(socketAuthMiddleware);
 
   io.on("connection", (socket: Socket) => {
-    console.log("User connected:", socket.data?.user?.id);
+    
 
     socket.on("join-room", (bookingId: string) =>
       chatSocketService.handleJoinRoom(socket, bookingId)

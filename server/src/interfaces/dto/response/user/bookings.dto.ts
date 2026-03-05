@@ -1,4 +1,6 @@
-import { Exclude, Expose, Transform } from "class-transformer";
+// src/interfaces/dto/response/user/bookings.dto.ts
+import { Exclude, Expose, Transform, Type } from "class-transformer";
+import { PrescriptionDTO, SlotDTO } from "../doctor/doctor-booking-response.dto";
 
 @Exclude()
 export class BookingResponseDTO {
@@ -18,8 +20,9 @@ export class BookingResponseDTO {
   date!: string;
 
   @Expose()
+  @Type(() => SlotDTO)
   @Transform(({ obj }) => ({ from: obj.startTime, to: obj.endTime }))
-  slot!: { from: string; to: string };
+  slot!: SlotDTO;
 
   @Expose()
   doctorEarning?: number;
@@ -36,7 +39,16 @@ export class BookingResponseDTO {
   @Expose()
   createdAt!: Date;
 
+  // --------------------
+  // Typed prescription (can be null if not present)
+  // --------------------
+  @Expose()
+  @Type(() => PrescriptionDTO)
+  prescription?: PrescriptionDTO | null;
 
+  // --------------------
+  // Computed fields
+  // --------------------
   @Expose()
   get time(): string {
     return `${this.slot.from} - ${this.slot.to}`;

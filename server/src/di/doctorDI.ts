@@ -30,7 +30,7 @@ import { GetDoctorAvailabilityExceptionsUseCase } from "../application/use_cases
 import { DeleteDoctorAvailabilityExceptionUseCase } from "../application/use_cases/doctor/deleteDoctorAvailabilityException";
 import { EditDoctorAvailabilityRuleUseCase } from "../application/use_cases/doctor/editAvailabilityRule";
 import { DeleteDoctorAvailabilityRuleUseCase } from "../application/use_cases/doctor/deleteDoctorAvailabilityRule";
-
+import { CompleteBookingUseCase } from "../application/use_cases/doctor/completeBookingUseCase";
 
 const userRepository = new UserRepositoryImpl();
 const  doctorRepository = new DoctorRepositoryImpl();
@@ -62,7 +62,7 @@ const getDoctorAvailabilityExceptions = new GetDoctorAvailabilityExceptionsUseCa
 const deleteAvailabilityException = new DeleteDoctorAvailabilityExceptionUseCase(doctorAvailabilityExceptionRepository );
 const editAvailabilityRuleUseCase = new EditDoctorAvailabilityRuleUseCase(availabilityRuleRepository)
 const deleteAvailabilityRule = new DeleteDoctorAvailabilityRuleUseCase(availabilityRuleRepository);
-
+const completeBookingUseCase = new CompleteBookingUseCase(bookingRepository);
 
 
 export const doctorController = new DoctorController(
@@ -84,6 +84,7 @@ export const doctorController = new DoctorController(
   deleteAvailabilityException,
   editAvailabilityRuleUseCase,
   deleteAvailabilityRule,
+  completeBookingUseCase
   
 );
 

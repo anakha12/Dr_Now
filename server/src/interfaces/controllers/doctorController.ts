@@ -21,7 +21,7 @@ import { IGetDoctorAvailabilityExceptions } from "../../application/use_cases/in
 import { IDeleteDoctorAvailabilityExceptionUseCase } from "../../application/use_cases/interfaces/doctor/IDeleteDoctorAvailabilityExceptionUseCase";
 import { IEditDoctorAvailabilityRule } from "../../application/use_cases/interfaces/doctor/IEditDoctorAvailabilityRuleUseCase";
 import { IDeleteDoctorAvailabilityRuleUseCase } from "../../application/use_cases/interfaces/doctor/IDeleteDoctorAvailabilityRuleUseCase";
-
+import { ICompleteBookingUseCase } from "../../application/use_cases/interfaces/doctor/ICompleteBookingUseCase";
 
  export interface MulterRequest extends Request {
   files?: {
@@ -52,6 +52,7 @@ export class DoctorController {
       private _deleteDoctorAvailabilityExceptionUseCase: IDeleteDoctorAvailabilityExceptionUseCase,
       private _editAvailabilityRuleUseCase: IEditDoctorAvailabilityRule,
       private _deleteAvailabilityRuleUseCase: IDeleteDoctorAvailabilityRuleUseCase,
+      private _completeBookingUseCase: ICompleteBookingUseCase,
   ) {}
 
   async sendOtp(req: MulterRequest, res: Response): Promise<void> {
@@ -359,6 +360,26 @@ async getBookingDetails(req: AuthRequest, res: Response): Promise<void> {
   }
 }
 
+async markBookingAsCompleted(req: AuthRequest, res: Response): Promise<void> {
+  try {
+    const doctorId = req.user?.id;
+    const bookingId = req.params.bookingId;
+    if (!doctorId) {
+      res.status(HttpStatus.UNAUTHORIZED).json({ error: Messages.UNAUTHORIZED });
+      return;
+    }
 
+    if (!bookingId) {
+      res.status(HttpStatus.BAD_REQUEST).json({ error: "Booking ID is required" });
+      return;
+    }
+
+    await this._completeBookingUseCase.execute(bookingId, doctorId);
+
+    res.status(HttpStatus.OK).json({ message: "Booking marked as Completed" });
+  } catch (err) {
+    handleControllerError(res, err, HttpStatus.BAD_REQUEST);
+  }
+}
 
 }

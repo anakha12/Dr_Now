@@ -20,6 +20,7 @@ import UpdateProfile from "../features/user/UpdateProfile";
 import { useSelector } from "react-redux";
 import type { RootState } from "../redux/store";
 import ChatPage from "../features/user/ChatPage";
+import UserPrescriptionView from "../features/user/UserPrescriptionView";
 
 const UserRoutes = () => {
   const location = useLocation();
@@ -52,6 +53,7 @@ const UserRoutes = () => {
           <Route path="update-profile" element={<UpdateProfile />} /> 
           <Route path="chat/:bookingId" element={<ChatPage />} />
         </Route>
+        <Route path="prescription" element={<UserPrescriptionView />} />
       </Route>
     </Routes>
   );
