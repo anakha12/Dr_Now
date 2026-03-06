@@ -17,7 +17,6 @@ export class UserRepositoryImpl
     super(UserModel); 
   }
 
-
 async findByEmailOrUid(email: string, uid: string): Promise<UserEntity | null> {
   const user = await UserModel.findOne({
     $or: [

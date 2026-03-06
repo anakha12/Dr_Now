@@ -46,7 +46,7 @@ const UserLayout = () => {
           </div>
           <nav className="flex items-center gap-6 text-sm md:text-base">
             <Link to="/user/dashboard" className="hover:text-teal-600">Home</Link>
-            <Link to="/services" className="hover:text-teal-600">Services</Link>
+            {/* <Link to="/services" className="hover:text-teal-600">Services</Link> */}
             <Link to="/about" className="hover:text-teal-600">About</Link>
             <Link to="/contact" className="hover:text-teal-600">Contact</Link>
             <Link to="/user/profile" className="hover:text-teal-600">Profile</Link>

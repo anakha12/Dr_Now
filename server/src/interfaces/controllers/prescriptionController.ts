@@ -11,7 +11,7 @@ export class PrescriptionController {
     try {
       const bookingId = req.params.bookingId;
       const prescriptionData = req.body;
-          console.log(req.body)
+
       const response = await this._addPrescriptionUseCase.execute({
         ...prescriptionData,
         bookingId,

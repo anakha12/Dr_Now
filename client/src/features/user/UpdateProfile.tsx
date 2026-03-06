@@ -46,6 +46,7 @@ const UpdateProfile: React.FC = () => {
       setPreview(URL.createObjectURL(e.target.files[0]));
     }
   };
+  
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -68,7 +69,7 @@ const UpdateProfile: React.FC = () => {
         if (value !== undefined && value !== null) data.append(key, value.toString());
       });
       if (selectedFile) data.append("file", selectedFile);
-
+      
       await updateUserProfile(data);
       addNotification(Messages.USER.PROFILE_UPDATE_SUCCESS, "SUCCESS");
       navigate("/user/profile");

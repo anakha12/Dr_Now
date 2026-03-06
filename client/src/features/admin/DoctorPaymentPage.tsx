@@ -96,13 +96,13 @@ const DoctorPaymentPage = () => {
           <div className="bg-white rounded-lg shadow p-4">
             <h2 className="font-semibold text-gray-600">Total Balance</h2>
             <p className="text-xl font-bold text-teal-700">
-              ₹{walletSummary.totalBalance}
+              ₹{Math.round(walletSummary.totalBalance)}
             </p>
           </div>
           <div className="bg-white rounded-lg shadow p-4">
             <h2 className="font-semibold text-gray-600">Total Commission</h2>
             <p className="text-xl font-bold text-teal-700">
-              ₹{walletSummary.totalCommission}
+              ₹{Math.round(walletSummary.totalCommission)}
             </p>
           </div>
           <div className="bg-white rounded-lg shadow p-4">
@@ -110,7 +110,7 @@ const DoctorPaymentPage = () => {
               Pending Doctor Payouts
             </h2>
             <p className="text-xl font-bold text-orange-600">
-              ₹{walletSummary.pendingDoctorPayouts}
+             ₹{Math.round(walletSummary.pendingDoctorPayouts)}
             </p>
           </div>
         </div>
