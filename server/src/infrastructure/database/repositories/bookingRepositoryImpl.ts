@@ -24,6 +24,8 @@ type IBookingWithPopulatedDoctorAndUser = Omit<IBooking, "doctorId" | "userId"> 
 
 
 export class BookingRepositoryImpl implements IBookingRepository {
+
+
   async createBooking(booking: Booking): Promise<Booking> {
     const newBooking = new BookingModel({
       doctorId: booking.doctorId,
@@ -58,6 +60,7 @@ export class BookingRepositoryImpl implements IBookingRepository {
     page: number,
     limit: number
   ): Promise<{ bookings: Booking[]; totalPages: number }> {
+    await this.autoCancelExpiredBookings();
     const skip = (page - 1) * limit;
     const [bookings, total] = await Promise.all([
       BookingModel.find({ doctorId })
@@ -94,6 +97,20 @@ export class BookingRepositoryImpl implements IBookingRepository {
       payoutStatus: b.payoutStatus,
     } as Booking));
 
+  }
+
+  async autoCancelExpiredBookings(): Promise<void> {
+    const now = new Date();
+
+    await BookingModel.updateMany(
+      {
+        date: { $lt: now },
+        status: "Upcoming",
+      },
+      {
+        $set: { status: "Cancelled" },
+      }
+    );
   }
 
 
@@ -135,6 +152,7 @@ export class BookingRepositoryImpl implements IBookingRepository {
     page: number,
     limit: number
   ): Promise<{ bookings: Booking[]; total: number }> {
+    await this.autoCancelExpiredBookings();
     const skip = (page - 1) * limit;
     const [bookings, total] = await Promise.all([
       BookingModel.find({ userId })
@@ -221,6 +239,7 @@ const bookings: BookingWithExtras[] = bookingsRaw.map((b: any) => {
     doctorId: string,
     date: string
   ): Promise<Booking[]> {
+    await this.autoCancelExpiredBookings();
     const start = new Date(date);
     start.setHours(0, 0, 0, 0);
 

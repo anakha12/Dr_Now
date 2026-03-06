@@ -8,7 +8,7 @@ import { cloudinary, getSignedImageURL } from "../../../config/cloudinary";
 import { Messages } from "../../../utils/Messages";
 
 export class UpdateUserProfileUseCase implements IUpdateUserProfileUseCase {
-  constructor(private _userRepository: IUserRepository) { }
+  constructor(private _userRepository: IUserRepository) {}
 
   async execute(
     userId: string,
@@ -21,7 +21,7 @@ export class UpdateUserProfileUseCase implements IUpdateUserProfileUseCase {
 
     const existingUser = await this._userRepository.findUserById(userId);
     if (!existingUser) throw new Error(Messages.USER_NOT_FOUND);
-    
+
     if (validatedDto.file) {
       const result = await cloudinary.uploader.upload(validatedDto.file.path, {
         folder: "users",
@@ -30,7 +30,6 @@ export class UpdateUserProfileUseCase implements IUpdateUserProfileUseCase {
       });
       validatedDto.image = getSignedImageURL(result.public_id, result.format, 600);
     }
-
 
 
     const isFirstCompletion =
@@ -54,13 +53,30 @@ export class UpdateUserProfileUseCase implements IUpdateUserProfileUseCase {
       address: validatedDto.address,
       image: validatedDto.image,
       profileCompletion: isFirstCompletion ? true : existingUser.profileCompletion,
-      age: validatedDto.age !== undefined ? String(validatedDto.age) : undefined,
-      dateOfBirth: validatedDto.dateOfBirth ? new Date(validatedDto.dateOfBirth) : undefined,
+      age: validatedDto.age !== undefined ? Number(validatedDto.age) : undefined,
+      dateOfBirth: validatedDto.dateOfBirth
+        ? new Date(validatedDto.dateOfBirth)
+        : undefined,
     };
 
 
     const updatedUser = await this._userRepository.updateUserProfile(userId, updates);
 
-    return plainToInstance(UpdateUserProfileResponseDTO, updatedUser);
+
+    return {
+      id: updatedUser.id,
+      name: updatedUser.name,
+      email: updatedUser.email,
+      phone: updatedUser.phone,
+      dateOfBirth: updatedUser.dateOfBirth
+        ? (updatedUser.dateOfBirth as Date).toISOString()
+        : undefined,
+      gender: updatedUser.gender,
+      bloodGroup: updatedUser.bloodGroup,
+      address: updatedUser.address,
+      image: updatedUser.image,
+      age: updatedUser.age !== undefined ? Number(updatedUser.age) : undefined,
+      profileCompletion: updatedUser.profileCompletion,
+    } as UpdateUserProfileResponseDTO;
   }
 }

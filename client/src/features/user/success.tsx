@@ -74,7 +74,7 @@ const Success = () => {
       </div>
 
       <button
-        onClick={() => navigate("/user/online-consultation")}
+        onClick={() => navigate("/user/bookings")}
         className="bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700 transition"
       >
         {Messages.DOCTOR.BOOKING_DETAILS.BACK_BUTTON}
