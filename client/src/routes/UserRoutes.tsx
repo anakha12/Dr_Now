@@ -29,15 +29,20 @@ import Contact from "../features/user/Contact";
 const UserRoutes = () => {
   const location = useLocation();
 
-  const isAuthenticated = useSelector(
-    (state: RootState) => state.userAuth.isAuthenticated
+  const { isAuthenticated } = useSelector(
+    (state: RootState) => state.userAuth
   );
 
   return (
     <Routes>
-
-     
-      <Route path="/login" element={<UserLogin />} />
+      <Route
+        path="/login"
+        element={
+          isAuthenticated
+            ? <Navigate to="/user/dashboard" replace />
+            : <UserLogin />
+        }
+      />
       <Route path="/user/register" element={<UserRegister />} />
       <Route path="/user/verify-otp" element={<VerifyOtp />} />
       <Route path="/user/forgot-password" element={<ForgotPassword />} />

@@ -21,10 +21,11 @@ function createAuthSlice<T extends object>(name: string) {
     reducers: {
       setAuth: (
         state,
-        action: PayloadAction<{ isAuthenticated: boolean; user: T }> // <-- removed optional
+        action: PayloadAction<{ isAuthenticated: boolean; user: T }> 
       ) => {
         state.isAuthenticated = action.payload.isAuthenticated;
         state.user = action.payload.user as Draft<T>;
+        state.loading = false;
       },
       setLoading: (state, action: PayloadAction<boolean>) => {
         state.loading = action.payload;
@@ -32,6 +33,7 @@ function createAuthSlice<T extends object>(name: string) {
       logout: (state) => {
         state.isAuthenticated = false;
         state.user = undefined;
+        state.loading = false; 
       },
     },
   });

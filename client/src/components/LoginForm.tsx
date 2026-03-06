@@ -30,24 +30,32 @@ const LoginForm = <TUser,>({
   const navigate = useNavigate();
   const dispatch = useDispatch<AppDispatch>();
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      schema.parse({ email, password });
-      const res = await loginService(email, password);
-      dispatch(setAuth({ isAuthenticated: true, user: res.user }));
-      toast.success(Messages.AUTH.LOGIN_SUCCESS);
-      setTimeout(() => navigate(redirectPath), 1200);
-    } catch (err: unknown) {
-      if (err instanceof ZodError) {
-        err.issues.forEach((issue) => toast.error(issue.message));
-      } else if (err instanceof Error) {
-        toast.error(err.message || Messages.AUTH.LOGIN_FAILED);
-      } else {
-        toast.error(Messages.AUTH.LOGIN_FAILED);
-      }
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  try {
+    schema.parse({ email, password });
+
+    const res = await loginService(email, password);
+
+   
+    localStorage.setItem("token", res.token);
+
+   
+    dispatch(setAuth({ isAuthenticated: true, user: res.user }));
+
+    toast.success(Messages.AUTH.LOGIN_SUCCESS);
+
+   setTimeout(() => navigate(redirectPath, { replace: true }), 1200);
+  } catch (err: unknown) {
+    if (err instanceof ZodError) {
+      err.issues.forEach((issue) => toast.error(issue.message));
+    } else if (err instanceof Error) {
+      toast.error(err.message || Messages.AUTH.LOGIN_FAILED);
+    } else {
+      toast.error(Messages.AUTH.LOGIN_FAILED);
     }
-  };
+  }
+};
 
 return (
   <div className="h-screen flex items-center justify-center bg-gray-100 px-4">
