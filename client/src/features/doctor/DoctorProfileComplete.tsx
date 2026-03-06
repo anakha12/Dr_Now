@@ -5,7 +5,8 @@ import { completeDoctorProfile } from "../../services/doctorService";
 import { useNotifications } from "../../context/NotificationContext";
 import { Messages } from "../../constants/messages";
 import { handleError } from "../../utils/errorHandler";
-
+import { doctorProfileSchema } from "../../validation/doctorSchema";
+import { ZodError } from "zod";
 
 interface Education {
   degree: string;
@@ -23,14 +24,14 @@ const DoctorProfileComplete = () => {
   const navigate = useNavigate();
   const { addNotification } = useNotifications();
 
-  // Retrieve stored registration details
+
   const doctorId = localStorage.getItem("doctorId");
   const storedName = localStorage.getItem("doctorName") || "";
   const storedGender = localStorage.getItem("doctorGender") || "";
   const storedSpecialization = localStorage.getItem("doctorSpecialization") || "";
   const storedConsultFee = localStorage.getItem("doctorConsultFee") || "";
 
-  // New fields for profile completion
+
   const [bio, setBio] = useState("");
   const [education, setEducation] = useState<Education[]>([{ degree: "", institution: "", year: "" }]);
   const [awards, setAwards] = useState<string[]>([""]);
@@ -71,42 +72,51 @@ const DoctorProfileComplete = () => {
   const addAward = () => setAwards([...awards, ""]);
 
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
 
-    const profileData = {
+  const profileData = {
+    bio,
+    education: education.filter((edu) => edu.degree && edu.institution && edu.year),
+    awards: awards.filter((a) => a.trim() !== ""),
+    experience: experience.filter((exp) => exp.hospital && exp.role && exp.years),
+    affiliatedHospitals: affiliatedHospitals
+      .split(",")
+      .map((h) => h.trim())
+      .filter(Boolean),
+  };
+
+  try {
+   
+    doctorProfileSchema.parse(profileData);
+
+    await completeDoctorProfile(doctorId, {
       name: storedName,
       specialization: storedSpecialization,
       gender: storedGender,
       consultFee: Number(storedConsultFee),
-      bio,
-      education: education.filter((edu) => edu.degree && edu.institution && edu.year),
-      awards: awards.filter((a) => a.trim() !== ""),
-      experience: experience.filter((exp) => exp.hospital && exp.role && exp.years),
-      affiliatedHospitals: affiliatedHospitals
-        .split(",")
-        .map((h) => h.trim())
-        .filter(Boolean),
-    };
+      ...profileData,
+    });
 
-    try {
-      await completeDoctorProfile(doctorId, profileData);
+    ["doctorId","doctorName","doctorGender","doctorSpecialization","doctorConsultFee"].forEach((key) =>
+      localStorage.removeItem(key)
+    );
 
-      // Clean up localStorage
-      localStorage.removeItem("doctorId");
-      localStorage.removeItem("doctorName");
-      localStorage.removeItem("doctorGender");
-      localStorage.removeItem("doctorSpecialization");
-      localStorage.removeItem("doctorConsultFee");
+    addNotification(Messages.DOCTOR.PROFILE_UPDATE_SUCCESS, "SUCCESS");
+    setTimeout(() => navigate("/doctor/login"), 1500);
 
-      addNotification(Messages.DOCTOR.PROFILE_UPDATE_SUCCESS, "SUCCESS");
-      setTimeout(() => navigate("/doctor/login"), 1500);
-    } catch (error: unknown) {
-      const err = handleError(error, Messages.DOCTOR.PROFILE_UPDATE_FAILED);
-      addNotification(err.message, "ERROR");
-    }
-  };
-
+  }catch (err: unknown) {
+  if (err instanceof ZodError) {
+    err.issues.forEach((issue) => {
+      const path = issue.path.join(".") || "Field";
+      addNotification(`${path}: ${issue.message}`, "ERROR");
+    });
+  } else {
+    const error = handleError(err, Messages.DOCTOR.PROFILE_UPDATE_FAILED);
+    addNotification(error.message, "ERROR");
+  }
+}
+}
   // ---------- UI ----------
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-teal-50 via-white to-teal-100 px-2 py-8">
