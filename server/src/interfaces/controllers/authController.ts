@@ -22,7 +22,9 @@ async refreshToken(req: Request, res: Response): Promise<void> {
     const decoded = this._tokenService.verifyRefreshToken(token);
     if (!decoded) throw new Error(Messages.INVALID_OR_EXPIRED_TOKEN);
 
-    const {exp: _exp, iat: _iat, ...payloadWithoutExp } = decoded;
+    const payloadWithoutExp = { ...decoded };
+    delete payloadWithoutExp.exp;
+    delete payloadWithoutExp.iat;
 
     const refreshToken = this._tokenService.generateRefreshToken(payloadWithoutExp); 
     const accessToken = this._tokenService.generateAccessToken(payloadWithoutExp);

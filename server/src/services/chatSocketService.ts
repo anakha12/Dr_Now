@@ -29,8 +29,12 @@ export class ChatSocketService {
       });
 
       io.to(data.bookingId).emit("receive-message", savedMessage);
-    } catch (err: any) {
-      socket.emit("error-message", { message: err.message });
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        socket.emit("error-message", { message: err.message });
+      } else {
+        socket.emit("error-message", { message: "Unknown error occurred" });
+      }
     }
   }
 }

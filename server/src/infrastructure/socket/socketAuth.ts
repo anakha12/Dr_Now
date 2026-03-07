@@ -32,7 +32,7 @@ export const socketAuthMiddleware = async (
     socket.data.user = decoded; 
 
     next();
-  } catch (error) {
+  } catch {
     next(new Error("Authentication failed"));
   }
 };

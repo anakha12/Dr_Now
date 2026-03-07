@@ -3,11 +3,18 @@ import { IDoctorRepository } from "../../../domain/repositories/doctorRepository
 import { DoctorEntity } from "../../../domain/entities/doctorEntity";
 import BookingModel from "../models/booking.model";
 import { ErrorMessages } from "../../../utils/Messages";
+import { FilterQuery } from "mongoose";
+import mongoose from "mongoose";
+import { Role } from "../../../utils/Constance"; 
+import { DoctorProfileData } from '../../../utils/types/doctorProfileData';
+
+type DoctorDoc = IDoctor & Document;
+
 
 export class DoctorRepositoryImpl implements IDoctorRepository {
 
 async getPaginatedDoctors(skip: number, limit: number, search: string = ""): Promise<DoctorEntity[]> {
-  const query: any = {};
+  const query: FilterQuery<IDoctor> = {};
 
   if (search) {
     query.name = { $regex: search, $options: "i" };
@@ -49,7 +56,7 @@ async countFilteredDoctors(filters: {
   maxFee?: number;
   gender?: string;
 }): Promise<number> {
-  const query: any = {
+  const query: FilterQuery<IDoctor> = {
     isVerified: true,
     isBlocked: false,
   };
@@ -81,7 +88,7 @@ async getFilteredDoctors(
   limit: number,
   sort: Record<string, 1 | -1>
 ): Promise<DoctorEntity[]> {
-  const query: any = { isVerified: true };
+   const query: FilterQuery<IDoctor> = { isVerified: true };
   if (filters.search) query.name = { $regex: filters.search, $options: "i" };
   if (filters.specialization) query.specialization = filters.specialization;
   if (filters.isBlocked !== undefined) query.isBlocked = filters.isBlocked;
@@ -96,7 +103,7 @@ async getFilteredDoctors(
 }
 
 
-  async completeProfile(doctorId: string, profileData: any): Promise<DoctorEntity> {
+  async completeProfile(doctorId: string, profileData: DoctorProfileData): Promise<DoctorEntity> {
     const updated = await DoctorModel.findByIdAndUpdate(
       doctorId,
       {
@@ -180,19 +187,19 @@ async getFilteredDoctors(
 
   async findByEmail(email: string): Promise<DoctorEntity | null> {
     const doctor = await DoctorModel.findOne({ email });
-    return doctor ? this._toDomain(doctor) : null;
+    return doctor ? this._toDomain(doctor as unknown as DoctorDoc) : null;
   }
 
   async createDoctor(doctor: DoctorEntity): Promise<DoctorEntity> {
     const persistenceDoctor = this._toPersistence(doctor);
     const created = await DoctorModel.create(persistenceDoctor);
-    return this._toDomain(created);
+    return this._toDomain(created as unknown as DoctorDoc);
   }
 
   async updateDoctor(id: string, updates: Partial<DoctorEntity>): Promise<DoctorEntity> {
     const updated = await DoctorModel.findByIdAndUpdate(id, updates, { new: true });
     if (!updated) throw new Error( ErrorMessages.DOCTOR_NOT_FOUND);
-    return this._toDomain(updated);
+    return this._toDomain(updated as unknown as DoctorDoc);
   }
 
 
@@ -220,9 +227,11 @@ async getFilteredDoctors(
     };
   }
 
-  private _toDomain(doc: any): DoctorEntity {
+  private _toDomain(
+    doc: IDoctor | (mongoose.Document & IDoctor)
+  ): DoctorEntity {
     return {
-      id: doc._id.toString(),
+      id: (doc._id as mongoose.Types.ObjectId).toString(),
       name: doc.name,
       email: doc.email,
       phone: doc.phone,
@@ -240,17 +249,31 @@ async getFilteredDoctors(
       isBlocked: doc.isBlocked,
       otp: doc.otp,
       otpExpiresAt: doc.otpExpiresAt,
-      availability: doc.availability,
+      availability: doc.availability ?? [],
       isRejected: doc.isRejected,
       walletBalance: doc.walletBalance,
-      walletTransactions: doc.walletTransactions,
+      walletTransactions: doc.walletTransactions?.map(tx => ({
+        type: tx.type,
+        amount: tx.amount,
+        reason: tx.reason,
+        bookingId: tx.bookingId?.toString(),
+        date: tx.date ?? new Date(),
+      })) ?? [],
       totalEarned: doc.totalEarned,
       bio: doc.bio,
-      education: doc.education,
+      education: doc.education?.map(ed => ({
+        degree: ed.degree,
+        institution: ed.institution,
+        year: Number(ed.year),
+      })) ?? [],
       awards: doc.awards,
-      experience: doc.experience,
+      experience: doc.experience?.map(exp => ({
+        hospital: exp.hospital,
+        role: exp.role,
+        years: Number(exp.years),
+      })) ?? [],
       affiliatedHospitals: doc.affiliatedHospitals,
-      role: doc.role
+      role: Role.DOCTOR,
     };
   }
 }

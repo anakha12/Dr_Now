@@ -5,6 +5,9 @@ import { IBookingRepository } from "../../../domain/repositories/bookingReposito
 import { PendingDoctorPayoutResponseDTO } from "../../../interfaces/dto/response/admin/pending-doctor-payout.dto";
 import { Role } from "../../../utils/Constance";
 import { BookingWithExtras } from "../../../domain/types/BookingWithExtras";
+import { FilterQuery,PipelineStage } from 'mongoose';
+type BookingDocument = Document & IBooking;
+
 
 interface IPopulatedDoctor {
   _id: mongoose.Types.ObjectId;
@@ -178,7 +181,7 @@ async findUserBookingsWithFilters(
   const skip = (page - 1) * limit;
 
 
-  const query: any = { userId: new mongoose.Types.ObjectId(userId) };
+ const query: FilterQuery<BookingDocument> = { userId: new mongoose.Types.ObjectId(userId) };
 
   if (filters.status) query.status = filters.status;
   if (filters.date) {
@@ -192,11 +195,18 @@ async findUserBookingsWithFilters(
   }
 
 
-  const aggregatePipeline: any[] = [
-    { $match: query },
-    { $lookup: { from: "doctors", localField: "doctorId", foreignField: "_id", as: "doctor" } },
-    { $unwind: "$doctor" },
-  ];
+  const aggregatePipeline: PipelineStage[] = [
+  { $match: query }, 
+  {
+    $lookup: {
+      from: "doctors",
+      localField: "doctorId",
+      foreignField: "_id",
+      as: "doctor",
+    },
+  },
+  { $unwind: "$doctor" },
+];
 
   if (filters.doctorName) {
     aggregatePipeline.push({ $match: { "doctor.name": { $regex: filters.doctorName, $options: "i" } } });

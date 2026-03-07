@@ -1,7 +1,7 @@
 
 import { IPrescriptionRepository } from "../../../domain/repositories/prescriptionRepository";
 import { Prescription } from "../../../domain/entities/prescription.entity";
-import BookingModel, { IBooking } from "../models/booking.model";
+import BookingModel from "../models/booking.model";
 
 export class PrescriptionRepositoryImpl implements IPrescriptionRepository {
   async addPrescription(
