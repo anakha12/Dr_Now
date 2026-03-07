@@ -55,6 +55,7 @@ export interface IDoctor extends Document {
   }[];
   affiliatedHospitals?: string[];
   role: Role;
+  availability?: Availability[];
 }
 
 const DoctorSchema: Schema = new Schema<IDoctor>(
@@ -111,7 +112,19 @@ const DoctorSchema: Schema = new Schema<IDoctor>(
       },
     ],
     affiliatedHospitals: [String],
+    availability: [
+      {
+        date: { type: String, required: true },
+        slots: [
+          {
+            from: { type: String, required: true },
+            to: { type: String, required: true },
+          },
+        ],
+      },
+    ],
   },
+  
 
   {
     timestamps: true,

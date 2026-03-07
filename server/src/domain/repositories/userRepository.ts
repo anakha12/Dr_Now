@@ -3,6 +3,13 @@ import { WalletTransactionUser } from "../entities/walletTransactionUserEntity";
 import { UpdateQuery } from "mongoose";
 import { UserEntity } from "../entities/userEntity";
 
+interface UserFilters {
+  search?: string;
+  gender?: string;
+  minAge?: number;
+  maxAge?: number;
+}
+
 export interface IUserRepository {
   findByEmail(email: string): Promise<UserEntity | null>;
   createUser(user: Partial<UserEntity>): Promise<UserEntity>;
@@ -11,13 +18,13 @@ export interface IUserRepository {
   getAllUsers(): Promise<UserEntity[]>;
 
   getFilteredUsers(
-    filters: Record<string, any>,
+    filters:UserFilters,
     skip: number,
     limit: number,
     sort: Record<string, 1 | -1>
   ): Promise<UserEntity[]>;
 
-  countFilteredUsers(filters: Record<string, any>): Promise<number>;
+   countFilteredUsers(filters: UserFilters): Promise<number>;
 
   updateUserProfile(userId: string, updates: Partial<UserEntity>): Promise<UserEntity>
   toggleBlockStatus(userId: string, block: boolean): Promise<UserEntity>;

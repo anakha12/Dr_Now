@@ -6,6 +6,7 @@ import { ErrorMessages, Messages } from "../../../utils/Messages";
 import { Role } from "../../../utils/Constance";
 import { BaseRepository } from "../../../domain/repositories/baseRepository";
 import { Document, Types } from "mongoose";
+import { FilterQuery  } from "mongoose";
 
 type UserDoc = IUSER & Document;
 
@@ -35,7 +36,7 @@ async findByEmailOrUid(email: string, uid: string): Promise<UserEntity | null> {
     limit: number,
     sort: Record<string, 1 | -1>
   ): Promise<UserEntity[]> {
-    const dbFilters: Record<string, any> = { role: Role.USER }; 
+    const dbFilters: FilterQuery<UserDoc> = { role: Role.USER };
 
     if (filters.search) {
       dbFilters.$or = [
@@ -62,7 +63,7 @@ async findByEmailOrUid(email: string, uid: string): Promise<UserEntity | null> {
   }
 
   async countFilteredUsers(filters: { search?: string; gender?: string; minAge?: number; maxAge?: number }): Promise<number> {
-    const dbFilters: Record<string, any> = { role: Role.USER };
+    const dbFilters: FilterQuery<UserDoc> = { role: Role.USER };
 
     if (filters.search) {
       dbFilters.$or = [
@@ -98,7 +99,8 @@ async findByEmailOrUid(email: string, uid: string): Promise<UserEntity | null> {
   const allTransactions = user.walletTransactions || [];
 
   const sorted = allTransactions.sort(
-    (a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime()
+    (a, b) => 
+      new Date(b.date ?? 0).getTime() - new Date(a.date ?? 0).getTime()
   );
 
   const skip = (page - 1) * limit;
@@ -197,13 +199,13 @@ async createUser(userData: UserEntity): Promise<UserEntity> {
   }
 
 
-  private _toDomain(user: any): UserEntity {
+ private _toDomain(user: UserDoc): UserEntity {
     return {
-      id: user._id.toString(),
+       id: (user._id as Types.ObjectId).toString(),
       name: user.name,
       email: user.email,
       age: user.age,
-      profileCompletion: user.profileCompletion,
+      profileCompletion: user.profileCompletion?? false,
       gender: user.gender,
       phone: user.phone,
       dateOfBirth: user.dateOfBirth,
@@ -218,7 +220,13 @@ async createUser(userData: UserEntity): Promise<UserEntity> {
       otpExpiresAt: user.otpExpiresAt,
       isVerified: user.isVerified,
       walletBalance: user.walletBalance,
-      walletTransactions: user.walletTransactions,
+     walletTransactions: user.walletTransactions?.map(tx => ({
+        type: tx.type,
+        amount: tx.amount,
+        reason: tx.reason,
+        bookingId: tx.bookingId?.toString(),
+        date: tx.date ?? new Date(), 
+      })),
     };
   }
 }
