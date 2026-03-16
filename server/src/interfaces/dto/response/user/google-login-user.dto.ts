@@ -14,7 +14,10 @@ class UserDTO {
 
 export class GoogleLoginUserResponseDTO {
   @Expose()
-  token!: string;
+  accessToken!: string;
+
+  @Expose()
+  refreshToken!: string;
 
   @Expose()
   @Type(() => UserDTO)

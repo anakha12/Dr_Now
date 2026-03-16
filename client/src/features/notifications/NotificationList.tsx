@@ -1,5 +1,5 @@
 
-import { useNotifications } from "../../context/NotificationContext";
+import { useNotifications } from "../../hooks/useNotifications";
 
 const NotificationList = () => {
   const { notifications, markAllAsRead } = useNotifications();

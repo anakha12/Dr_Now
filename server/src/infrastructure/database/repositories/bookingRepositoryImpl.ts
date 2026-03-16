@@ -206,7 +206,16 @@ async findUserBookingsWithFilters(
     },
   },
   { $unwind: "$doctor" },
-];
+  {
+      $lookup: {
+        from: "users",
+        localField: "userId",
+        foreignField: "_id",
+        as: "user",
+      },
+    },
+    { $unwind: "$user" },
+  ];
 
   if (filters.doctorName) {
     aggregatePipeline.push({ $match: { "doctor.name": { $regex: filters.doctorName, $options: "i" } } });
@@ -226,7 +235,18 @@ async findUserBookingsWithFilters(
     BookingModel.aggregate([...aggregatePipeline, { $count: "total" }]),
   ]);
 
-const bookings: BookingWithExtras[] = bookingsRaw.map((b: any) => {
+  type BookingAggregateResult = BookingDocument & {
+    doctor: {
+      name: string;
+      specialization: string;
+    };
+    user: {
+      name: string;
+    };
+    createdAt: Date;
+  };
+
+const bookings: BookingWithExtras[] = bookingsRaw.map((b: BookingAggregateResult) => {
   const domainBooking = this._toDomain(b);
 
   return {
@@ -234,7 +254,7 @@ const bookings: BookingWithExtras[] = bookingsRaw.map((b: any) => {
     id: domainBooking.id ?? b._id.toString(), 
     doctorName: b.doctor?.name,
     department: b.doctor?.specialization,
-    patientName: b.userId?.name,
+    patientName: b.user?.name,
     slot: { from: b.startTime, to: b.endTime },
     createdAt: b.createdAt,
   };

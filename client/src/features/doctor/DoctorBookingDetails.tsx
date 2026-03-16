@@ -1,10 +1,10 @@
 
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback  } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { getDoctorBookingDetails } from "../../services/doctorService";
 import { motion } from "framer-motion";
-import { useNotifications } from "../../context/NotificationContext";
+import { useNotifications } from "../../hooks/useNotifications";
 import logger from "../../utils/logger";
 import {
   CalendarDays,
@@ -27,21 +27,21 @@ const DoctorBookingDetails = () => {
   const [loading, setLoading] = useState(true);
   const { addNotification } = useNotifications();
 
-  useEffect(() => {
-    const fetchBooking = async () => {
-      try {
-        const res = await getDoctorBookingDetails(bookingId);
-        setBooking(res);
-      } catch (error) {
-        addNotification(Messages.DOCTOR.BOOKING_DETAILS.FETCH_FAILED, "ERROR");
-        logger.error(error)
-      } finally {
-        setLoading(false);
-      }
-    };
+  const fetchBooking = useCallback(async () => {
+    try {
+      const res = await getDoctorBookingDetails(bookingId);
+      setBooking(res);
+    } catch (error) {
+      addNotification(Messages.DOCTOR.BOOKING_DETAILS.FETCH_FAILED, "ERROR");
+      logger.error(error);
+    } finally {
+      setLoading(false);
+    }
+  }, [bookingId, addNotification]); 
 
+  useEffect(() => {
     fetchBooking();
-  }, [bookingId]);
+  }, [fetchBooking]);
 
   if (loading) {
     return (

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { sendResetOtp, verifyResetOtp } from "../../services/userService";
 import { useNavigate } from "react-router-dom";
-import { useNotifications } from "../../context/NotificationContext";
+import { useNotifications } from "../../hooks/useNotifications";
 import { Messages } from "../../constants/messages";
 import logger from "../../utils/logger";
 import { handleError } from "../../utils/errorHandler"; 

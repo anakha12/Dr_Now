@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { getDoctorById } from "../../services/userService";
 import { motion, type Variants } from "framer-motion";
-import { useNotifications } from "../../context/NotificationContext";
+import { useNotifications } from "../../hooks/useNotifications";
 import { Messages } from "../../constants/messages";
 import type { DoctorProfile } from "../../types/doctorProfile";
 import logger from "../../utils/logger";

@@ -1,7 +1,7 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState,useCallback  } from "react";
 import { useNavigate } from "react-router-dom";
 import { getDoctorBookings, cancelDoctorBooking } from "../../services/doctorService";
-import { useNotifications } from "../../context/NotificationContext";
+import { useNotifications } from "../../hooks/useNotifications";
 import { Messages } from "../../constants/messages";
 import type { Booking } from "../../types/booking";
 import { format } from "date-fns";
@@ -16,19 +16,19 @@ const DoctorAppointments = () => {
   const { addNotification, confirmMessage, promptInput } = useNotifications();
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const fetchBookings = async () => {
-      try {
-        const res = await getDoctorBookings(currentPage, itemsPerPage);
-        setBookings(res.bookings || []);
-        setTotalPages(res.totalPages || 1);
-      } catch {
-        addNotification(Messages.DOCTOR.APPOINTMENTS.FETCH_FAILED, "ERROR");
-      }
-    };
+  const fetchBookings = useCallback(async () => {
+    try {
+      const res = await getDoctorBookings(currentPage, itemsPerPage);
+      setBookings(res.bookings || []);
+      setTotalPages(res.totalPages || 1);
+    } catch {
+      addNotification(Messages.DOCTOR.APPOINTMENTS.FETCH_FAILED, "ERROR");
+    }
+  }, [currentPage, addNotification]);
 
+  useEffect(() => {
     fetchBookings();
-  }, [currentPage]);
+  }, [fetchBookings]);
 
   const handleCancel = async (bookingId: string) => {
     const confirm = await confirmMessage(Messages.DOCTOR.APPOINTMENTS.CONFIRM_CANCEL);

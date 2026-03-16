@@ -3,15 +3,16 @@ import { useNavigate, useParams } from "react-router-dom";
 import { getBookingDetails } from "../../services/userService";
 import { motion } from "framer-motion";
 import { CalendarDays, User, CreditCard, Clock, FileText, ArrowLeft, FileText as PrescriptionIcon } from "lucide-react";
-import { useNotifications } from "../../context/NotificationContext";
+import { useNotifications } from "../../hooks/useNotifications";
 import { Messages } from "../../constants/messages";
 import logger from "../../utils/logger";
+import type { Booking } from "../../types/booking";
 
 const BookingDetails = () => {
   const { id: bookingId } = useParams();
   const navigate = useNavigate();
   const { addNotification } = useNotifications();
-  const [booking, setBooking] = useState<any>(null);
+  const [booking, setBooking] = useState<Booking | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -77,17 +78,21 @@ const BookingDetails = () => {
           <Item label={Messages.DOCTOR.BOOKING_DETAILS.LABELS.DEPARTMENT} value={booking.department || "N/A"} icon={<User size={20} />} />
           <Item
             label={Messages.DOCTOR.BOOKING_DETAILS.LABELS.DATE}
-            value={new Date(booking.date).toLocaleDateString("en-GB")}
+            value={booking.date ? new Date(booking.date).toLocaleDateString("en-GB") : "N/A"}
             icon={<CalendarDays size={20} />}
           />
           <Item label={Messages.DOCTOR.BOOKING_DETAILS.LABELS.TIME_SLOT} value={`${booking.slot?.from} - ${booking.slot?.to}`} icon={<Clock size={20} />} />
           <Item
             label={Messages.DOCTOR.BOOKING_DETAILS.LABELS.STATUS}
-            value={booking.status}
+            value={booking.status ?? "N/A"}
             color={booking.status === "Cancelled" ? "text-red-500" : "text-green-600"}
             icon={<FileText size={20} />}
           />
-          <Item label={Messages.DOCTOR.BOOKING_DETAILS.LABELS.PAYMENT_STATUS} value={booking.paymentStatus} icon={<CreditCard size={20} />} />
+          <Item
+            label={Messages.DOCTOR.BOOKING_DETAILS.LABELS.PAYMENT_STATUS}
+            value={booking.payoutStatus ?? "N/A"} 
+            icon={<CreditCard size={20} />}
+          />
           <Item
             label={Messages.DOCTOR.BOOKING_DETAILS.LABELS.TOTAL_AMOUNT}
             value={`₹${(booking.doctorEarning ?? 0) + (booking.commissionAmount ?? 0)}`}
@@ -101,7 +106,7 @@ const BookingDetails = () => {
                 navigate("/user/prescription", {
                   state: {
                     prescription: booking.prescription,
-                    patientName: booking.userName || "Patient",
+                    patientName: booking.patientName ?? "Patient",
                     department: booking.department || "N/A",
                   },
                 })

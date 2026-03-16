@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
-import { useNotifications } from "../../context/NotificationContext";
+import { useNotifications } from "../../hooks/useNotifications";
 import { useDispatch } from "react-redux";
 import { setUserAuth } from "../../redux/slices/authSlice";
 import { getUserProfile } from "../../services/userService";

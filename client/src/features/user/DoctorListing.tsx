@@ -1,29 +1,27 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { getFilteredDoctors } from "../../services/userService";
 import { useNavigate } from "react-router-dom";
 import { FaUserMd } from "react-icons/fa";
 import { MdWork, MdCurrencyRupee } from "react-icons/md";
 import { motion, type Variants } from "framer-motion";
 import type { Doctor } from "../../types/doctor";
-import { useNotifications } from "../../context/NotificationContext";
+import { useNotifications } from "../../hooks/useNotifications";
 import { Messages } from "../../constants/messages";
 import logger from "../../utils/logger";
+import type { FiltersProps,DoctorCardsProps } from "../../types/doctorListingFilterProps";
 
+// ---------------------- Animations ----------------------
 const fadeInUp: Variants = {
   hidden: { opacity: 0, y: 40 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" } }
+  visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" } },
 };
 
 const staggerContainer: Variants = {
   hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.15
-    }
-  }
+  visible: { opacity: 1, transition: { staggerChildren: 0.15 } },
 };
 
+// ---------------------- Main Component ----------------------
 const DoctorListing = () => {
   const [doctors, setDoctors] = useState<Doctor[]>([]);
   const [search, setSearch] = useState("");
@@ -31,7 +29,7 @@ const DoctorListing = () => {
   const [feeFilter, setFeeFilter] = useState(1000);
   const [genderFilter, setGenderFilter] = useState("");
   const [specializations, setSpecializations] = useState<{ id: string; Departmentname: string }[]>([]);
-  const [debouncedSearch, setDebouncedSeach] = useState(search);
+  const [debouncedSearch, setDebouncedSearch] = useState(search);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(true);
@@ -39,17 +37,18 @@ const DoctorListing = () => {
   const navigate = useNavigate();
   const { addNotification } = useNotifications();
 
-  // Debounce search
+  // Debounce search input
   useEffect(() => {
     const handler = setTimeout(() => {
-      setDebouncedSeach(search);
+      setDebouncedSearch(search);
       setPage(1);
     }, 500);
 
     return () => clearTimeout(handler);
   }, [search]);
 
-  const fetchDoctors = async () => {
+  // Fetch doctors from API
+  const fetchDoctors = useCallback(async () => {
     setLoading(true);
     try {
       const data = await getFilteredDoctors({
@@ -73,16 +72,14 @@ const DoctorListing = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [debouncedSearch, specializationFilter, feeFilter, genderFilter, page, addNotification]);
 
   useEffect(() => {
     fetchDoctors();
-  }, [debouncedSearch, specializationFilter, feeFilter, genderFilter, page]);
+  }, [fetchDoctors]);
 
   const handlePageChange = (newPage: number) => {
-    if (newPage >= 1 && newPage <= totalPages) {
-      setPage(newPage);
-    }
+    if (newPage >= 1 && newPage <= totalPages) setPage(newPage);
   };
 
   if (loading) {
@@ -102,49 +99,40 @@ const DoctorListing = () => {
       {/* Hero Section */}
       <section className="relative w-full py-16 flex items-center justify-center bg-white overflow-hidden border-b border-slate-100">
         <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
-          <motion.div 
-            animate={{ scale: [1, 1.1, 1], rotate: [0, 15, 0] }} 
+          <motion.div
+            animate={{ scale: [1, 1.1, 1], rotate: [0, 15, 0] }}
             transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
             className="absolute -top-[50%] -left-[10%] w-[40vw] h-[40vw] rounded-full bg-teal-50/80 blur-3xl"
           />
-          <motion.div 
-            animate={{ scale: [1, 1.2, 1], rotate: [0, -15, 0] }} 
+          <motion.div
+            animate={{ scale: [1, 1.2, 1], rotate: [0, -15, 0] }}
             transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
             className="absolute top-[20%] -right-[10%] w-[35vw] h-[35vw] rounded-full bg-blue-50/80 blur-3xl opacity-70"
           />
         </div>
 
         <div className="container mx-auto px-6 md:px-12 relative z-10 text-center">
-          <motion.div 
-            initial="hidden"
-            animate="visible"
-            variants={staggerContainer}
-            className="max-w-3xl mx-auto"
-          >
-            <motion.div variants={fadeInUp} className="inline-block mb-4 px-4 py-1.5 rounded-full bg-teal-50 border border-teal-100 text-teal-600 font-bold text-xs tracking-widest uppercase">
+          <motion.div initial="hidden" animate="visible" variants={staggerContainer} className="max-w-3xl mx-auto">
+            <motion.div
+              variants={fadeInUp}
+              className="inline-block mb-4 px-4 py-1.5 rounded-full bg-teal-50 border border-teal-100 text-teal-600 font-bold text-xs tracking-widest uppercase"
+            >
               Our Experts
             </motion.div>
-            <motion.h1 
-              variants={fadeInUp}
-              className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-slate-900 leading-tight mb-6"
-            >
+            <motion.h1 variants={fadeInUp} className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-slate-900 leading-tight mb-6">
               Find the <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal-500 to-emerald-600">Best Doctors</span>
             </motion.h1>
-            <motion.p 
-              variants={fadeInUp}
-              className="text-lg md:text-xl text-slate-600 max-w-2xl mx-auto leading-relaxed"
-            >
+            <motion.p variants={fadeInUp} className="text-lg md:text-xl text-slate-600 max-w-2xl mx-auto leading-relaxed">
               Browse our directory of certified professionals and find the perfect specialist for your medical needs.
             </motion.p>
           </motion.div>
         </div>
       </section>
 
-      {/* Main Content Area */}
+      {/* Main Content */}
       <section className="py-12 relative z-10">
         <div className="container mx-auto px-6 md:px-12">
           <div className="flex flex-col lg:flex-row gap-10 xl:gap-14">
-            {/* Filters */}
             <Filters
               search={search}
               setSearch={setSearch}
@@ -156,15 +144,7 @@ const DoctorListing = () => {
               setGenderFilter={setGenderFilter}
               specializations={specializations}
             />
-
-            {/* Doctor Cards */}
-            <DoctorCards 
-              doctors={doctors} 
-              page={page} 
-              totalPages={totalPages} 
-              handlePageChange={handlePageChange} 
-              navigate={navigate} 
-            />
+            <DoctorCards doctors={doctors} page={page} totalPages={totalPages} handlePageChange={handlePageChange} navigate={navigate} />
           </div>
         </div>
       </section>
@@ -174,8 +154,7 @@ const DoctorListing = () => {
 
 export default DoctorListing;
 
-// ---------------------------- Components ----------------------------
-
+// ---------------------- Filters Component ----------------------
 const Filters = ({
   search,
   setSearch,
@@ -186,7 +165,7 @@ const Filters = ({
   genderFilter,
   setGenderFilter,
   specializations,
-}: any) => (
+}: FiltersProps) => (
   <motion.div
     className="w-full lg:w-1/3 xl:w-1/4 bg-white rounded-[2rem] shadow-xl shadow-slate-200/40 p-8 border border-slate-100 h-fit sticky top-8"
     initial={{ opacity: 0, x: -30 }}
@@ -210,9 +189,7 @@ const Filters = ({
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
-          <div className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 text-lg">
-            🔍
-          </div>
+          <div className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 text-lg">🔍</div>
         </div>
       </div>
 
@@ -226,18 +203,14 @@ const Filters = ({
             onChange={(e) => setSpecializationFilter(e.target.value)}
           >
             <option value="">All Specialties</option>
-            {specializations.map((spec: any) => (
+            {specializations.map((spec) => (
               <option key={spec.id} value={spec.Departmentname}>
                 {spec.Departmentname}
               </option>
             ))}
           </select>
-          <div className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 text-lg">
-            🩺
-          </div>
-          <div className="absolute right-5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none">
-            ▼
-          </div>
+          <div className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 text-lg">🩺</div>
+          <div className="absolute right-5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none">▼</div>
         </div>
       </div>
 
@@ -289,13 +262,9 @@ const Filters = ({
   </motion.div>
 );
 
-const DoctorCards = ({ doctors, page, totalPages, handlePageChange, navigate }: any) => (
-  <motion.div
-    className="w-full lg:w-2/3 xl:w-3/4"
-    initial="hidden"
-    animate="visible"
-    variants={staggerContainer}
-  >
+// ---------------------- DoctorCards Component ----------------------
+const DoctorCards = ({ doctors, page, totalPages, handlePageChange, navigate }: DoctorCardsProps) => (
+  <motion.div className="w-full lg:w-2/3 xl:w-3/4" initial="hidden" animate="visible" variants={staggerContainer}>
     {doctors.length === 0 ? (
       <motion.div variants={fadeInUp} className="bg-white rounded-[2rem] p-12 text-center border border-slate-100 shadow-sm">
         <div className="text-6xl mb-4">🩺</div>
@@ -304,7 +273,7 @@ const DoctorCards = ({ doctors, page, totalPages, handlePageChange, navigate }: 
       </motion.div>
     ) : (
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
-        {doctors.map((doc: Doctor) => (
+        {doctors.map((doc) => (
           <motion.div
             key={doc.id}
             variants={fadeInUp}
@@ -313,7 +282,7 @@ const DoctorCards = ({ doctors, page, totalPages, handlePageChange, navigate }: 
             className="bg-white rounded-[2rem] p-8 text-center shadow-lg shadow-slate-200/40 hover:shadow-2xl hover:shadow-teal-900/10 transition-all border border-slate-100 cursor-pointer group flex flex-col h-full"
           >
             <div className="relative inline-block mb-6 mx-auto">
-              <div className="absolute inset-0 bg-teal-400 blur-md opacity-0 group-hover:opacity-40 transition-opacity rounded-full z-0"></div>
+              <div className="absolute inset-0 bg-teal-400 blur-md opacity-0 group-hover:opacity-40 transition-opacity rounded-full z-0" />
               <img
                 src={doc.profileImage}
                 alt={doc.name}
@@ -364,8 +333,8 @@ const DoctorCards = ({ doctors, page, totalPages, handlePageChange, navigate }: 
               key={i + 1}
               onClick={() => handlePageChange(i + 1)}
               className={`w-12 h-12 rounded-full font-bold transition-all ${
-                page === i + 1 
-                  ? "bg-teal-600 text-white shadow-md shadow-teal-500/30" 
+                page === i + 1
+                  ? "bg-teal-600 text-white shadow-md shadow-teal-500/30"
                   : "bg-white border border-slate-200 text-slate-600 hover:border-teal-500 hover:text-teal-600"
               }`}
             >

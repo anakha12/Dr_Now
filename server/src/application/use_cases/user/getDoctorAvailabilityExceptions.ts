@@ -17,14 +17,11 @@ export class GetDoctorAvailabilityExceptionsUseCase
   }
 
   async execute(dto: GetDoctorBasicsDTO): Promise<DoctorAvailabilityExceptionResponseDTO[]> {
+     console.log("Received DTO:", dto);
     const validatedDto = await this.validateDto(GetDoctorBasicsDTO, dto);
-
+    
     const exceptions = await this._exceptionRepo.getExceptionsForDoctor(validatedDto.doctorId);
 
-
-    if (!exceptions || exceptions.length === 0) {
-      throw new Error( ErrorMessages.EXCEPTION_NOT_FOUND);
-    }
 
     const plainExceptions = exceptions.map((ex) => ({
        _id: ex._id ? String(ex._id) : "",
@@ -35,9 +32,11 @@ export class GetDoctorAvailabilityExceptionsUseCase
       endTime: ex.endTime,
       slotDuration: ex.slotDuration,
     }));
-
-    return plainToInstance(DoctorAvailabilityExceptionResponseDTO, plainExceptions, {
+ 
+    const result = plainToInstance(DoctorAvailabilityExceptionResponseDTO, plainExceptions, {
       excludeExtraneousValues: true,
     });
+
+    return result;
   }
 }

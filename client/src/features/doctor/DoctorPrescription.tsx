@@ -5,7 +5,7 @@ import {
   addPrescriptionToBooking,
   getDoctorProfile,
 } from "../../services/doctorService";
-import { useNotifications } from "../../context/NotificationContext";
+import { useNotifications } from "../../hooks/useNotifications";
 import type { Booking, Prescription } from "../../types/booking";
 import { prescriptionSchema } from "../../validation/prescriptionSchema"
 
@@ -50,17 +50,17 @@ const DoctorPrescription = () => {
     };
 
     fetchData();
-  }, [bookingId]);
+  }, [bookingId,addNotification]);
 
   /* ---------------- MEDICINE HANDLERS ---------------- */
-
+  type Medicine = Prescription["medicines"][number];
   const handleMedicineChange = (
     index: number,
-    field: string,
+    field: keyof Medicine,
     value: string
   ) => {
     const updated = [...medicines];
-    (updated[index] as any)[field] = value;
+    updated[index][field] = value;
     setMedicines(updated);
   };
 

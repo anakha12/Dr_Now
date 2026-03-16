@@ -1,5 +1,5 @@
 // src/pages/Doctor/CurrentSchedules.tsx
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback} from "react";
 import {
   fetchDoctorAvailabilityRules,
   addDoctorAvailabilityRule,
@@ -10,7 +10,7 @@ import {
   deleteDoctorAvailabilityException,
   getAllDepartments,
 } from "../../services/doctorService";
-import { useNotifications } from "../../context/NotificationContext";
+import { useNotifications } from "../../hooks/useNotifications";
 import type { AvailabilityRule } from "../../types/availabilityRule";
 import type { AvailabilityException } from "../../types/availabilityException";
 import type { Department } from "../../types/department";
@@ -40,7 +40,7 @@ const generateSlots = (rule: AvailabilityRule) => {
 const CurrentSchedules = () => {
   const [rules, setRules] = useState<AvailabilityRule[]>([]);
   const [exceptions, setExceptions] = useState<AvailabilityException[]>([]);
-  const [departments, setDepartments] = useState<Department[]>([]);
+  const [, setDepartments] = useState<Department[]>([]);
   const [activeDay, setActiveDay] = useState(1);
   const { addNotification, confirmMessage } = useNotifications();
 
@@ -66,38 +66,39 @@ const CurrentSchedules = () => {
   });
 
   // --- Load data ---
-  useEffect(() => {
-    loadAvailabilityRules();
-    loadAvailabilityExceptions();
-    loadDepartments();
-  }, []);
 
-  const loadAvailabilityRules = async () => {
+  const loadAvailabilityRules = useCallback(async () => {
     try {
       const data = await fetchDoctorAvailabilityRules();
       setRules(data);
     } catch {
       addNotification(Messages.AVAILABILITY.FETCH_RULES_FAILED, "ERROR");
     }
-  };
+ }, [addNotification]);
 
-  const loadAvailabilityExceptions = async () => {
+  const loadAvailabilityExceptions = useCallback(async () => {
     try {
       const data = await fetchDoctorAvailabilityExceptions();
       setExceptions(data);
     } catch {
       addNotification(Messages.AVAILABILITY.FETCH_EXCEPTIONS_FAILED, "ERROR");
     }
-  };
+  }, [addNotification]);
 
-  const loadDepartments = async () => {
+  const loadDepartments = useCallback(async () => {
     try {
       const data = await getAllDepartments();
       setDepartments(data);
     } catch {
       addNotification(Messages.AVAILABILITY.FETCH_DEPARTMENTS_FAILED, "ERROR");
     }
-  };
+  }, [addNotification]);
+
+  useEffect(() => {
+    loadAvailabilityRules();
+    loadAvailabilityExceptions();
+    loadDepartments(); 
+  }, [loadAvailabilityRules, loadAvailabilityExceptions, loadDepartments]);
 
   // --- Handlers ---
   const handleSaveRule = async () => {
@@ -274,7 +275,11 @@ const CurrentSchedules = () => {
                   )}
                 </div>
                 <button
-                  onClick={() =>{ ex._id && handleDeleteException(ex._id)}}
+                 onClick={() => {
+                          if (ex._id) {
+                            handleDeleteException(ex._id);
+                          }
+                        }}
                   className="text-red-500 hover:text-red-700 font-semibold text-sm mt-2 sm:mt-0"
                 >
                   Delete

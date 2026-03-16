@@ -4,6 +4,7 @@ import { format } from "date-fns";
 import { useRef } from "react";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
+import type { Prescription } from "../../types/booking";
 
 const UserPrescriptionView = () => {
   const location = useLocation();
@@ -106,7 +107,7 @@ const UserPrescriptionView = () => {
               </tr>
             </thead>
             <tbody>
-              {prescription.medicines?.map((med: any, idx: number) => (
+              {prescription.medicines?.map((med: Prescription["medicines"][0], idx: number) => (
                 <tr key={idx} style={{ backgroundColor: idx % 2 === 0 ? "#f9fafb" : "#ffffff" }}>
                   <td style={{ padding: 8, borderBottom: "1px solid #e5e7eb", wordWrap: "break-word" }}>{med.name || "-"}</td>
                   <td style={{ padding: 8, borderBottom: "1px solid #e5e7eb", wordWrap: "break-word" }}>{med.dose || "-"}</td>

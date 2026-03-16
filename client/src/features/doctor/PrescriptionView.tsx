@@ -3,14 +3,17 @@ import { format } from "date-fns";
 import { useRef } from "react";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
+import type { Prescription } from "../../types/booking"; // adjust the path
+
+interface LocationState {
+  prescription: Prescription;
+  patientName: string;
+  department: string;
+}
 
 const PrescriptionView = () => {
   const location = useLocation();
-  const { prescription, patientName, department } = location.state as {
-    prescription: any;
-    patientName: string;
-    department: string;
-  };
+  const { prescription, patientName, department } = location.state as LocationState;
 
   const prescriptionRef = useRef<HTMLDivElement>(null);
 
@@ -41,7 +44,7 @@ const PrescriptionView = () => {
     pdf.save(`Prescription_${patientName}.pdf`);
   };
 
-  const safeClinicColor = "#0d9488"; // teal for clinic name
+  const safeClinicColor = "#0d9488"; // teal
 
   return (
     <div style={{ maxWidth: 800, margin: "2.5rem auto" }}>
@@ -75,56 +78,57 @@ const PrescriptionView = () => {
           </div>
         </div>
 
-        {/* Prescription ID */}
-        <div style={{ marginBottom: 24 }}>
-          <p style={{ fontSize: 14 }}>
-            Prescription ID:{" "}
-            <span style={{ fontFamily: "monospace" }}>{prescription._id || "N/A"}</span>
-          </p>
-        </div>
+        {/* Prescription ID / Registration Number */}
+        {prescription.registrationNumber && (
+          <div style={{ marginBottom: 24 }}>
+            <p style={{ fontSize: 14 }}>
+              Registration No: <span style={{ fontFamily: "monospace" }}>{prescription.registrationNumber}</span>
+            </p>
+          </div>
+        )}
 
         {/* Medicines Table */}
         <div style={{ marginBottom: 24 }}>
-        <h2
+          <h2
             style={{
-            fontSize: 18,
-            fontWeight: 600,
-            borderBottom: "1px solid #e5e7eb",
-            paddingBottom: 4,
-            marginBottom: 8,
+              fontSize: 18,
+              fontWeight: 600,
+              borderBottom: "1px solid #e5e7eb",
+              paddingBottom: 4,
+              marginBottom: 8,
             }}
-        >
+          >
             Medicines
-        </h2>
-        <table
+          </h2>
+          <table
             style={{
-            width: "100%",
-            borderCollapse: "collapse",
-            border: "1px solid #e5e7eb",
-            tableLayout: "fixed", // fixed layout for proper alignment
+              width: "100%",
+              borderCollapse: "collapse",
+              border: "1px solid #e5e7eb",
+              tableLayout: "fixed",
             }}
-        >
+          >
             <thead style={{ backgroundColor: "#f3f4f6" }}>
-            <tr>
+              <tr>
                 <th style={{ padding: 8, borderBottom: "1px solid #e5e7eb", width: "20%", textAlign: "left" }}>Medicine</th>
                 <th style={{ padding: 8, borderBottom: "1px solid #e5e7eb", width: "15%", textAlign: "left" }}>Dose</th>
                 <th style={{ padding: 8, borderBottom: "1px solid #e5e7eb", width: "20%", textAlign: "left" }}>Frequency</th>
                 <th style={{ padding: 8, borderBottom: "1px solid #e5e7eb", width: "15%", textAlign: "left" }}>Duration</th>
                 <th style={{ padding: 8, borderBottom: "1px solid #e5e7eb", width: "30%", textAlign: "left" }}>Notes</th>
-            </tr>
+              </tr>
             </thead>
             <tbody>
-            {prescription.medicines.map((med: any, idx: number) => (
+              {prescription.medicines.map((med, idx) => (
                 <tr key={idx} style={{ backgroundColor: idx % 2 === 0 ? "#f9fafb" : "#ffffff" }}>
-                <td style={{ padding: 8, borderBottom: "1px solid #e5e7eb", wordWrap: "break-word" }}>{med.name || "-"}</td>
-                <td style={{ padding: 8, borderBottom: "1px solid #e5e7eb", wordWrap: "break-word" }}>{med.dose || "-"}</td>
-                <td style={{ padding: 8, borderBottom: "1px solid #e5e7eb", wordWrap: "break-word" }}>{med.frequency || "-"}</td>
-                <td style={{ padding: 8, borderBottom: "1px solid #e5e7eb", wordWrap: "break-word" }}>{med.duration || "-"}</td>
-                <td style={{ padding: 8, borderBottom: "1px solid #e5e7eb", wordWrap: "break-word" }}>{med.notes || "-"}</td>
+                  <td style={{ padding: 8, borderBottom: "1px solid #e5e7eb", wordWrap: "break-word" }}>{med.name || "-"}</td>
+                  <td style={{ padding: 8, borderBottom: "1px solid #e5e7eb", wordWrap: "break-word" }}>{med.dose || "-"}</td>
+                  <td style={{ padding: 8, borderBottom: "1px solid #e5e7eb", wordWrap: "break-word" }}>{med.frequency || "-"}</td>
+                  <td style={{ padding: 8, borderBottom: "1px solid #e5e7eb", wordWrap: "break-word" }}>{med.duration || "-"}</td>
+                  <td style={{ padding: 8, borderBottom: "1px solid #e5e7eb", wordWrap: "break-word" }}>{med.notes || "-"}</td>
                 </tr>
-            ))}
+              ))}
             </tbody>
-        </table>
+          </table>
         </div>
 
         {/* Notes */}

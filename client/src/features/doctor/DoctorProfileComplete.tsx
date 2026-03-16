@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { FaStethoscope } from "react-icons/fa";
 import { completeDoctorProfile } from "../../services/doctorService";
-import { useNotifications } from "../../context/NotificationContext";
+import { useNotifications } from "../../hooks/useNotifications";
 import { Messages } from "../../constants/messages";
 import { handleError } from "../../utils/errorHandler";
 import { doctorProfileSchema } from "../../validation/doctorSchema";
@@ -44,6 +44,7 @@ const DoctorProfileComplete = () => {
       addNotification(Messages.DOCTOR.PROFILE_UPDATE_FAILED, "ERROR");
       navigate("/doctor/register");
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   if (!doctorId) return null;

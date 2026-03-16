@@ -135,6 +135,21 @@ export class UserController {
         return;
       }
       const result = await this._googleLoginUser.execute({ email, name, uid });
+      const accessTokenMaxAge= Number(process.env.ACCESS_TOKEN_COOKIE_MAXAGE);
+      const refreshTokenMaxAge= Number(process.env.REFRESH_TOKEN_COOKIE_MAXAGE);
+  
+    res.cookie("userAccessToken", result.accessToken, {
+      httpOnly: true,
+      secure: false, 
+      sameSite: "lax",                               
+      maxAge: accessTokenMaxAge,
+    });
+    res.cookie("refreshToken", result.refreshToken, {
+      httpOnly: true,
+      secure: false,
+      sameSite: "lax",
+      maxAge: refreshTokenMaxAge,
+    });
       res.status(HttpStatus.OK).json(result);
     } catch (err: unknown) {
       handleControllerError(res, err, HttpStatus.BAD_REQUEST);
@@ -393,8 +408,9 @@ async getDoctorAvailabilityRules(req: Request, res: Response) {
 async getDoctorAvailabilityExceptions(req: Request, res: Response) {
   try {
     const { doctorId } = req.params;
-
+    console.log(doctorId)
     const exceptions = await this._getDoctorAvailabilityExceptionsUseCase.execute({doctorId});
+    console.log("exceptions",exceptions)
     res.status(HttpStatus.OK).json(exceptions);
   } catch (err: unknown) {
       handleControllerError(res, err, HttpStatus.BAD_REQUEST);

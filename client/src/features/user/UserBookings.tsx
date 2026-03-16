@@ -1,9 +1,9 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import type { Variants } from "framer-motion";
 import { cancelUserBooking, getUserBookings } from "../../services/userService";
-import { useNotifications } from "../../context/NotificationContext";
+import { useNotifications } from "../../hooks/useNotifications";
 import type { Booking } from "../../types/booking";
 import { Messages } from "../../constants/messages";
 import logger from "../../utils/logger";
@@ -44,7 +44,7 @@ const UserBookings = () => {
     connectSocket();
   }, []);
 
-  const fetchBookings = async (page: number) => {
+  const fetchBookings = useCallback(async (page: number) => {
     setLoading(true);
     try {
       const res = await getUserBookings(page, ITEMS_PER_PAGE, {
@@ -61,11 +61,17 @@ const UserBookings = () => {
     } finally {
       setLoading(false);
     }
-  };
+    },[
+    statusFilter,
+    dateFilter,
+    doctorFilter,
+    specializationFilter,
+    addNotification
+  ]);
 
   useEffect(() => {
     fetchBookings(currentPage);
-  }, [currentPage, statusFilter, dateFilter, doctorFilter, specializationFilter]);
+  }, [currentPage, fetchBookings]);
 
   const handleCancel = async (bookingId: string) => {
     const confirmed = await confirmMessage(Messages.DOCTOR.APPOINTMENTS.CONFIRM_CANCEL);

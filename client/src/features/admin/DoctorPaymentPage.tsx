@@ -1,6 +1,7 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { toast } from "react-hot-toast";
-import { useNotifications } from "../../context/NotificationContext";
+import { useNotifications } from "../../hooks/useNotifications";
+
 import {
   getWalletSummary,
   getPendingDoctors,
@@ -36,11 +37,9 @@ const DoctorPaymentPage = () => {
 
   const { addNotification, confirmMessage } = useNotifications();
 
-  useEffect(() => {
-    fetchData();
-  }, [currentPage]);
 
-  const fetchData = async () => {
+
+  const fetchData = useCallback(async () => {
     try {
       const [walletData, doctorsData]: [WalletSummary, PendingDoctorsResponse] =
         await Promise.all([
@@ -55,7 +54,11 @@ const DoctorPaymentPage = () => {
       const err = handleError(error, Messages.DOCTOR.FETCH_WALLET_FAILED);
       toast.error(err.message);
     }
-  };
+ }, [currentPage]);
+
+   useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
   const handlePayout = async (doctorId: string) => {
     const doctor = pendingDoctors.find((d) => d.doctorId === doctorId);

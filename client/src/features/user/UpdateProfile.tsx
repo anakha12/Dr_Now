@@ -3,7 +3,7 @@ import type { ChangeEvent, FormEvent } from "react";
 import { updateUserProfile, getUserProfile } from "../../services/userService"; 
 import type { UserProfile } from "../../types/userProfile";
 import { z } from "zod";
-import { useNotifications } from "../../context/NotificationContext";
+import { useNotifications } from "../../hooks/useNotifications";
 import { Messages } from "../../constants/messages";
 import { useNavigate } from "react-router-dom";
 import { handleError } from "../../utils/errorHandler"; 

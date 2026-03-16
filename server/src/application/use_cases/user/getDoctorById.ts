@@ -9,7 +9,7 @@ export class GetDoctorById implements IGetDoctorById{
   async execute(id: string): Promise<DoctorDetailsResponseDTO > {
     
     const doctorDetails = await this._doctorRepo.findById(id);
-    
+  
     return plainToInstance( DoctorDetailsResponseDTO, doctorDetails);
   }
 }

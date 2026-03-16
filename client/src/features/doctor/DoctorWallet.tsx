@@ -1,7 +1,7 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState,useCallback } from "react";
 import { getWalletSummary } from "../../services/doctorService";
 import type { WalletTransaction } from "../../types/WalletTransaction";
-import { useNotifications } from "../../context/NotificationContext";
+import { useNotifications } from "../../hooks/useNotifications";
 import { Messages } from "../../constants/messages";
 import { handleError } from "../../utils/errorHandler";
 
@@ -15,11 +15,9 @@ const DoctorWallet = () => {
 
   const { addNotification } = useNotifications();
 
-  useEffect(() => {
-    fetchWalletData(currentPage);
-  }, [currentPage]);
+ 
 
-  const fetchWalletData = async (page: number) => {
+  const fetchWalletData = useCallback(async (page: number) => {
     try {
       const response = await getWalletSummary(page, ITEMS_PER_PAGE);
       setTransactions(response.transactions);
@@ -27,11 +25,15 @@ const DoctorWallet = () => {
       setTotalPages(
         Math.ceil( response.totalTransactions / ITEMS_PER_PAGE)
       );
-    } catch (error: unknown) {
-        const err = handleError(error, Messages.DOCTOR.PROFILE_UPDATE_FAILED);
-          addNotification(err.message, "ERROR");
-        }
-  };
+    }  catch (error: unknown) {
+      const err = handleError(error, Messages.DOCTOR.PROFILE_UPDATE_FAILED);
+      addNotification(err.message, "ERROR");
+    }
+  }, [addNotification]); 
+
+   useEffect(() => {
+    fetchWalletData(currentPage);
+  }, [currentPage, fetchWalletData]);
 
   return (
     <div className="max-w-5xl mx-auto p-4">

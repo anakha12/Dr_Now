@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, type Variants } from "framer-motion";
 import { getAllDoctors, getDepartments } from "../../services/userService";
-import { useNotifications } from "../../context/NotificationContext"; 
+import { useNotifications } from "../../hooks/useNotifications";
 import { Messages } from "../../constants/messages";
 import logger from "../../utils/logger";
 
