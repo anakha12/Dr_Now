@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { sendOtp, registerUser } from "../../services/userService";
 import { useNavigate, useLocation } from "react-router-dom";
-import { useNotifications } from "../../context/NotificationContext";
+import { useNotifications } from "../../hooks/useNotifications";
 import { Messages } from "../../constants/messages";
 import { handleError } from "../../utils/errorHandler";
 

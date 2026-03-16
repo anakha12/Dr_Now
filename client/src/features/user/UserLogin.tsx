@@ -6,7 +6,7 @@ import { auth, provider, signInWithPopup } from "../../firebase";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { userAxios } from "../../services/axiosInstances";
-import { useNotifications } from "../../context/NotificationContext";
+import { useNotifications } from "../../hooks/useNotifications";
 import { Messages } from "../../constants/messages";
 
 const UserLogin = () => {

@@ -1,8 +1,9 @@
 import { IBookingRepository } from "../../../domain/repositories/bookingRepository";
 import { SlotDto } from "../../../interfaces/dto/response/user/slot.dto";
 import { plainToInstance } from "class-transformer";
+import { IGetBookedSlots } from "../interfaces/user/IGetBookedSlots";
 
-export class GetBookedSlotsUseCase {
+export class GetBookedSlotsUseCase implements IGetBookedSlots{
   constructor(private _bookingRepo: IBookingRepository) {}
 
   async execute(doctorId: string, date: string): Promise<SlotDto[]> {

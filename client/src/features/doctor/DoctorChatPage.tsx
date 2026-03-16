@@ -2,7 +2,7 @@ import { useEffect, useState, useRef } from "react";
 import { useParams } from "react-router-dom";
 import { socket, connectSocket } from "../../services/socket";
 import type { ChatMessage } from "../../types/chatMessage";
-import { useNotifications } from "../../context/NotificationContext";
+import { useNotifications } from "../../hooks/useNotifications";
 import { completeBooking } from "../../services/doctorService";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -101,7 +101,7 @@ const DoctorChatPage = () => {
       socket.emit("leave-room", bookingId);
       socket.off();
     };
-  }, [bookingId]);
+  }, [bookingId, addNotification]);
 
   // ---------------- AUTO SCROLL ----------------
 

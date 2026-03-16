@@ -1,8 +1,9 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState,useCallback  } from "react";
 import toast from "react-hot-toast";
 import Table from "../../components/Table";
 import type { Department } from "../../types/department"; 
-import { useNotifications } from "../../context/NotificationContext";
+import { useNotifications } from "../../hooks/useNotifications";
+
 import {
   getAllDoctors,
   toggleDoctorBlockStatus,
@@ -38,7 +39,7 @@ const Doctors = () => {
   const doctorsPerPage = 5;
   
   const { addNotification } = useNotifications();
-  useEffect(() => {
+    useEffect(() => {
       const fetchDepartments = async () => {
         try {
           const data = await getAllDepartments();
@@ -48,9 +49,10 @@ const Doctors = () => {
         }
       };
       fetchDepartments();
+      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-  const fetchDoctors = async () => {
+  const fetchDoctors = useCallback(async () => {
     try {
       setLoading(true);
 
@@ -71,13 +73,13 @@ const Doctors = () => {
     } finally {
       setLoading(false);
     }
-  };
+   }, [currentPage, searchQuery, status, specialization, sort]);
 
 
   useEffect(() => {
     const delayDebounce = setTimeout(fetchDoctors, 400);
     return () => clearTimeout(delayDebounce);
-  }, [currentPage, searchQuery, status, specialization, sort]);
+  }, [fetchDoctors]);
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);

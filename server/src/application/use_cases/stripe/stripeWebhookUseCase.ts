@@ -41,12 +41,16 @@ export class StripeWebhookUseCase {
     let savedBooking;
     try {
       savedBooking = await this._bookingRepo.createBooking(booking);
-    } catch (err: any) {
-     
-      if (err.code === 11000) {
+    } catch (err: unknown) {
+      if (
+        err instanceof Error &&
+        typeof (err as { code?: number }).code === "number" &&
+        (err as { code?: number }).code === 11000
+      ) {
         throw new Error("This slot is already booked. Please choose another time.");
       }
-      throw err; 
+
+      throw err;
     }
 
 

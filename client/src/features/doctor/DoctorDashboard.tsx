@@ -1,7 +1,7 @@
 // src/pages/Doctor/DoctorDashboard.tsx
 import { useEffect, useState } from "react";
 import { getDoctorBookings, getWalletSummary } from "../../services/doctorService";
-import { useNotifications } from "../../context/NotificationContext";
+import { useNotifications } from "../../hooks/useNotifications";
 import { Messages } from "../../constants/messages";
 
 import type { Booking } from "../../types/booking";
@@ -28,7 +28,7 @@ const DoctorDashboard = () => {
   const { addNotification } = useNotifications();
 
   const [bookings, setBookings] = useState<Booking[]>([]);
-  const [walletBalance, setWalletBalance] = useState<number>(0);
+  const [, setWalletBalance] = useState<number>(0);
   const [transactions, setTransactions] = useState<WalletTransaction[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -45,6 +45,7 @@ const DoctorDashboard = () => {
         setWalletBalance(walletData.walletBalance);
         setTransactions(walletData.transactions || []);
       } catch (error) {
+        console.error(error)
         addNotification(Messages.DOCTOR.FETCH_FAILED, "ERROR");
       } finally {
         setLoading(false);
@@ -165,9 +166,9 @@ const DoctorDashboard = () => {
                 fill="#8884d8"
                 label
               >
-                {bookingPieData.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                ))}
+                {bookingPieData.map((_, index) => (
+                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                  ))}
               </Pie>
               <Tooltip />
             </PieChart>

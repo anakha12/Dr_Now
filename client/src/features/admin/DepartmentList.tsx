@@ -1,6 +1,7 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { addDepartmentSchema } from "../../validation/departmentSchema";
-import { useNotifications } from "../../context/NotificationContext";
+import { useNotifications } from "../../hooks/useNotifications";
+
 import {
   getAllDepartments,
   toggleDepartmentStatus,
@@ -22,7 +23,7 @@ const DepartmentList = () => {
   const { addNotification } = useNotifications();
   const itemsPerPage = 5;
 
-  const fetchDepartments = async () => {
+  const fetchDepartments = useCallback(async () => {
     try {
       const data: DepartmentResponse = await getAllDepartments(
         currentPage,
@@ -35,10 +36,14 @@ const DepartmentList = () => {
         setTotalPages(data.totalPages);
       }
     } catch (err: unknown) {
-      const error = handleError(err, Messages.AVAILABILITY.FETCH_DEPARTMENTS_FAILED);
+      const error = handleError(
+        err,
+        Messages.AVAILABILITY.FETCH_DEPARTMENTS_FAILED
+      );
       addNotification(error.message, "ERROR");
     }
-  };
+  }, [currentPage, itemsPerPage, searchQuery, addNotification]);
+
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
@@ -91,12 +96,12 @@ const DepartmentList = () => {
   };
 
   useEffect(() => {
-    const delayDebounce = setTimeout(() => {
-      fetchDepartments();
-    }, 400);
+  const delayDebounce = setTimeout(() => {
+    fetchDepartments();
+  }, 400);
 
-    return () => clearTimeout(delayDebounce);
-  }, [currentPage, searchQuery]);
+  return () => clearTimeout(delayDebounce);
+}, [fetchDepartments]);
 
   return (
     <div className="max-w-4xl mx-auto p-4">

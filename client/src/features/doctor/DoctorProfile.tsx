@@ -5,14 +5,23 @@ import {
   getAllDepartments,
 } from "../../services/doctorService";
 import { useNavigate } from "react-router-dom";
-import { useNotifications } from "../../context/NotificationContext";
+import { useNotifications } from "../../hooks/useNotifications";
 import type { DoctorProfileForm } from "../../types/doctorProfileForm";
 import { Messages } from "../../constants/messages"; 
 import type { Department } from "../../types/department";
 import logger from "../../utils/logger";
 
+type ArrayFieldKeys = "awards" | "education" | "experience" | "affiliatedHospitals";
 
-const DoctorProfileComponent  = () => {
+// Map array fields to their element types
+type ArrayFieldMap = {
+  awards: string[];
+  education: { degree: string; institution: string; year: string }[];
+  experience: { hospital: string; role: string; years: string }[];
+  affiliatedHospitals: string[];
+};
+
+const DoctorProfileComponent = () => {
   const [form, setForm] = useState<DoctorProfileForm>({
     _id: "",
     name: "",
@@ -25,7 +34,7 @@ const DoctorProfileComponent  = () => {
     medicalLicense: "",
     idProof: "",
     gender: "",
-    consultFee:0,
+    consultFee: 0,
     awards: [""],
     education: [{ degree: "", institution: "", year: "" }],
     experience: [{ hospital: "", role: "", years: "" }],
@@ -35,10 +44,11 @@ const DoctorProfileComponent  = () => {
   const [loading, setLoading] = useState(true);
   const [editMode, setEditMode] = useState(false);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
-   const [departments, setDepartments] = useState<Department[]>([]);
+  const [departments, setDepartments] = useState<Department[]>([]);
   const { addNotification, confirmMessage } = useNotifications();
   const navigate = useNavigate();
 
+  // ------------------ FETCH DATA ------------------
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -47,8 +57,8 @@ const DoctorProfileComponent  = () => {
           getAllDepartments(),
         ]);
 
-        setForm({
-          ...form,
+        setForm((prev) => ({
+          ...prev,
           ...profile,
           awards: profile.awards || [""],
           education: profile.education?.length
@@ -58,48 +68,52 @@ const DoctorProfileComponent  = () => {
             ? profile.experience
             : [{ hospital: "", role: "", years: "" }],
           affiliatedHospitals: profile.affiliatedHospitals || [""],
-        });
+        }));
 
         setDepartments(deptList || []);
         setLoading(false);
       } catch (error) {
         setLoading(false);
         addNotification(Messages.DOCTOR.FETCH_FAILED, "ERROR");
-        logger.error(error)
+        logger.error(error);
       }
     };
 
     fetchData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [addNotification]);
 
+  // ------------------ HANDLERS ------------------
   const handleChange = (
-    e: React.ChangeEvent<
-      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-    >
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setForm((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleArrayChange = (
+  const handleArrayChange = <K extends ArrayFieldKeys>(
     index: number,
-    field: keyof DoctorProfileForm,
-    value: any,
-    key?: string
+    field: K,
+    value: ArrayFieldMap[K][number] | string,
+    key?: keyof ArrayFieldMap[K][number]
   ) => {
-    const updatedArray = [...(form[field] as any[])];
-    if (key) {
-      updatedArray[index][key] = value;
+    const updatedArray = [...form[field]] as ArrayFieldMap[K];
+
+    if (key && typeof updatedArray[index] === "object") {
+      updatedArray[index] = {
+        ...(updatedArray[index] as object),
+        [key]: value,
+      } as ArrayFieldMap[K][number];
     } else {
-      updatedArray[index] = value;
+      updatedArray[index] = value as ArrayFieldMap[K][number];
     }
+
     setForm((prev) => ({ ...prev, [field]: updatedArray }));
   };
 
-  const addField = (field: keyof DoctorProfileForm, template: any) => {
+  const addField = <K extends ArrayFieldKeys>(field: K, template: ArrayFieldMap[K][number]) => {
     setForm((prev) => ({
       ...prev,
-      [field]: [...(prev[field] as any[]), template],
+      [field]: [...prev[field], template] as ArrayFieldMap[K],
     }));
   };
 
@@ -127,19 +141,10 @@ const DoctorProfileComponent  = () => {
     gender: form.gender,
     consultFee: Number(form.consultFee),
     awards: form.awards,
-    education: form.education.map(e => ({
-      degree: e.degree,
-      institution: e.institution,
-      year: (e.year),
-    })),
-    experience: form.experience.map(exp => ({
-      hospital: exp.hospital,
-      role: exp.role,
-      years: (exp.years), 
-    })),
+    education: form.education.map((e) => ({ ...e })),
+    experience: form.experience.map((e) => ({ ...e })),
     affiliatedHospitals: form.affiliatedHospitals,
   };
-
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -165,24 +170,24 @@ const DoctorProfileComponent  = () => {
         }
 
         addNotification(Messages.DOCTOR.PROFILE_UPDATE_WITH_CONFIRM, "SUCCESS");
-        setTimeout(() => {
-          navigate("/login");
-        }, 1500);
+        setTimeout(() => navigate("/login"), 1500);
       } else {
         addNotification(Messages.DOCTOR.PROFILE_UPDATE_SUCCESS, "SUCCESS");
       }
 
       setEditMode(false);
-    } catch (error: any) {
-      addNotification(error.message || Messages.DOCTOR.PROFILE_UPDATE_FAILED, "ERROR");
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        addNotification(error.message, "ERROR");
+      } else {
+        addNotification(Messages.DOCTOR.PROFILE_UPDATE_FAILED, "ERROR");
+      }
     }
   };
 
-  if (loading)
-    return (
-      <p className="text-center mt-10 text-gray-500">Loading...</p>
-    );
+  if (loading) return <p className="text-center mt-10 text-gray-500">Loading...</p>;
 
+  // ------------------ RENDER ------------------
   return (
     <div className="max-w-4xl mx-auto bg-white p-10 rounded-3xl shadow-lg animate-fadeIn border border-teal-200">
       <h2 className="text-3xl font-bold mb-8 text-teal-700 text-center">
@@ -199,15 +204,17 @@ const DoctorProfileComponent  = () => {
           <p><strong>Specialization:</strong> {form.specialization}</p>
           <p><strong>Gender:</strong> {form.gender}</p>
           <p><strong>Consult Fee:</strong> ₹{form.consultFee}</p>
-          <div className="sm:col-span-2">
-            <p><strong>Bio:</strong> {form.bio}</p>
-          </div>
+          <div className="sm:col-span-2"><p><strong>Bio:</strong> {form.bio}</p></div>
+
+          {/* Awards */}
           <div className="sm:col-span-2">
             <p><strong>Awards:</strong></p>
             <ul className="list-disc ml-6 text-sm text-gray-700">
               {form.awards.map((a, i) => <li key={i}>{a}</li>)}
             </ul>
           </div>
+
+          {/* Education */}
           <div className="sm:col-span-2">
             <p><strong>Education:</strong></p>
             <ul className="list-disc ml-6 text-sm text-gray-700">
@@ -216,6 +223,8 @@ const DoctorProfileComponent  = () => {
               ))}
             </ul>
           </div>
+
+          {/* Experience */}
           <div className="sm:col-span-2">
             <p><strong>Experience:</strong></p>
             <ul className="list-disc ml-6 text-sm text-gray-700">
@@ -224,12 +233,15 @@ const DoctorProfileComponent  = () => {
               ))}
             </ul>
           </div>
+
+          {/* Affiliated Hospitals */}
           <div className="sm:col-span-2">
             <p><strong>Affiliated Hospitals:</strong></p>
             <ul className="list-disc ml-6 text-sm text-gray-700">
               {form.affiliatedHospitals.map((h, i) => <li key={i}>{h}</li>)}
             </ul>
           </div>
+
           <div className="sm:col-span-2 flex justify-center mt-8">
             <button
               onClick={() => setEditMode(true)}
@@ -242,13 +254,14 @@ const DoctorProfileComponent  = () => {
       ) : (
         // --- EDIT MODE ---
         <form onSubmit={handleSubmit} className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+          {/* Basic Fields */}
           {["name", "phone", "yearsOfExperience", "gender", "consultFee"].map((name) => (
             <div key={name} className="col-span-1">
               <input
                 type={name === "yearsOfExperience" || name === "consultFee" ? "number" : "text"}
                 name={name}
                 placeholder={name.replace(/([A-Z])/g, " $1")}
-                value={(form as any)[name]}
+                value={form[name as keyof DoctorProfileForm] as string | number}
                 onChange={handleChange}
                 className={`w-full border p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-600 ${errors[name] ? "border-red-500" : "border-gray-300"}`}
               />
@@ -256,6 +269,7 @@ const DoctorProfileComponent  = () => {
             </div>
           ))}
 
+          {/* Specialization */}
           <div className="col-span-1">
             <select
               name="specialization"
@@ -265,16 +279,13 @@ const DoctorProfileComponent  = () => {
             >
               <option value="">Select Specialization</option>
               {departments.map((dept) => (
-                <option key={dept.id} value={dept.Departmentname}>
-                  {dept.Departmentname}
-                </option>
+                <option key={dept.id} value={dept.Departmentname}>{dept.Departmentname}</option>
               ))}
             </select>
-            {errors.specialization && (
-              <p className="text-red-500 text-sm mt-1">{errors.specialization}</p>
-            )}
+            {errors.specialization && <p className="text-red-500 text-sm mt-1">{errors.specialization}</p>}
           </div>
 
+          {/* Bio */}
           <div className="col-span-1 sm:col-span-2">
             <textarea
               name="bio"
@@ -286,7 +297,8 @@ const DoctorProfileComponent  = () => {
             />
           </div>
 
-          {/* Awards Section */}
+          {/* --- ARRAY FIELDS --- */}
+          {/* Awards */}
           <div className="col-span-1 sm:col-span-2">
             <label className="font-semibold text-gray-700 mb-1 block">Awards</label>
             {form.awards.map((value, i) => (
@@ -298,16 +310,10 @@ const DoctorProfileComponent  = () => {
                 className="w-full mb-2 border p-2 rounded-md focus:ring-2 focus:ring-teal-600"
               />
             ))}
-            <button
-              type="button"
-              onClick={() => addField("awards", "")}
-              className="text-sm text-teal-600 underline"
-            >
-              + Add another award
-            </button>
+            <button type="button" onClick={() => addField("awards", "")} className="text-sm text-teal-600 underline">+ Add another award</button>
           </div>
 
-          {/* Education Section */}
+          {/* Education */}
           <div className="col-span-1 sm:col-span-2">
             <label className="font-semibold text-gray-700 mb-1 block">Education</label>
             {form.education.map((edu, i) => (
@@ -320,9 +326,7 @@ const DoctorProfileComponent  = () => {
                 />
                 <input
                   value={edu.institution}
-                  onChange={(e) =>
-                    handleArrayChange(i, "education", e.target.value, "institution")
-                  }
+                  onChange={(e) => handleArrayChange(i, "education", e.target.value, "institution")}
                   placeholder="Institution"
                   className="border p-2 rounded"
                 />
@@ -334,25 +338,17 @@ const DoctorProfileComponent  = () => {
                 />
               </div>
             ))}
-            <button
-              type="button"
-              onClick={() => addField("education", { degree: "", institution: "", year: "" })}
-              className="text-sm text-teal-600 underline"
-            >
-              + Add another education
-            </button>
+            <button type="button" onClick={() => addField("education", { degree: "", institution: "", year: "" })} className="text-sm text-teal-600 underline">+ Add another education</button>
           </div>
 
-          {/* Experience Section */}
+          {/* Experience */}
           <div className="col-span-1 sm:col-span-2">
             <label className="font-semibold text-gray-700 mb-1 block">Experience</label>
             {form.experience.map((exp, i) => (
               <div key={i} className="grid grid-cols-3 gap-2 mb-2">
                 <input
                   value={exp.hospital}
-                  onChange={(e) =>
-                    handleArrayChange(i, "experience", e.target.value, "hospital")
-                  }
+                  onChange={(e) => handleArrayChange(i, "experience", e.target.value, "hospital")}
                   placeholder="Hospital"
                   className="border p-2 rounded"
                 />
@@ -370,16 +366,10 @@ const DoctorProfileComponent  = () => {
                 />
               </div>
             ))}
-            <button
-              type="button"
-              onClick={() => addField("experience", { hospital: "", role: "", years: "" })}
-              className="text-sm text-teal-600 underline"
-            >
-              + Add another experience
-            </button>
+            <button type="button" onClick={() => addField("experience", { hospital: "", role: "", years: "" })} className="text-sm text-teal-600 underline">+ Add another experience</button>
           </div>
 
-          {/* Affiliated Hospitals Section */}
+          {/* Affiliated Hospitals */}
           <div className="col-span-1 sm:col-span-2">
             <label className="font-semibold text-gray-700 mb-1 block">Affiliated Hospitals</label>
             {form.affiliatedHospitals.map((value, i) => (
@@ -391,29 +381,13 @@ const DoctorProfileComponent  = () => {
                 className="w-full mb-2 border p-2 rounded-md focus:ring-2 focus:ring-teal-600"
               />
             ))}
-            <button
-              type="button"
-              onClick={() => addField("affiliatedHospitals", "")}
-              className="text-sm text-teal-600 underline"
-            >
-              + Add another hospital
-            </button>
+            <button type="button" onClick={() => addField("affiliatedHospitals", "")} className="text-sm text-teal-600 underline">+ Add another hospital</button>
           </div>
 
+          {/* Submit/Cancel */}
           <div className="col-span-1 sm:col-span-2 flex gap-4 justify-center pt-6">
-            <button
-              type="submit"
-              className="bg-teal-600 text-white px-6 py-3 rounded-xl hover:bg-teal-700 transition duration-300 shadow-md"
-            >
-              Save
-            </button>
-            <button
-              type="button"
-              onClick={() => setEditMode(false)}
-              className="bg-gray-400 text-white px-6 py-3 rounded-xl hover:bg-gray-500 transition duration-300"
-            >
-              Cancel
-            </button>
+            <button type="submit" className="bg-teal-600 text-white px-6 py-3 rounded-xl hover:bg-teal-700 transition duration-300 shadow-md">Save</button>
+            <button type="button" onClick={() => setEditMode(false)} className="bg-gray-400 text-white px-6 py-3 rounded-xl hover:bg-gray-500 transition duration-300">Cancel</button>
           </div>
         </form>
       )}

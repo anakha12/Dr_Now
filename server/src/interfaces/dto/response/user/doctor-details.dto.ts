@@ -7,6 +7,9 @@ export class DoctorDetailsResponseDTO {
 
   @Expose()
   name!: string;
+  
+  @Expose()
+  gender!: string;
 
   @Expose()
   email!: string;

@@ -7,7 +7,8 @@ import {
 } from "../../services/adminService";
 import type { Doctor } from "../../types/doctor";
 import { Messages } from "../../constants/messages";
-import { useNotifications } from "../../context/NotificationContext";
+import { useNotifications } from "../../hooks/useNotifications";
+
 import logger from "../../utils/logger";
 
 const ITEMS_PER_PAGE = 5;

@@ -3,8 +3,8 @@ import { IUserRepository } from "../../../domain/repositories/userRepository";
 import { GoogleLoginRequestDTO } from "../../../interfaces/dto/request/google-login.dto";
 import { GoogleLoginUserResponseDTO } from "../../../interfaces/dto/response/user/google-login-user.dto";
 import { plainToInstance } from "class-transformer";
-import jwt from "jsonwebtoken";
 import { IGoogleLoginUser } from "../interfaces/user/IGoogleLoginUser";
+import { ITokenService } from "../../../interfaces/tokenServiceInterface";
 
 interface CreateUserDTO {
   email: string;
@@ -17,7 +17,7 @@ export class GoogleLoginUser
   extends BaseUseCase<GoogleLoginRequestDTO, GoogleLoginUserResponseDTO>
   implements IGoogleLoginUser
 {
-  constructor(private _userRepository: IUserRepository) {
+  constructor(private _userRepository: IUserRepository, private _tokenService: ITokenService) {
     super();
   }
 
@@ -45,11 +45,20 @@ export class GoogleLoginUser
     }
 
     
-    const payload = { userId: user.id, email: user.email };
-    const token = jwt.sign(payload, process.env.JWT_SECRET!, { expiresIn: "1h" });
+   const accessToken = this._tokenService.generateAccessToken({
+    id: user.id!,
+    email: user.email,
+    role: user.role,
+  });
 
+  const refreshToken = this._tokenService.generateRefreshToken({
+    id: user.id!,
+    email: user.email,
+    role: user.role,
+  });
     const response = {
-      token,
+      accessToken,
+      refreshToken,
       user: {
         id: user.id,
         email: user.email,

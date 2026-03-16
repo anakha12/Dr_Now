@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { getAllUsers, toggleUserBlockStatus } from "../../services/adminService";
 import toast from "react-hot-toast";
 import Table from "../../components/Table";
@@ -22,7 +22,7 @@ const Patients = () => {
 
   const patientsPerPage = 5;
 
-  const fetchPatients = async () => {
+  const fetchPatients = useCallback(async () => {
     try {
       const data = await getAllUsers(
         currentPage,
@@ -43,7 +43,7 @@ const Patients = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [currentPage, searchQuery, genderFilter, statusFilter, sortOption]);
 
   useEffect(() => {
     const delayDebounce = setTimeout(() => {
@@ -51,7 +51,7 @@ const Patients = () => {
     }, 400);
 
     return () => clearTimeout(delayDebounce);
-  }, [currentPage, searchQuery, genderFilter, statusFilter, sortOption]);
+  }, [fetchPatients]);
 
   const handleToggleBlock = async (id: string, isBlocked: boolean) => {
     try {

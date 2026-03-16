@@ -1,5 +1,6 @@
 
-import { useNotifications } from "../../context/NotificationContext";
+import { useNotifications } from "../../hooks/useNotifications";
+
 
 const NotificationBell = () => {
   const { notifications } = useNotifications();

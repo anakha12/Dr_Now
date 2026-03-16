@@ -3,7 +3,9 @@ import { motion } from "framer-motion";
 import type { Variants } from "framer-motion";
 import { getUserProfile } from "../../services/userService";
 import type { User } from "../../types/user";
-import { useNotifications } from "../../context/NotificationContext";
+import { useNotifications } from "../../hooks/useNotifications";
+
+
 import { Messages } from "../../constants/messages";
 import { useNavigate } from "react-router-dom";
 import { User as UserIcon, Phone, Edit3, Calendar, MapPin, Droplet, Mail } from "lucide-react";

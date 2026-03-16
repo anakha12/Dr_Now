@@ -25,7 +25,7 @@ import {
 } from "../../services/userService";
 
 import { loadStripe } from "@stripe/stripe-js";
-import { useNotifications } from "../../context/NotificationContext";
+import { useNotifications } from "../../hooks/useNotifications";
 import { Messages, NotificationDefaults } from "../../constants/messages";
 
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY!);

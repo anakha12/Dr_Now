@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNotifications } from "../../context/NotificationContext";
+import { useNotifications } from "../../hooks/useNotifications";
 import { getUserWallet } from "../../services/userService";
 import type { Transaction } from "../../types/transaction";
 import { Messages } from "../../constants/messages";

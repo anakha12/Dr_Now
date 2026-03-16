@@ -12,6 +12,7 @@ import { DoctorRoutes } from "../constants/apiRoutes";
 import type { DoctorLoginResponse } from "../types/auth";
 import type { DoctorBookingsResponse } from "../types/doctorBookingsResponse";
 import type { WalletSummaryResponse } from "../types/walletSummaryResponse";
+import type { Prescription } from "../types/booking";
 
 export const sendOtp = async (formData: FormData): Promise<{ message: string }> => {
   try {
@@ -210,7 +211,7 @@ export const getWalletSummary = async (page: number, limit: number): Promise<Wal
 
 export const addPrescriptionToBooking = async (
   bookingId: string,
-  prescription: any 
+  prescription: Prescription 
 ): Promise<{ message: string }> => {
   try {
     const response = await doctorAxios.patch(

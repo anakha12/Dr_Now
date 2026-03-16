@@ -1,6 +1,7 @@
 import ms from "ms";
 import { ITokenService } from "../interfaces/tokenServiceInterface";
-import jwt, { JwtPayload, Secret } from "jsonwebtoken";
+import jwt, { Secret } from "jsonwebtoken";
+import { JwtPayload } from "../utils/types/jwt";
 
 export class JwtService implements ITokenService {
   private _accessSecret: Secret;
@@ -23,14 +24,22 @@ export class JwtService implements ITokenService {
     return jwt.sign(payload, this._refreshSecret, { expiresIn: this._refreshExpiresIn as ms.StringValue });
   }
 
-  verifyAccessToken(token: string): string | JwtPayload | null {
-    try { return jwt.verify(token, this._accessSecret) as JwtPayload; } 
-    catch { return null; }
+  verifyAccessToken(token: string): JwtPayload | null {
+    try {
+      const decoded = jwt.verify(token, this._accessSecret);
+      return decoded as JwtPayload;
+    } catch {
+      return null;
+    }
   }
 
-  verifyRefreshToken(token: string): string | JwtPayload | null {
-    try { return jwt.verify(token, this._refreshSecret) as JwtPayload; } 
-    catch { return null; }
+  verifyRefreshToken(token: string): JwtPayload | null {
+    try {
+      const decoded = jwt.verify(token, this._refreshSecret);
+      return decoded as JwtPayload;
+    } catch {
+      return null;
+    }
   }
 
   decodeAccessToken(token: string): JwtPayload | null {

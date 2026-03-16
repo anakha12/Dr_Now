@@ -19,7 +19,7 @@ export class GetDoctorAvailabilityExceptionsUseCase
     await this.validateDto(GetDoctorBasicsDTO, dto);
 
     const exceptions = await this._repo.getExceptionsForDoctor(dto.doctorId);
-
+    console.log(exceptions)
     return exceptions.map((ex) =>
       plainToInstance(DoctorAvailabilityExceptionResponseDTO, ex, {
         excludeExtraneousValues: true,

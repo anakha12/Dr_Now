@@ -3,7 +3,7 @@ import { sendOtp, registerUser, googleLogin } from "../../services/userService";
 import { useNavigate } from "react-router-dom";
 import { auth, provider, signInWithPopup } from "../../firebase";
 import { FaStethoscope } from "react-icons/fa";
-import { useNotifications } from "../../context/NotificationContext";
+import { useNotifications } from "../../hooks/useNotifications";
 import { Messages, NotificationDefaults } from "../../constants/messages";
 import { ZodError } from "zod";
 import { userRegisterSchema } from "../../validation/userSchema";
@@ -11,6 +11,7 @@ import logger from "../../utils/logger";
 import { useDispatch } from "react-redux";
 import { setUserAuth } from "../../redux/slices/authSlice";
 import { userAxios } from "../../services/axiosInstances";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
 
 const UserRegister = () => {
   const [email, setEmail] = useState("");
@@ -22,7 +23,9 @@ const UserRegister = () => {
   const [isDonner, setIsDonner] = useState(false);
   const [timer, setTimer] = useState(0);
   const [isCountingDown, setIsCountingDown] = useState(false);
-  const [fadeIn, setFadeIn] = useState(false);
+  const [, setFadeIn] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -169,21 +172,39 @@ return (
               className="w-full px-4 py-2 mb-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 outline-none"
             />
 
-            <input
-              type="password"
-              placeholder="Password"
-              value={password}
-              onChange={e => setPassword(e.target.value)}
-              className="w-full px-4 py-2 mb-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 outline-none"
-            />
+            <div className="relative mb-4">
+              <input
+                type={showPassword ? "text" : "password"}
+                placeholder="Password"
+                value={password}
+                onChange={e => setPassword(e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 outline-none"
+              />
 
-            <input
-              type="password"
-              placeholder="Confirm Password"
-              value={confirmPassword}
-              onChange={e => setConfirmPassword(e.target.value)}
-              className="w-full px-4 py-2 mb-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 outline-none"
-            />
+              <span
+                className="absolute right-3 top-2.5 cursor-pointer text-gray-500"
+                onClick={() => setShowPassword(!showPassword)}
+              >
+                {showPassword ? <FaEyeSlash /> : <FaEye />}
+              </span>
+            </div>
+
+            <div className="relative mb-4">
+              <input
+                type={showConfirmPassword ? "text" : "password"}
+                placeholder="Confirm Password"
+                value={confirmPassword}
+                onChange={e => setConfirmPassword(e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 outline-none"
+              />
+
+              <span
+                className="absolute right-3 top-2.5 cursor-pointer text-gray-500"
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+              >
+                {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
+              </span>
+            </div>
 
             <div className="flex items-center mb-5">
               <input
