@@ -21,8 +21,6 @@ const getIcon = (key: string) => {
   switch (key) {
     case "profile": return <FaUser className="w-5 h-5" />;
     case "bookings": return <FaCalendarAlt className="w-5 h-5" />;
-    case "prescriptions": return <FaFilePrescription className="w-5 h-5" />;
-    case "chat": return <FaComments className="w-5 h-5" />;
     case "fund-request": return <FaHandHoldingHeart className="w-5 h-5" />;
     case "wallet": return <FaWallet className="w-5 h-5" />;
     case "logout": return <FaSignOutAlt className="w-5 h-5" />;
@@ -38,7 +36,6 @@ const ProfileLayout = () => {
 
   const active = location.pathname.split("/")[2] || "profile";
 
-  // Close mobile menu on route change
   useEffect(() => {
     setIsMobileMenuOpen(false);
   }, [location.pathname]);

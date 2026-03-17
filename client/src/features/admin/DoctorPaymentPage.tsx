@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { toast } from "react-hot-toast";
 import { useNotifications } from "../../hooks/useNotifications";
+import { Wallet, Landmark, Clock, IndianRupee } from "lucide-react";
 
 import {
   getWalletSummary,
@@ -34,13 +35,13 @@ const DoctorPaymentPage = () => {
   const [pendingDoctors, setPendingDoctors] = useState<PendingDoctor[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [loading, setLoading] = useState(true);
 
   const { addNotification, confirmMessage } = useNotifications();
 
-
-
   const fetchData = useCallback(async () => {
     try {
+      setLoading(true);
       const [walletData, doctorsData]: [WalletSummary, PendingDoctorsResponse] =
         await Promise.all([
           getWalletSummary(),
@@ -53,6 +54,8 @@ const DoctorPaymentPage = () => {
     } catch (error: unknown) {
       const err = handleError(error, Messages.DOCTOR.FETCH_WALLET_FAILED);
       toast.error(err.message);
+    } finally {
+      setLoading(false);
     }
  }, [currentPage]);
 
@@ -87,103 +90,137 @@ const DoctorPaymentPage = () => {
   const handleNext = () => setCurrentPage((p) => Math.min(totalPages, p + 1));
 
   return (
-    <div className="max-w-4xl mx-auto p-4">
-      {/* Title */}
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold text-teal-700">Doctor Payments</h2>
+    <div className="max-w-6xl mx-auto p-4 sm:p-6 lg:p-8 font-sans space-y-6">
+      {/* Header */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white border border-slate-200 shadow-sm rounded-xl p-6">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-800 tracking-tight">Doctor Payments</h1>
+          <p className="text-slate-500 mt-1 text-sm">Manage platform revenue and process pending payouts.</p>
+        </div>
+        <div className="bg-teal-50 text-teal-700 px-3 py-1.5 rounded-lg border border-teal-100 flex items-center gap-2 text-sm font-medium">
+          <IndianRupee className="w-4 h-4" />
+          Finance Overview
+        </div>
       </div>
 
       {/* Wallet Summary */}
       {walletSummary && (
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
-          <div className="bg-white rounded-lg shadow p-4">
-            <h2 className="font-semibold text-gray-600">Total Balance</h2>
-            <p className="text-xl font-bold text-teal-700">
-              ₹{Math.round(walletSummary.totalBalance)}
-            </p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-5 flex items-center gap-4">
+            <div className="p-3 bg-teal-50 text-teal-600 rounded-lg">
+              <Wallet className="w-6 h-6" />
+            </div>
+            <div>
+              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Total Balance</p>
+              <p className="text-2xl font-bold text-slate-800">
+                ₹{Math.round(walletSummary.totalBalance).toLocaleString()}
+              </p>
+            </div>
           </div>
-          <div className="bg-white rounded-lg shadow p-4">
-            <h2 className="font-semibold text-gray-600">Total Commission</h2>
-            <p className="text-xl font-bold text-teal-700">
-              ₹{Math.round(walletSummary.totalCommission)}
-            </p>
+          <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-5 flex items-center gap-4">
+            <div className="p-3 bg-blue-50 text-blue-600 rounded-lg">
+              <Landmark className="w-6 h-6" />
+            </div>
+            <div>
+              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Total Commission</p>
+              <p className="text-2xl font-bold text-slate-800">
+                ₹{Math.round(walletSummary.totalCommission).toLocaleString()}
+              </p>
+            </div>
           </div>
-          <div className="bg-white rounded-lg shadow p-4">
-            <h2 className="font-semibold text-gray-600">
-              Pending Doctor Payouts
-            </h2>
-            <p className="text-xl font-bold text-orange-600">
-             ₹{Math.round(walletSummary.pendingDoctorPayouts)}
-            </p>
+          <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-5 flex items-center gap-4 sm:col-span-2 lg:col-span-1">
+            <div className="p-3 bg-amber-50 text-amber-600 rounded-lg">
+              <Clock className="w-6 h-6" />
+            </div>
+            <div>
+              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Pending Payouts</p>
+              <p className="text-2xl font-bold text-slate-800">
+               ₹{Math.round(walletSummary.pendingDoctorPayouts).toLocaleString()}
+              </p>
+            </div>
           </div>
         </div>
       )}
 
-      {/* Doctor List */}
-      <div className="overflow-x-auto bg-white rounded-lg shadow">
-        <table className="min-w-full divide-y divide-gray-200 text-sm">
-          <thead className="bg-teal-100">
-            <tr>
-              <th className="px-6 py-3 text-left font-medium text-teal-800">
-                Doctor
-              </th>
-              <th className="px-6 py-3 text-left font-medium text-teal-800">
-                Pending Amount
-              </th>
-              <th className="px-6 py-3 text-center font-medium text-teal-800">
-                Action
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {pendingDoctors.length === 0 ? (
-              <tr>
-                <td colSpan={3} className="text-center py-6 text-gray-500">
-                  No pending payouts
-                </td>
+      {/* Doctor List Table */}
+      <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+        <div className={`transition-opacity duration-200 overflow-x-auto ${loading ? 'opacity-50 pointer-events-none' : ''}`}>
+          <table className="w-full text-left border-collapse">
+            <thead>
+              <tr className="bg-slate-50 border-b border-slate-200">
+                <th className="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                  Doctor
+                </th>
+                <th className="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                  Pending Amount
+                </th>
+                <th className="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider text-right">
+                  Action
+                </th>
               </tr>
-            ) : (
-              pendingDoctors.map((doc) => (
-                <tr key={doc.doctorId} className="border-b hover:bg-teal-50">
-                  <td className="px-6 py-4">{doc.doctorName}</td>
-                  <td className="px-6 py-4">₹{doc.totalPendingAmount}</td>
-                  <td className="px-6 py-4 text-center">
-                    <button
-                      onClick={() => handlePayout(doc.doctorId)}
-                      className="bg-teal-600 text-white py-2 px-4 rounded hover:bg-teal-700"
-                    >
-                      Pay
-                    </button>
+            </thead>
+            <tbody className="divide-y divide-slate-200">
+              {loading ? (
+                <tr>
+                  <td colSpan={3} className="text-center py-8 text-slate-500 text-sm">
+                    Loading payouts...
                   </td>
                 </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-      </div>
-
-      {/* Pagination */}
-      {totalPages > 1 && (
-        <div className="mt-4 flex justify-center items-center space-x-2">
-          <button
-            onClick={handlePrev}
-            disabled={currentPage === 1}
-            className="px-3 py-1 bg-gray-200 hover:bg-gray-300 rounded disabled:opacity-50"
-          >
-            Prev
-          </button>
-          <span className="text-gray-700 font-medium">
-            Page {currentPage} of {totalPages}
-          </span>
-          <button
-            onClick={handleNext}
-            disabled={currentPage === totalPages}
-            className="px-3 py-1 bg-gray-200 hover:bg-gray-300 rounded disabled:opacity-50"
-          >
-            Next
-          </button>
+              ) : pendingDoctors.length === 0 ? (
+                <tr>
+                  <td colSpan={3} className="text-center py-8 text-slate-500 text-sm bg-slate-50/50">
+                    No pending payouts
+                  </td>
+                </tr>
+              ) : (
+                pendingDoctors.map((doc) => (
+                  <tr key={doc.doctorId} className="hover:bg-slate-50 transition-colors">
+                    <td className="px-6 py-4">
+                      <span className="text-sm font-medium text-slate-800">{doc.doctorName}</span>
+                    </td>
+                    <td className="px-6 py-4">
+                      <span className="text-sm font-semibold text-slate-700">₹{doc.totalPendingAmount.toLocaleString()}</span>
+                    </td>
+                    <td className="px-6 py-4 text-right">
+                      <button
+                        onClick={() => handlePayout(doc.doctorId)}
+                        className="inline-flex items-center justify-center px-4 py-1.5 rounded-md text-xs font-semibold bg-white border border-teal-300 text-teal-700 hover:bg-teal-50 transition-colors"
+                      >
+                        Process Payout
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
         </div>
-      )}
+
+        {/* Pagination */}
+        {!loading && totalPages > 1 && (
+          <div className="px-6 py-4 bg-slate-50 border-t border-slate-200 flex items-center justify-between">
+            <span className="text-sm text-slate-700">
+              Page <span className="font-medium">{currentPage}</span> of <span className="font-medium">{totalPages}</span>
+            </span>
+            <div className="flex gap-2">
+              <button
+                onClick={handlePrev}
+                disabled={currentPage === 1}
+                className="px-3 py-1.5 rounded border border-slate-300 bg-white text-slate-700 text-sm font-medium hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                Previous
+              </button>
+              <button
+                onClick={handleNext}
+                disabled={currentPage === totalPages}
+                className="px-3 py-1.5 rounded border border-slate-300 bg-white text-slate-700 text-sm font-medium hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                Next
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 };

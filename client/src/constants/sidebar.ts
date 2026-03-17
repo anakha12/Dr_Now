@@ -24,8 +24,6 @@ export const doctorSidebarItems = [
 export const profileSidebarItems = [
   { label: "Profile", key: "profile" },
   { label: "See Bookings", key: "bookings" },
-  { label: "Prescriptions", key: "prescriptions" },
-  { label: "Chat", key: "chat" },
   { label: "Fund Request", key: "fund-request" },
   { label: "Wallet", key: "wallet" },
   { label: "Logout", key: "logout" },
