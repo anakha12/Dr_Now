@@ -240,8 +240,10 @@ function Dashboard() {
         </div>
       </section>
 
+
+
       {/* INFO CARDS SECTION (Alternating side-by-side) */}
-      <section className="py-24 bg-white">
+      <section className="py-24 bg-slate-50">
         <div className="container mx-auto px-6 md:px-12 space-y-32">
           {[
             {

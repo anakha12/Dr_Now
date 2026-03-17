@@ -117,6 +117,11 @@ export class UserController {
       sameSite: "lax",
       secure: process.env.NODE_ENV === "production",
     });
+    res.clearCookie("refreshToken", {
+      httpOnly: true,
+      sameSite: "lax",
+      secure: process.env.NODE_ENV === "production",
+    });
 
     const result = await this._logoutUserUseCase.execute();
     res.status(HttpStatus.OK).json(result);

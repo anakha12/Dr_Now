@@ -13,10 +13,10 @@ export class WalletTransactionDTO {
   reason!: string;
 
   @Expose()
-  bookingId!: string;
+  bookingId?: string;
 
   @Expose()
-  date!: Date;
+  date?: Date;
 }
 
 @Exclude()

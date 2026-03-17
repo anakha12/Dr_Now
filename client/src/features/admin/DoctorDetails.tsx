@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { User as UserIcon, Phone,  FileText, Calendar } from "lucide-react";
+import { User as UserIcon, Phone, FileText, Calendar, X, GraduationCap, Briefcase, ChevronRight } from "lucide-react";
 import type { Doctor } from "../../types/doctor";
 
 interface DoctorDetailsProps {
@@ -7,150 +7,162 @@ interface DoctorDetailsProps {
   onClose: () => void;
 }
 
+const InfoItem = ({ icon: Icon, label, value }: { icon: any, label: string, value: string | number }) => (
+  <div className="flex items-start gap-3 p-3 rounded-lg bg-slate-50 border border-slate-100">
+    <div className="p-2 bg-white rounded-md shadow-sm border border-slate-200 text-teal-600 shrink-0">
+      <Icon className="w-4 h-4" />
+    </div>
+    <div>
+      <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-0.5">{label}</p>
+      <p className="font-semibold text-slate-800 text-sm">{value}</p>
+    </div>
+  </div>
+);
+
 const DoctorDetails = ({ doctor, onClose }: DoctorDetailsProps) => {
   return (
-    <div className="fixed inset-0 bg-black/30 flex justify-center items-center z-50">
+    <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex justify-center items-center z-50 p-4 font-sans">
       <motion.div
-        className="bg-white rounded-3xl shadow-2xl p-10 space-y-6 max-w-4xl w-full overflow-y-auto max-h-[90vh] border border-gray-100"
-        initial={{ opacity: 0, y: 30 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.1 }}
+        className="bg-white rounded-xl shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden border border-slate-200"
+        initial={{ opacity: 0, scale: 0.95, y: 10 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.95, y: 10 }}
+        transition={{ duration: 0.2 }}
       >
-        {/* Profile */}
-        <div className="flex flex-col items-center">
-          <img
-            src={doctor.profileImage || "/default-avatar.png"}
-            alt={doctor.name}
-            className="w-32 h-32 rounded-full border-4 border-teal-500 shadow-md object-cover"
-          />
-          <h2 className="mt-4 text-2xl font-bold text-gray-800">{doctor.name}</h2>
-          <p className="text-gray-500">{doctor.email}</p>
+        {/* Header (Sticky) */}
+        <div className="flex items-center justify-between px-5 py-3 border-b border-slate-100 bg-white rounded-t-xl shrink-0">
+          <h2 className="text-lg font-bold text-slate-800">Doctor Profile</h2>
+          <button 
+            onClick={onClose}
+            className="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-50 rounded-lg transition-colors"
+          >
+            <X className="w-5 h-5" />
+          </button>
         </div>
 
-        {/* Main Info */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-6 text-gray-700">
-          <div className="flex items-center space-x-3">
-            <Phone className="text-teal-600 w-5 h-5" />
-            <div>
-              <p className="text-sm text-gray-500">Phone</p>
-              <p className="font-semibold">{doctor.phone || "N/A"}</p>
-            </div>
-          </div>
-
-          <div className="flex items-center space-x-3">
-            <Calendar className="text-teal-600 w-5 h-5" />
-            <div>
-              <p className="text-sm text-gray-500">Years of Experience</p>
-              <p className="font-semibold">{doctor.yearsOfExperience ?? "N/A"}</p>
-            </div>
-          </div>
-
-          <div className="flex items-center space-x-3">
-            <UserIcon className="text-teal-600 w-5 h-5" />
-            <div>
-              <p className="text-sm text-gray-500">Gender</p>
-              <p className="font-semibold">{doctor.gender || "N/A"}</p>
-            </div>
-          </div>
-
-          <div className="flex items-center space-x-3">
-            <UserIcon className="text-teal-600 w-5 h-5" />
-            <div>
-              <p className="text-sm text-gray-500">Specialization</p>
-              <p className="font-semibold">{doctor.specialization || "N/A"}</p>
-            </div>
-          </div>
-
-          <div className="flex items-center space-x-3">
-            <FileText className="text-teal-600 w-5 h-5" />
-            <div>
-              <p className="text-sm text-gray-500">Consultation Fee</p>
-              <p className="font-semibold">₹{doctor.consultFee ?? "N/A"}</p>
-            </div>
-          </div>
-
-          <div className="flex items-center space-x-3">
-            <FileText className="text-teal-600 w-5 h-5" />
-            <div>
-              <p className="text-sm text-gray-500">Total Earned</p>
-              <p className="font-semibold">₹{doctor.totalEarned ?? 0}</p>
-            </div>
-          </div>
-
-          <div className="flex items-center space-x-3">
-            <FileText className="text-teal-600 w-5 h-5" />
-            <div>
-              <p className="text-sm text-gray-500">Wallet Balance</p>
-              <p className="font-semibold">₹{doctor.walletBalance ?? 0}</p>
-            </div>
-          </div>
-        </div>
-
-        {/* Bio */}
-        {doctor.bio && (
-          <div className="pt-4">
-            <h3 className="font-semibold text-gray-700">Bio:</h3>
-            <p className="text-gray-600">{doctor.bio}</p>
-          </div>
-        )}
-
-        {/* Education */}
-        {doctor.education && doctor.education.length > 0 && (
-          <div className="pt-4">
-            <h3 className="font-semibold text-gray-700">Education:</h3>
-            <ul className="list-disc list-inside text-gray-600">
-              {doctor.education.map((edu, idx) => (
-                <li key={idx}>
-                  {edu.degree} - {edu.institution} ({edu.year})
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
-
-        {/* Experience */}
-        {doctor.experience && doctor.experience.length > 0 && (
-          <div className="pt-4">
-            <h3 className="font-semibold text-gray-700">Experience:</h3>
-            <ul className="list-disc list-inside text-gray-600">
-              {doctor.experience.map((exp, idx) => (
-                <li key={idx}>
-                  {exp.hospital} - {exp.role} ({exp.years} years)
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
-
-        {/* Documents */}
-        <div className="pt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
-          {doctor.medicalLicense && (
-            <div>
-              <p className="font-semibold text-gray-700">Medical License:</p>
+        {/* Scrollable Content (if needed) */}
+        <div className="overflow-y-auto p-5 space-y-6">
+          {/* Profile Section */}
+          <div className="flex items-start gap-5">
+            <div className="relative shrink-0">
               <img
-                src={doctor.medicalLicense}
-                alt="Medical License"
-                className="w-full max-w-xs rounded shadow"
+                src={doctor.profileImage || "/default-avatar.png"}
+                alt={doctor.name}
+                className="w-24 h-24 rounded-xl border border-slate-200 shadow-sm object-cover"
               />
+              <span className={`absolute -bottom-2 -right-2 px-2 py-0.5 text-[10px] uppercase font-bold rounded-lg border bg-white shadow-sm ${doctor.isBlocked ? 'text-red-600 border-red-200' : 'text-green-600 border-green-200'}`}>
+                {doctor.isBlocked ? 'Blocked' : 'Active'}
+              </span>
             </div>
-          )}
-          {doctor.idProof && (
-            <div>
-              <p className="font-semibold text-gray-700">ID Proof:</p>
-              <img
-                src={doctor.idProof}
-                alt="ID Proof"
-                className="w-full max-w-xs rounded shadow"
-              />
+            <div className="space-y-1">
+              <h2 className="text-xl font-bold text-slate-900">{doctor.name}</h2>
+              <p className="text-slate-500 font-medium text-sm">{doctor.email}</p>
+              {doctor.bio && (
+                <p className="text-sm text-slate-600 mt-2 leading-relaxed bg-slate-50 p-2.5 rounded-lg border border-slate-100">
+                  {doctor.bio}
+                </p>
+              )}
             </div>
-          )}
+          </div>
+
+          {/* Core Info Grid */}
+          <div>
+            <h3 className="text-xs font-bold text-slate-800 uppercase tracking-wider mb-3 pb-2 border-b border-slate-100">Professional Details</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <InfoItem icon={UserIcon} label="Specialization" value={doctor.specialization || "N/A"} />
+              <InfoItem icon={Phone} label="Contact Number" value={doctor.phone || "N/A"} />
+              <InfoItem icon={Calendar} label="Experience" value={`${doctor.yearsOfExperience ?? 0} Years`} />
+              <InfoItem icon={UserIcon} label="Gender" value={doctor.gender || "N/A"} />
+              <InfoItem icon={FileText} label="Consultation Fee" value={`₹${doctor.consultFee ?? "N/A"}`} />
+              <InfoItem icon={Briefcase} label="Wallet Balance" value={`₹${doctor.walletBalance ?? 0}`} />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            {/* Education */}
+            {doctor.education && doctor.education.length > 0 && (
+              <div>
+                <h3 className="text-xs font-bold text-slate-800 uppercase tracking-wider mb-3 pb-2 border-b border-slate-100 flex items-center gap-1.5">
+                  <GraduationCap className="w-3.5 h-3.5 text-teal-600" />
+                  Education
+                </h3>
+                <div className="space-y-2">
+                  {doctor.education.map((edu, idx) => (
+                    <div key={idx} className="flex items-start gap-2 p-2.5 rounded-lg border border-slate-100 hover:border-slate-200 transition-colors">
+                      <ChevronRight className="w-3.5 h-3.5 text-slate-400 mt-0.5 shrink-0" />
+                      <div>
+                        <p className="font-semibold text-slate-800 text-sm">{edu.degree}</p>
+                        <p className="text-xs text-slate-500">{edu.institution} &bull; {edu.year}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Experience */}
+            {doctor.experience && doctor.experience.length > 0 && (
+              <div>
+                <h3 className="text-xs font-bold text-slate-800 uppercase tracking-wider mb-3 pb-2 border-b border-slate-100 flex items-center gap-1.5">
+                  <Briefcase className="w-3.5 h-3.5 text-teal-600" />
+                  Experience
+                </h3>
+                <div className="space-y-2">
+                  {doctor.experience.map((exp, idx) => (
+                    <div key={idx} className="flex items-start gap-2 p-2.5 rounded-lg border border-slate-100 hover:border-slate-200 transition-colors">
+                      <ChevronRight className="w-3.5 h-3.5 text-slate-400 mt-0.5 shrink-0" />
+                      <div>
+                        <p className="font-semibold text-slate-800 text-sm">{exp.role}</p>
+                        <p className="text-xs text-slate-500">{exp.hospital} &bull; {exp.years} yrs</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Verification Documents */}
+          <div className="pt-1">
+            <h3 className="text-xs font-bold text-slate-800 uppercase tracking-wider mb-3 pb-2 border-b border-slate-100">Verification Documents</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {doctor.medicalLicense && (
+                <div className="bg-slate-50 rounded-lg border border-slate-200 overflow-hidden">
+                  <div className="px-3 py-1.5 bg-slate-100 border-b border-slate-200">
+                    <p className="text-[10px] uppercase font-bold text-slate-600">Medical License</p>
+                  </div>
+                  <div className="p-3 flex justify-center bg-white">
+                    <img
+                      src={doctor.medicalLicense}
+                      alt="Medical License"
+                      className="max-h-48 object-contain rounded border border-slate-100 shadow-sm"
+                    />
+                  </div>
+                </div>
+              )}
+              {doctor.idProof && (
+                <div className="bg-slate-50 rounded-lg border border-slate-200 overflow-hidden">
+                  <div className="px-3 py-1.5 bg-slate-100 border-b border-slate-200">
+                    <p className="text-[10px] uppercase font-bold text-slate-600">ID Proof</p>
+                  </div>
+                  <div className="p-3 flex justify-center bg-white">
+                    <img
+                      src={doctor.idProof}
+                      alt="ID Proof"
+                      className="max-h-48 object-contain rounded border border-slate-100 shadow-sm"
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
         </div>
 
-        {/* Close Button */}
-        <div className="pt-6 flex justify-center">
+        {/* Footer */}
+        <div className="px-5 py-3 border-t border-slate-100 bg-slate-50 flex justify-end rounded-b-xl shrink-0">
           <button
             onClick={onClose}
-            className="px-6 py-3 bg-gray-600 text-white font-medium rounded-xl shadow-md hover:bg-gray-700 transition"
+            className="px-5 py-2 bg-slate-800 text-white font-medium text-sm rounded-lg hover:bg-slate-900 transition-colors shadow-sm"
           >
             Close
           </button>

@@ -1,71 +1,110 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
-import type { Draft } from "immer";
-import type { Doctor, User, Admin } from "../../types/auth"; 
+import type { Doctor, User, Admin } from "../../types/auth";
 
-export interface AuthState<UserType> {
+// -------------------- USER --------------------
+interface UserAuthState {
   isAuthenticated: boolean;
   loading: boolean;
-  user?: UserType;
+  user: User | null;
 }
 
-function createAuthSlice<T extends object>(name: string) {
-  const initialState: AuthState<T> = {
-    isAuthenticated: false,
-    loading: true,
-    user: undefined,
-  };
+const initialUserState: UserAuthState = {
+  isAuthenticated: false,
+  loading: true,
+  user: null,
+};
 
-  const slice = createSlice({
-    name,
-    initialState,
-    reducers: {
-      setAuth: (
-        state,
-        action: PayloadAction<{ isAuthenticated: boolean; user: T }> 
-      ) => {
-        state.isAuthenticated = action.payload.isAuthenticated;
-        state.user = action.payload.user as Draft<T>;
-        state.loading = false;
-      },
-      setLoading: (state, action: PayloadAction<boolean>) => {
-        state.loading = action.payload;
-      },
-      logout: (state) => {
-        state.isAuthenticated = false;
-        state.user = undefined;
-        state.loading = false; 
-      },
+const userSlice = createSlice({
+  name: "userAuth",
+  initialState: initialUserState,
+  reducers: {
+    setAuth: (state, action: PayloadAction<{ isAuthenticated: boolean; user: User }>) => {
+      state.isAuthenticated = action.payload.isAuthenticated;
+      state.user = action.payload.user;
+      state.loading = false;
     },
-  });
+    setLoading: (state, action: PayloadAction<boolean>) => {
+      state.loading = action.payload;
+    },
+    logout: (state) => {
+      state.isAuthenticated = false;
+      state.user = null;
+      state.loading = false;
+    },
+  },
+});
 
-  return slice;
+export const { setAuth: setUserAuth, setLoading: setUserLoading, logout: userLogout } = userSlice.actions;
+export const userAuthReducer = userSlice.reducer;
+
+// -------------------- DOCTOR --------------------
+interface DoctorAuthState {
+  isAuthenticated: boolean;
+  loading: boolean;
+  user: Doctor | null;
 }
 
+const initialDoctorState: DoctorAuthState = {
+  isAuthenticated: false,
+  loading: true,
+  user: null,
+};
 
-// --- Doctor ---
-const doctorSlice = createAuthSlice<Doctor>("doctorAuth");
-export const {
-  setAuth: setDoctorAuth,
-  setLoading: setDoctorLoading,
-  logout: doctorLogout,
-} = doctorSlice.actions;
+const doctorSlice = createSlice({
+  name: "doctorAuth",
+  initialState: initialDoctorState,
+  reducers: {
+    setAuth: (state, action: PayloadAction<{ isAuthenticated: boolean; user: Doctor }>) => {
+      state.isAuthenticated = action.payload.isAuthenticated;
+      state.user = action.payload.user;
+      state.loading = false;
+    },
+    setLoading: (state, action: PayloadAction<boolean>) => {
+      state.loading = action.payload;
+    },
+    logout: (state) => {
+      state.isAuthenticated = false;
+      state.user = null;
+      state.loading = false;
+    },
+  },
+});
 
-// --- User ---
-const userSlice = createAuthSlice<User>("userAuth");
-export const {
-  setAuth: setUserAuth,
-  setLoading: setUserLoading,
-  logout: userLogout,
-} = userSlice.actions;
-
-// --- Admin ---
-const adminSlice = createAuthSlice<Admin>("adminAuth");
-export const {
-  setAuth: setAdminAuth,
-  setLoading: setAdminLoading,
-  logout: adminLogout,
-} = adminSlice.actions;
-
+export const { setAuth: setDoctorAuth, setLoading: setDoctorLoading, logout: doctorLogout } = doctorSlice.actions;
 export const doctorAuthReducer = doctorSlice.reducer;
-export const userAuthReducer = userSlice.reducer;
+
+// -------------------- ADMIN --------------------
+interface AdminAuthState {
+  isAuthenticated: boolean;
+  loading: boolean;
+  user: Admin | null;
+}
+
+const initialAdminState: AdminAuthState = {
+  isAuthenticated: false,
+  loading: true,
+  user: null,
+};
+
+const adminSlice = createSlice({
+  name: "adminAuth",
+  initialState: initialAdminState,
+  reducers: {
+    setAuth: (state, action: PayloadAction<{ isAuthenticated: boolean; user: Admin }>) => {
+      state.isAuthenticated = action.payload.isAuthenticated;
+      state.user = action.payload.user;
+      state.loading = false;
+    },
+    setLoading: (state, action: PayloadAction<boolean>) => {
+      state.loading = action.payload;
+    },
+    logout: (state) => {
+      state.isAuthenticated = false;
+      state.user = null;
+      state.loading = false;
+    },
+  },
+});
+
+export const { setAuth: setAdminAuth, setLoading: setAdminLoading, logout: adminLogout } = adminSlice.actions;
 export const adminAuthReducer = adminSlice.reducer;

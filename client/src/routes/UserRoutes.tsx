@@ -28,7 +28,6 @@ import Contact from "../features/user/Contact";
 
 const UserRoutes = () => {
   const location = useLocation();
-
   const { isAuthenticated } = useSelector(
     (state: RootState) => state.userAuth
   );
@@ -38,25 +37,26 @@ const UserRoutes = () => {
       <Route
         path="/login"
         element={
-          isAuthenticated
-            ? <Navigate to="/user/dashboard" replace />
-            : <UserLogin />
+          isAuthenticated ? (
+            <Navigate to="/user/dashboard" replace />
+          ) : (
+            <UserLogin />
+          )
         }
       />
       <Route path="/user/register" element={<UserRegister />} />
       <Route path="/user/verify-otp" element={<VerifyOtp />} />
       <Route path="/user/forgot-password" element={<ForgotPassword />} />
       <Route path="/user/success" element={<Success />} />
-      <Route path="/about" element={<About />} />
-      <Route path="/contact" element={<Contact />} />
-   
+
       <Route
-      
         path="/user"
         element={
-          isAuthenticated
-            ? <UserLayout />
-            : <Navigate to="/login" state={{ from: location }} />
+          isAuthenticated ? (
+            <UserLayout />
+          ) : (
+            <Navigate to="/login" state={{ from: location }} />
+          )
         }
       >
         <Route path="dashboard" element={<Dashboard />} />
@@ -75,18 +75,13 @@ const UserRoutes = () => {
           <Route path="wallet" element={<UserWallet />} />
           <Route path="update-profile" element={<UpdateProfile />} />
           <Route path="chat/:bookingId" element={<ChatPage />} />
-          
         </Route>
 
         <Route path="prescription" element={<UserPrescriptionView />} />
-
-      
         <Route path="*" element={<NotFound />} />
       </Route>
 
-     
       <Route path="*" element={<NotFound />} />
-
     </Routes>
   );
 };

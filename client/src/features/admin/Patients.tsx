@@ -7,7 +7,7 @@ import { Messages } from "../../constants/messages";
 import type { AdminUser } from "../../types/userProfile";
 import PatientDetails from "./PatientDetails";
 import logger from "../../utils/logger";
-
+import { FaSearch } from "react-icons/fa";
 
 const Patients = () => {
   const [patients, setPatients] = useState<AdminUser[]>([]);
@@ -24,6 +24,7 @@ const Patients = () => {
 
   const fetchPatients = useCallback(async () => {
     try {
+      setLoading(true);
       const data = await getAllUsers(
         currentPage,
         patientsPerPage,
@@ -79,8 +80,8 @@ const Patients = () => {
       header: "Status",
       accessor: (user: AdminUser) => (
         <span
-          className={`font-semibold ${
-            user.isBlocked ? "text-red-600" : "text-green-600"
+          className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${
+            user.isBlocked ? "bg-red-100 text-red-800" : "bg-green-100 text-green-800"
           }`}
         >
           {user.isBlocked ? "Blocked" : "Active"}
@@ -91,13 +92,14 @@ const Patients = () => {
       header: "Action",
       accessor: (user: AdminUser) => (
         <button
-          onClick={() =>
-            handleToggleBlock(user.id!, user.isBlocked || false)
-          }
-          className={`px-4 py-2 rounded text-white font-medium transition shadow ${
+          onClick={(e) => {
+            e.stopPropagation();
+            handleToggleBlock(user.id!, user.isBlocked || false);
+          }}
+          className={`inline-flex items-center justify-center px-3 py-1.5 rounded-md text-xs font-semibold transition-colors ${
             user.isBlocked
-              ? "bg-green-500 hover:bg-green-600"
-              : "bg-red-500 hover:bg-red-600"
+              ? "bg-white border border-green-300 text-green-700 hover:bg-green-50"
+              : "bg-white border border-red-300 text-red-700 hover:bg-red-50"
           }`}
         >
           {user.isBlocked ? "Unblock" : "Block"}
@@ -107,7 +109,7 @@ const Patients = () => {
   ];
 
   return (
-    <div className="max-w-5xl mx-auto p-4">
+    <div className="max-w-6xl mx-auto p-4 sm:p-6 lg:p-8 font-sans space-y-6">
       {selectedUser ? (
         <PatientDetails
           user={selectedUser}
@@ -115,61 +117,75 @@ const Patients = () => {
         />
       ) : (
         <>
-          {/* HEADER + FILTERS */}
-          <div className="flex flex-wrap justify-between items-center gap-3 mb-6">
-            <h2 className="text-2xl font-bold text-teal-700">
-              All Patients
-            </h2>
-
-            <div className="flex flex-wrap gap-3">
-              {/* Search */}
+          {/* HEADER SECTION */}
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white border border-slate-200 shadow-sm rounded-xl p-6">
+            <div>
+              <h1 className="text-2xl font-bold text-slate-800 tracking-tight">
+                Patients
+              </h1>
+              <p className="text-slate-500 mt-1 text-sm">Manage patient applications and statuses.</p>
+            </div>
+            
+            <div className="relative w-full md:w-64">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <FaSearch className="text-slate-400 text-sm" />
+              </div>
               <input
                 type="text"
-                placeholder="Search"
                 value={searchQuery}
                 onChange={(e) => {
                   setSearchQuery(e.target.value);
                   setCurrentPage(1);
                 }}
-                className="border rounded px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-teal-400"
+                placeholder="Search name or email..."
+                className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:bg-white transition-colors"
               />
+            </div>
+          </div>
 
-              {/* Gender Filter */}
-              <select
-                value={genderFilter}
-                onChange={(e) => {
-                  setGenderFilter(e.target.value);
-                  setCurrentPage(1);
-                }}
-                className="border rounded px-3 py-1 text-sm"
-              >
-                <option value="">All Genders</option>
-                <option value="male">Male</option>
-                <option value="female">Female</option>
-              </select>
-
-              {/* Status Filter */}
+          {/* FILTERS SECTION */}
+          <div className="bg-white border border-slate-200 shadow-sm rounded-xl p-4 flex flex-wrap gap-4 items-center">
+            <div className="flex-1 min-w-[200px]">
+              <label className="block text-xs font-medium text-slate-500 mb-1">Status</label>
               <select
                 value={statusFilter}
                 onChange={(e) => {
                   setStatusFilter(e.target.value);
                   setCurrentPage(1);
                 }}
-                className="border rounded px-3 py-1 text-sm"
+                className="w-full px-3 py-2 border border-slate-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-teal-500 focus:border-teal-500 bg-white"
               >
                 <option value="">All Status</option>
                 <option value="active">Active</option>
                 <option value="blocked">Blocked</option>
               </select>
+            </div>
 
-              {/* Sort */}
+            <div className="flex-1 min-w-[200px]">
+              <label className="block text-xs font-medium text-slate-500 mb-1">Gender</label>
+              <select 
+                value={genderFilter} 
+                onChange={(e) => {
+                  setGenderFilter(e.target.value);
+                  setCurrentPage(1);
+                }} 
+                className="w-full px-3 py-2 border border-slate-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-teal-500 focus:border-teal-500 bg-white"
+              >
+                <option value="">All Genders</option>
+                <option value="male">Male</option>
+                <option value="female">Female</option>
+              </select>
+            </div>
+
+            <div className="flex-1 min-w-[200px]">
+              <label className="block text-xs font-medium text-slate-500 mb-1">Sort By</label>
               <select
                 value={sortOption}
                 onChange={(e) => {
                   setSortOption(e.target.value);
                   setCurrentPage(1);
                 }}
-                className="border rounded px-3 py-1 text-sm"
+                className="w-full px-3 py-2 border border-slate-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-teal-500 focus:border-teal-500 bg-white"
               >
                 <option value="">Sort</option>
                 <option value="NAME_ASC">Name A-Z</option>
@@ -179,46 +195,46 @@ const Patients = () => {
                 <option value="REGISTERED_ASC">Oldest First</option>
                 <option value="REGISTERED_DESC">Newest First</option>
               </select>
-
             </div>
           </div>
 
-          <Table
-            data={patients}
-            columns={columns}
-            onViewDetails={handleViewDetails}
-            emptyMessage="No patients found."
-          />
-
-          {!loading && totalPages > 1 && (
-            <div className="mt-4 flex justify-center items-center space-x-2">
-              <button
-                onClick={() =>
-                  setCurrentPage((prev) => Math.max(1, prev - 1))
-                }
-                disabled={currentPage === 1}
-                className="px-3 py-1 bg-gray-200 hover:bg-gray-300 rounded disabled:opacity-50"
-              >
-                Prev
-              </button>
-
-              <span className="text-gray-700 font-medium">
-                Page {currentPage} of {totalPages}
-              </span>
-
-              <button
-                onClick={() =>
-                  setCurrentPage((prev) =>
-                    Math.min(totalPages, prev + 1)
-                  )
-                }
-                disabled={currentPage === totalPages}
-                className="px-3 py-1 bg-gray-200 hover:bg-gray-300 rounded disabled:opacity-50"
-              >
-                Next
-              </button>
+          {/* TABLE SECTION */}
+          <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+            <div className={`${loading ? 'opacity-50 pointer-events-none' : ''} transition-opacity duration-200`}>
+              <Table
+                data={patients}
+                columns={columns}
+                rowKey="id"
+                onViewDetails={handleViewDetails}
+                emptyMessage="No patients found."
+              />
             </div>
-          )}
+            
+            {/* PAGINATION */}
+            {totalPages > 1 && (
+              <div className="px-6 py-4 bg-slate-50 border-t border-slate-200 flex items-center justify-between">
+                <span className="text-sm text-slate-700">
+                  Page <span className="font-medium">{currentPage}</span> of <span className="font-medium">{totalPages}</span>
+                </span>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
+                    disabled={currentPage === 1 || loading}
+                    className="px-3 py-1.5 rounded border border-slate-300 bg-white text-slate-700 text-sm font-medium hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  >
+                    Previous
+                  </button>
+                  <button
+                    onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
+                    disabled={currentPage === totalPages || loading}
+                    className="px-3 py-1.5 rounded border border-slate-300 bg-white text-slate-700 text-sm font-medium hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  >
+                    Next
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
         </>
       )}
     </div>

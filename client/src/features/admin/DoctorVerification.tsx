@@ -8,6 +8,7 @@ import {
 import type { Doctor } from "../../types/doctor";
 import { Messages } from "../../constants/messages";
 import { useNotifications } from "../../hooks/useNotifications";
+import { FileCheck } from "lucide-react";
 
 import logger from "../../utils/logger";
 
@@ -26,7 +27,7 @@ const DoctorVerification = () => {
         setDoctors(data.doctors);
       } catch (err) {
         logger.error(err);
-        addNotification(Messages.DOCTOR.FETCH_FAILED);
+        addNotification(Messages.DOCTOR.FETCH_FAILED, "ERROR");
       } finally {
         setLoading(false);
       }
@@ -46,9 +47,9 @@ const DoctorVerification = () => {
     try {
       await verifyDoctorById(doctorId);
       setDoctors((prev) => prev.filter((doc) => doc.id !== doctorId));
-      addNotification(Messages.DOCTOR.VERIFY_SUCCESS);
+      addNotification(Messages.DOCTOR.VERIFY_SUCCESS, "SUCCESS");
     } catch {
-      addNotification( Messages.DOCTOR.VERIFY_FAILED);
+      addNotification(Messages.DOCTOR.VERIFY_FAILED, "ERROR");
     }
   };
 
@@ -62,109 +63,122 @@ const DoctorVerification = () => {
 
       await rejectDoctorById(doctorId, reason);
       setDoctors((prev) => prev.filter((doc) => doc.id !== doctorId));
-      addNotification( Messages.DOCTOR.REJECT_SUCCESS);
+      addNotification(Messages.DOCTOR.REJECT_SUCCESS, "SUCCESS");
     } catch {
-      addNotification( Messages.DOCTOR.REJECT_FAILED);
+      addNotification(Messages.DOCTOR.REJECT_FAILED, "ERROR");
     }
   };
 
-  if (loading) {
-    return (
-      <div className="p-4 text-teal-700 font-medium">
-        {Messages.DOCTOR.LOADING}
-      </div>
-    );
-  }
-
   return (
-    <div className="max-w-4xl mx-auto p-4">
-      {/* Header */}
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold text-teal-700">
-          Doctor Verification
-        </h2>
+    <div className="max-w-6xl mx-auto p-4 sm:p-6 lg:p-8 font-sans space-y-6">
+      {/* HEADER SECTION */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white border border-slate-200 shadow-sm rounded-xl p-6">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-800 tracking-tight">
+            Doctor Verification
+          </h1>
+          <p className="text-slate-500 mt-1 text-sm">Review and approve new doctor registrations.</p>
+        </div>
+        <div className="bg-teal-50 text-teal-700 px-3 py-1.5 rounded-lg border border-teal-100 flex items-center gap-2 text-sm font-medium">
+          <FileCheck className="w-4 h-4" />
+          {doctors.length} Pending
+        </div>
       </div>
 
-      {/* Table */}
-      <div className="overflow-x-auto bg-white rounded-lg shadow">
-        <table className="min-w-full divide-y divide-gray-200 text-sm">
-          <thead className="bg-teal-100">
-            <tr>
-              <th className="px-6 py-3 text-left font-medium text-teal-800">Name</th>
-              <th className="px-6 py-3 text-left font-medium text-teal-800">Department</th>
-              <th className="px-6 py-3 text-left font-medium text-teal-800">Status</th>
-              <th className="px-6 py-3 text-left font-medium text-teal-800">Details</th>
-              <th className="px-6 py-3 text-left font-medium text-teal-800">Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            {paginatedDoctors.length === 0 ? (
-              <tr>
-                <td colSpan={5} className="text-center py-6 text-gray-500">
-                  {Messages.DOCTOR.NO_RESULTS}
-                </td>
+      {/* TABLE SECTION */}
+      <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+        <div className={`${loading ? 'opacity-50 pointer-events-none' : ''} transition-opacity duration-200 overflow-x-auto`}>
+          <table className="w-full text-left border-collapse">
+            <thead>
+              <tr className="bg-slate-50 border-b border-slate-200">
+                <th className="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Name</th>
+                <th className="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Department</th>
+                <th className="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Status</th>
+                <th className="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Details</th>
+                <th className="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Action</th>
               </tr>
-            ) : (
-              paginatedDoctors.map((doc) => (
-                <tr key={doc.id} className="border-b hover:bg-teal-50">
-                  <td className="px-6 py-4">{doc.name}</td>
-                  <td className="px-6 py-4">{doc.specialization}</td>
-                  <td className="px-6 py-4">
-                    <span className="px-3 py-1 rounded-full text-xs font-semibold bg-yellow-100 text-yellow-700">
-                      Pending
-                    </span>
-                  </td>
-                  <td className="px-6 py-4">
-                    <Link
-                      to={`/admin/doctor-verification/${doc.id}`}
-                      className="text-teal-600 hover:underline font-medium"
-                    >
-                      View Details
-                    </Link>
-                  </td>
-                  <td className="px-6 py-4 space-x-2">
-                    <button
-                      onClick={() => handleApprove(doc.id)}
-                      className="px-4 py-2 rounded text-white font-medium bg-green-500 hover:bg-green-600 shadow"
-                    >
-                      Approve
-                    </button>
-                    <button
-                      onClick={() => handleReject(doc.id)}
-                      className="px-4 py-2 rounded text-white font-medium bg-red-500 hover:bg-red-600 shadow"
-                    >
-                      Reject
-                    </button>
+            </thead>
+            <tbody className="divide-y divide-slate-200">
+              {loading ? (
+                <tr>
+                  <td colSpan={5} className="text-center py-8 text-slate-500 text-sm">
+                    Loading verification requests...
                   </td>
                 </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-      </div>
-
-      {/* Pagination */}
-      {totalPages > 1 && (
-        <div className="mt-4 flex justify-center items-center space-x-2">
-          <button
-            onClick={handlePrev}
-            disabled={currentPage === 1}
-            className="px-3 py-1 bg-gray-200 hover:bg-gray-300 rounded disabled:opacity-50"
-          >
-            Prev
-          </button>
-          <span className="text-gray-700 font-medium">
-            Page {currentPage} of {totalPages}
-          </span>
-          <button
-            onClick={handleNext}
-            disabled={currentPage === totalPages}
-            className="px-3 py-1 bg-gray-200 hover:bg-gray-300 rounded disabled:opacity-50"
-          >
-            Next
-          </button>
+              ) : paginatedDoctors.length === 0 ? (
+                <tr>
+                  <td colSpan={5} className="text-center py-8 text-slate-500 text-sm bg-slate-50/50">
+                    {Messages.DOCTOR.NO_RESULTS}
+                  </td>
+                </tr>
+              ) : (
+                paginatedDoctors.map((doc) => (
+                  <tr key={doc.id} className="hover:bg-slate-50 transition-colors">
+                    <td className="px-6 py-4">
+                      <span className="text-sm font-medium text-slate-800">{doc.name}</span>
+                    </td>
+                    <td className="px-6 py-4 text-sm text-slate-600">{doc.specialization}</td>
+                    <td className="px-6 py-4">
+                      <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-amber-100 text-amber-800">
+                        Pending
+                      </span>
+                    </td>
+                    <td className="px-6 py-4">
+                      <Link
+                        to={`/admin/doctor-verification/${doc.id}`}
+                        className="text-sm text-teal-600 hover:text-teal-700 font-medium hover:underline"
+                      >
+                        Review Profile
+                      </Link>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => handleApprove(doc.id)}
+                          className="inline-flex items-center justify-center px-3 py-1.5 rounded-md text-xs font-semibold bg-white border border-green-300 text-green-700 hover:bg-green-50 transition-colors"
+                        >
+                          Approve
+                        </button>
+                        <button
+                          onClick={() => handleReject(doc.id)}
+                          className="inline-flex items-center justify-center px-3 py-1.5 rounded-md text-xs font-semibold bg-white border border-red-300 text-red-700 hover:bg-red-50 transition-colors"
+                        >
+                          Reject
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
         </div>
-      )}
+        
+        {/* PAGINATION */}
+        {!loading && totalPages > 1 && (
+          <div className="px-6 py-4 bg-slate-50 border-t border-slate-200 flex items-center justify-between">
+            <span className="text-sm text-slate-700">
+              Page <span className="font-medium">{currentPage}</span> of <span className="font-medium">{totalPages}</span>
+            </span>
+            <div className="flex gap-2">
+              <button
+                onClick={handlePrev}
+                disabled={currentPage === 1}
+                className="px-3 py-1.5 rounded border border-slate-300 bg-white text-slate-700 text-sm font-medium hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                Previous
+              </button>
+              <button
+                onClick={handleNext}
+                disabled={currentPage === totalPages}
+                className="px-3 py-1.5 rounded border border-slate-300 bg-white text-slate-700 text-sm font-medium hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                Next
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 };

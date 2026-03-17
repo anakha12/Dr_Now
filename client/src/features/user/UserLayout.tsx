@@ -1,22 +1,33 @@
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { Stethoscope, LogOut, User } from "lucide-react";
 import { useEffect, useState } from "react";
-import { getUserProfile } from "../../services/userService";
-import { useDispatch } from "react-redux";
+import { getUserProfile, logoutUser } from "../../services/userService";
+import { useDispatch, useSelector } from "react-redux";
 import { userLogout } from "../../redux/slices/authSlice";
-import logger from "../../utils/logger";
 import { persistor } from "../../redux/store";
-import { socket } from "../../services/socket";
+import type { RootState } from "../../redux/store";
+// import { socket } from "../../services/socket";
 import { motion, AnimatePresence } from "framer-motion";
+import logger from "../../utils/logger";
 
 const UserLayout = () => {
   const [user, setUser] = useState<{ name: string } | null>(null);
   const [isScrolled, setIsScrolled] = useState(false);
+
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const location = useLocation();
 
+  const { isAuthenticated } = useSelector(
+    (state: RootState) => state.userAuth
+  );
+
   useEffect(() => {
+    if (!isAuthenticated) {
+      setUser(null);
+      return;
+    }
+
     const fetchUser = async () => {
       try {
         const profile = await getUserProfile();
@@ -28,35 +39,45 @@ const UserLayout = () => {
     };
     fetchUser();
 
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 20);
-    };
+    const handleScroll = () => setIsScrolled(window.scrollY > 20);
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+  }, [isAuthenticated]);
 
-  const handleLogout = () => {
-    logger.log("Logout clicked");
-    socket.disconnect();
-    dispatch(userLogout());
-    persistor.purge();
-    navigate("/login");
-  };
+  // Logout handler
+const handleLogout = async () => {
+
+  await logoutUser(); 
+  // if (socket && typeof socket.disconnect === "function") {
+    
+  //   socket.disconnect();
+   
+  // } else {
+    
+  // }
+
+  dispatch(userLogout()); 
+  await persistor.purge();
+  setUser(null);
+  navigate("/login", { replace: true });
+
+};
 
   const navLinks = [
     { name: "Home", path: "/user/dashboard" },
-    { name: "About", path: "/about" },
-    { name: "Contact", path: "/contact" },
+    { name: "About", path: "/user/about" },
+    { name: "Contact", path: "/user/contact" },
   ];
 
   return (
     <div className="min-h-screen flex flex-col font-sans text-slate-800 bg-slate-50 selection:bg-teal-100">
       {/* Header */}
       <header
-        className={`sticky top-0 z-50 transition-all duration-300 ${isScrolled
+        className={`sticky top-0 z-50 transition-all duration-300 ${
+          isScrolled
             ? "bg-white/80 backdrop-blur-xl border-b border-slate-200 shadow-sm py-3"
             : "bg-transparent py-5"
-          }`}
+        }`}
       >
         <div className="container mx-auto px-6 max-w-7xl flex justify-between items-center">
           {/* Logo */}
@@ -78,8 +99,11 @@ const UserLayout = () => {
                   <Link
                     key={link.name}
                     to={link.path}
-                    className={`text-sm font-bold transition-all relative py-2 ${isActive ? "text-teal-600" : "text-slate-500 hover:text-slate-900"
-                      }`}
+                    className={`text-sm font-bold transition-all relative py-2 ${
+                      isActive
+                        ? "text-teal-600"
+                        : "text-slate-500 hover:text-slate-900"
+                    }`}
                   >
                     {link.name}
                     {isActive && (
@@ -96,7 +120,7 @@ const UserLayout = () => {
 
             {/* Auth/Profile Section */}
             <div className="flex items-center gap-4 pl-6 border-l border-slate-200">
-              {user ? (
+              {isAuthenticated && user ? (
                 <div className="flex items-center gap-4">
                   <Link
                     to="/user/profile"
@@ -128,7 +152,7 @@ const UserLayout = () => {
         </div>
       </header>
 
-      {/* Main Content with Page Transitions */}
+      {/* Main Content */}
       <main className="flex-1 w-full max-w-7xl mx-auto py-8">
         <AnimatePresence mode="wait">
           <motion.div
@@ -144,7 +168,7 @@ const UserLayout = () => {
         </AnimatePresence>
       </main>
 
-      {/* Modern Footer */}
+      {/* Footer */}
       <footer className="mt-auto border-t border-slate-200 bg-white">
         <div className="container mx-auto max-w-7xl px-6 py-8 flex flex-col md:flex-row justify-between items-center gap-4">
           <div className="flex items-center gap-2 opacity-50">
@@ -153,7 +177,9 @@ const UserLayout = () => {
           </div>
           <div className="text-center md:text-right text-sm font-medium text-slate-500">
             <p>© {new Date().getFullYear()} DrNow. All rights reserved.</p>
-            <p className="mt-1">Providing trusted care to patients and support to doctors.</p>
+            <p className="mt-1">
+              Providing trusted care to patients and support to doctors.
+            </p>
           </div>
         </div>
       </footer>

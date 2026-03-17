@@ -108,8 +108,8 @@ async findByEmailOrUid(email: string, uid: string): Promise<UserEntity | null> {
 
   return {
     walletBalance: user.walletBalance || 0,
-    walletTransactions: paginated as WalletTransactionUser[],
-    totalTransactions: sorted.length,
+    walletTransactions: paginated as WalletTransactionUser[] || [],
+    totalTransactions: sorted.length || 0,
   };
 }
 

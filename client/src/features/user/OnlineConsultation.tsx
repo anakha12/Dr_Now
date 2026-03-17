@@ -219,6 +219,86 @@ const OnlineConsultation = () => {
         </div>
       </section>
 
+      {/* HOW IT WORKS / TIMELINE SECTION */}
+      <section className="py-24 bg-white relative z-10 overflow-hidden">
+        {/* Subtle Light Pattern */}
+        <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: "radial-gradient(#14b8a6 1px, transparent 1px)", backgroundSize: "30px 30px" }} />
+
+        <div className="container mx-auto px-6 md:px-12 relative z-10">
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.2 }}
+            variants={fadeInUp}
+            className="text-center max-w-2xl mx-auto mb-20"
+          >
+            <h4 className="text-teal-600 font-bold uppercase tracking-widest mb-2">How It Works</h4>
+            <h2 className="text-3xl md:text-5xl font-bold text-slate-900 mb-4">Your Journey to Wellness</h2>
+            <div className="w-24 h-1 bg-gradient-to-r from-teal-400 to-blue-500 mx-auto rounded-full" />
+          </motion.div>
+
+          {/* Horizontal Timeline */}
+          <div className="relative max-w-7xl mx-auto">
+            {/* The Connecting Line (Desktop) */}
+            <div className="hidden lg:block absolute top-10 md:top-12 left-[5%] right-[5%] w-[90%] h-1 bg-gradient-to-r from-transparent via-slate-200 to-transparent rounded-full z-0">
+               <motion.div 
+                 initial={{ width: 0 }}
+                 whileInView={{ width: "100%" }}
+                 transition={{ duration: 2, ease: "easeInOut" }}
+                 viewport={{ once: true }}
+                 className="absolute top-0 left-0 h-full bg-gradient-to-r from-teal-400 via-blue-500 to-teal-500 rounded-full shadow-sm"
+               />
+            </div>
+
+            {/* The Connecting Line (Mobile) */}
+            <div className="lg:hidden absolute left-10 top-[5%] bottom-[5%] w-1 bg-gradient-to-b from-transparent via-slate-200 to-transparent rounded-full z-0">
+               <motion.div 
+                 initial={{ height: 0 }}
+                 whileInView={{ height: "100%" }}
+                 transition={{ duration: 2, ease: "easeInOut" }}
+                 viewport={{ once: true }}
+                 className="absolute top-0 left-0 w-full bg-gradient-to-b from-teal-400 via-blue-500 to-teal-500 rounded-full shadow-sm"
+               />
+            </div>
+
+            <div className="flex flex-col lg:grid lg:grid-cols-6 gap-12 lg:gap-4 relative z-10">
+              {[
+                { title: "Doctor", desc: "Select Specialist", icon: "👨‍⚕️" },
+                { title: "Slot", desc: "Pick a Time", icon: "📅" },
+                { title: "Payment", desc: "Secure Checkout", icon: "💳" },
+                { title: "Confirm", desc: "Appointment Set", icon: "✅" },
+                { title: "Consult", desc: "Meet Online", icon: "💻" },
+                { title: "Prescription", desc: "Receive Meds", icon: "📝" },
+              ].map((step, i) => (
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0, y: 30 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: i * 0.15 + 0.3, type: "spring", stiffness: 100 }}
+                  className="flex lg:flex-col items-center gap-6 lg:gap-0 group relative"
+                >
+                  <div className="w-20 h-20 md:w-24 md:h-24 rounded-full bg-white border-4 border-slate-100 group-hover:border-teal-300 flex items-center justify-center text-3xl md:text-4xl shadow-xl shadow-slate-200/50 relative z-10 transition-all duration-300 group-hover:-translate-y-2 group-hover:shadow-2xl group-hover:shadow-teal-500/20 shrink-0">
+                    <span className="relative z-10 group-hover:scale-110 transition-transform">{step.icon}</span>
+                    <div className="absolute inset-0 rounded-full bg-gradient-to-br from-teal-50 to-blue-50 opacity-0 group-hover:opacity-100 transition-opacity" />
+                    
+                    {/* Step Number Badge */}
+                    <div className="absolute -top-2 -right-2 w-8 h-8 rounded-full bg-gradient-to-br from-teal-400 to-blue-500 text-white text-sm font-bold flex items-center justify-center border-2 border-white shadow-md">
+                      {i + 1}
+                    </div>
+                  </div>
+
+                  <div className="text-left lg:text-center mt-0 lg:mt-6 bg-white/60 lg:bg-transparent px-4 py-2 lg:p-0 rounded-xl backdrop-blur-sm lg:backdrop-filter-none border border-slate-100 lg:border-none shadow-sm lg:shadow-none w-full lg:w-auto">
+                    <h3 className="text-xl font-bold text-slate-900 mb-1 group-hover:text-teal-600 transition-colors">{step.title}</h3>
+                    <p className="text-slate-500 text-sm font-medium">{step.desc}</p>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Services Carousel - Departments */}
       <section className="py-24 bg-white relative">
         <div className="container mx-auto px-6 md:px-12">
