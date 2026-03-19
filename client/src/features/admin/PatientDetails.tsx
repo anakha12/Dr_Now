@@ -1,13 +1,14 @@
 import { motion } from "framer-motion";
 import { User as UserIcon, Phone, Calendar, MapPin, Droplet, X } from "lucide-react";
 import type { AdminUser } from "../../types/userProfile";
+import type { InfoItemProps } from "../../types/ui";
 
 interface PatientDetailsProps {
   user: AdminUser;
   onClose: () => void;
 }
 
-const InfoItem = ({ icon: Icon, label, value }: { icon: any, label: string, value: string | number }) => (
+const InfoItem = ({ icon: Icon, label, value }: InfoItemProps) => (
   <div className="flex items-start gap-3 p-3 rounded-lg bg-slate-50 border border-slate-100">
     <div className="p-2 bg-white rounded-md shadow-sm border border-slate-200 text-teal-600 shrink-0">
       <Icon className="w-4 h-4" />

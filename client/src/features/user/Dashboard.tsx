@@ -57,7 +57,7 @@ function Dashboard() {
       bgColor: "bg-gradient-to-br from-teal-400 to-emerald-500",
       icon: "💬",
       shadow: "shadow-teal-500/40",
-      path: "/user/online-consultation"
+      path: "/online-consultation"
     },
     {
       title: "Find Blood Donors",
@@ -65,7 +65,7 @@ function Dashboard() {
       bgColor: "bg-gradient-to-br from-rose-400 to-red-500",
       icon: "🩸",
       shadow: "shadow-red-500/40",
-      path: "/user/blood-donor-search"
+      path: "/blood-donor-search"
     },
     {
       title: "Medical Fund Support",
@@ -73,7 +73,7 @@ function Dashboard() {
       bgColor: "bg-gradient-to-br from-blue-400 to-indigo-500",
       icon: "💰",
       shadow: "shadow-blue-500/40",
-      path: "/user/fund-donor-search"
+      path: "/fund-donor-search"
     },
   ];
 
@@ -122,13 +122,13 @@ function Dashboard() {
             </motion.p>
             <motion.div variants={fadeInUp} className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4">
               <button
-                onClick={() => navigate("/user/online-consultation")}
+                onClick={() => navigate("/online-consultation")}
                 className="px-8 py-4 w-full sm:w-auto rounded-full bg-teal-600 hover:bg-teal-700 text-white font-bold text-lg shadow-lg shadow-teal-500/30 transition-all hover:-translate-y-1"
               >
                 Book Consultation
               </button>
               <button
-                onClick={() => navigate("/user/fund-donor-search")}
+                onClick={() => navigate("/fund-donor-search")}
                 className="px-8 py-4 w-full sm:w-auto rounded-full bg-white border border-slate-200 hover:border-teal-500 text-slate-700 font-bold text-lg shadow-sm transition-all hover:-translate-y-1"
               >
                 Explore Funding

@@ -35,7 +35,7 @@ const UserLogin = () => {
         "Authorization"
       ] = `Bearer ${response.token}`;
 
-      navigate("/user/dashboard");
+      navigate("/");
     } catch (err) {
       addNotification(Messages.AUTH.LOGIN_FAILED, "ERROR");
       console.error(err);
@@ -49,8 +49,8 @@ const UserLogin = () => {
       schema={userLoginSchema}
       loginService={loginUser}
       setAuth={setUserAuth}
-      redirectPath="/user/dashboard"
-      registerPath="/user/register"
+      redirectPath="/"
+      registerPath="/register"
       registerText="New patient? Create account"
       placeholders={{ email: "Enter Email", password: "Enter Password" }}
       showGoogleLogin={true}

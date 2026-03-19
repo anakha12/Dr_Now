@@ -38,19 +38,19 @@ const UserRoutes = () => {
         path="/login"
         element={
           isAuthenticated ? (
-            <Navigate to="/user/dashboard" replace />
+            <Navigate to="/" replace />
           ) : (
             <UserLogin />
           )
         }
       />
-      <Route path="/user/register" element={<UserRegister />} />
-      <Route path="/user/verify-otp" element={<VerifyOtp />} />
-      <Route path="/user/forgot-password" element={<ForgotPassword />} />
-      <Route path="/user/success" element={<Success />} />
+      <Route path="/register" element={<UserRegister />} />
+      <Route path="/verify-otp" element={<VerifyOtp />} />
+      <Route path="/forgot-password" element={<ForgotPassword />} />
+      <Route path="/success" element={<Success />} />
 
       <Route
-        path="/user"
+        path="/"
         element={
           isAuthenticated ? (
             <UserLayout />
@@ -59,7 +59,7 @@ const UserRoutes = () => {
           )
         }
       >
-        <Route path="dashboard" element={<Dashboard />} />
+        <Route index element={<Dashboard />} />
         <Route path="online-consultation" element={<OnlineConsultation />} />
         <Route path="doctors" element={<DoctorListing />} />
         <Route path="consult/doctor/:id" element={<DoctorDetail />} />

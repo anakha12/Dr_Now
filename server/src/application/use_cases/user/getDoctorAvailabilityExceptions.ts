@@ -5,7 +5,7 @@ import { IDoctorAvailabilityExceptionRepository } from "../../../domain/reposito
 import { DoctorAvailabilityExceptionResponseDTO } from "../../../interfaces/dto/response/doctor/doctor-exception-response.dto";
 import { plainToInstance } from "class-transformer";
 import { GetDoctorBasicsDTO } from "../../../interfaces/dto/request/doctor-basic.dto";
-import { ErrorMessages } from "../../../utils/Messages";
+
 
 
 export class GetDoctorAvailabilityExceptionsUseCase

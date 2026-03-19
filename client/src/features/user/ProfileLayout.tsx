@@ -7,8 +7,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   FaUser,
   FaCalendarAlt,
-  FaFilePrescription,
-  FaComments,
   FaHandHoldingHeart,
   FaWallet,
   FaSignOutAlt,
@@ -46,7 +44,7 @@ const ProfileLayout = () => {
       dispatch(userLogout());
       navigate("/login");
     } else {
-      navigate(`/user/${key}`);
+      navigate(`/${key}`);
     }
   };
 
@@ -67,7 +65,7 @@ const ProfileLayout = () => {
       </div>
 
       {/* Mobile Top Bar */}
-      <div className="lg:hidden sticky top-[72px] left-0 right-0 bg-white/80 backdrop-blur-xl border-b border-slate-200 z-40 flex items-center justify-between px-6 py-4 shadow-sm">
+      <div className="lg:hidden sticky top: 72px left-0 right-0 bg-white/80 backdrop-blur-xl border-b border-slate-200 z-40 flex items-center justify-between px-6 py-4 shadow-sm">
         <h2 className="text-xl font-extrabold bg-gradient-to-r from-teal-600 to-emerald-600 bg-clip-text text-transparent">Menu</h2>
         <button 
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
@@ -78,7 +76,7 @@ const ProfileLayout = () => {
       </div>
 
       {/* Layout Container */}
-      <div className="flex-1 w-full max-w-[1600px] mx-auto relative z-10 lg:pt-24 px-4 lg:px-8 pb-12 flex gap-8">
+      <div className="flex-1 w-full max-w-400 mx-auto relative z-10 lg:pt-24 px-4 lg:px-8 pb-12 flex gap-8">
         
         {/* Sidebar */}
         <aside className={`
@@ -87,7 +85,7 @@ const ProfileLayout = () => {
           transition-transform duration-300 ease-in-out lg:transform-none lg:flex lg:flex-col
           h-full lg:h-[calc(100vh-8rem)]
         `}>
-          <div className="bg-white/80 backdrop-blur-xl border border-slate-200 shadow-xl shadow-slate-200/50 rounded-r-[2rem] lg:rounded-[2rem] p-6 lg:p-8 flex flex-col h-full overflow-y-auto mt-[72px] lg:mt-0 scrollbar-hide [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+          <div className="bg-white/80 backdrop-blur-xl border border-slate-200 shadow-xl shadow-slate-200/50 rounded-r-3xl lg:rounded-3xl p-6 lg:p-8 flex flex-col h-full overflow-y-auto mt: 72px lg:mt-0 scrollbar-hide [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
             <div className="hidden lg:block mb-8">
               <h2 className="text-3xl font-extrabold text-slate-900 mb-2">My Profile</h2>
               <p className="text-slate-500 font-medium text-sm">Manage your health preferences</p>
@@ -139,7 +137,7 @@ const ProfileLayout = () => {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-slate-900/20 backdrop-blur-sm z-40 lg:hidden mt-[72px]"
+              className="fixed inset-0 bg-slate-900/20 backdrop-blur-sm z-40 lg:hidden mt: 72px"
               onClick={() => setIsMobileMenuOpen(false)}
             />
           )}
@@ -150,7 +148,7 @@ const ProfileLayout = () => {
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="flex-1 bg-white/60 backdrop-blur-xl border border-slate-200 shadow-xl shadow-slate-200/50 rounded-[2rem] overflow-x-hidden overflow-y-auto scrollbar-hide [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
+            className="flex-1 bg-white/60 backdrop-blur-xl border border-slate-200 shadow-xl shadow-slate-200/50 border-radius: 2rem; overflow-x-hidden overflow-y-auto scrollbar-hide [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
           >
             <Outlet />
           </motion.div>

@@ -278,7 +278,7 @@ const DoctorCards = ({ doctors, page, totalPages, handlePageChange, navigate }: 
             key={doc.id}
             variants={fadeInUp}
             whileHover={{ y: -8 }}
-            onClick={() => navigate(`/user/consult/doctor/${doc.id}`)}
+            onClick={() => navigate(`/consult/doctor/${doc.id}`)}
             className="bg-white rounded-[2rem] p-8 text-center shadow-lg shadow-slate-200/40 hover:shadow-2xl hover:shadow-teal-900/10 transition-all border border-slate-100 cursor-pointer group flex flex-col h-full"
           >
             <div className="relative inline-block mb-6 mx-auto">

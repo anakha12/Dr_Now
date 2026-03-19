@@ -103,7 +103,7 @@ const BookingDetails = () => {
           {booking.prescription && (
             <button
               onClick={() =>
-                navigate("/user/prescription", {
+                navigate("/prescription", {
                   state: {
                     prescription: booking.prescription,
                     patientName: booking.patientName ?? "Patient",
@@ -119,7 +119,7 @@ const BookingDetails = () => {
 
           {/* Go Back Button */}
           <button
-            onClick={() => navigate("/user/bookings")}
+            onClick={() => navigate("/bookings")}
             className="flex items-center gap-2 text-sm text-blue-700 hover:text-blue-900 font-medium mt-4"
           >
             <ArrowLeft size={18} /> {Messages.DOCTOR.BOOKING_DETAILS.BACK_BUTTON}

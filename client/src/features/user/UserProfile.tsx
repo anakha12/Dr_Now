@@ -101,7 +101,7 @@ const UserProfile = () => {
         <motion.button
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
-          onClick={() => navigate("/user/update-profile")}
+          onClick={() => navigate("/update-profile")}
           className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-teal-600 to-emerald-600 text-white font-bold rounded-xl shadow-lg shadow-teal-500/30 hover:shadow-teal-500/50 transition-all border border-teal-500"
         >
           <Edit3 className="w-5 h-5" />
