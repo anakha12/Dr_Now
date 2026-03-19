@@ -186,7 +186,7 @@ const BookAppointment = () => {
            format(selectedDate, "yyyy-MM-dd")
         );
         addNotification(Messages.USER.APPOINTMENT_BOOKED_WALLET, "SUCCESS");
-        navigate("/user/appointment/success");
+        navigate("/appointment/success");
         return;
       }
 

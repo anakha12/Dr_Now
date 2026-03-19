@@ -99,7 +99,7 @@ const UserRegister = () => {
       dispatch(setUserAuth({ isAuthenticated: true, user: response.user }));
 
       userAxios.defaults.headers.common["Authorization"] = `Bearer ${response.token}`;
-      navigate("/user/dashboard");
+      navigate("/");
     } catch (err) {
       addNotification(Messages.DOCTOR.REGISTRATION.OTP_FAILED, "ERROR");
       logger.error(err);

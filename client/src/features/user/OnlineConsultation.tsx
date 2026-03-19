@@ -357,7 +357,7 @@ const OnlineConsultation = () => {
               <h2 className="text-4xl md:text-5xl font-bold text-slate-900">Meet Our Doctors</h2>
             </div>
             <button 
-              onClick={() => navigate("/user/doctors")}
+              onClick={() => navigate("/doctors")}
               className="px-6 py-3 rounded-full bg-white border border-slate-200 hover:border-teal-500 text-slate-700 font-bold shadow-sm transition-all hover:text-teal-600 hover:shadow-md"
             >
               View All Doctors →
@@ -378,7 +378,7 @@ const OnlineConsultation = () => {
                 <motion.div
                   key={doc.id}
                   whileHover={{ y: -10 }}
-                  onClick={() => navigate(`/user/consult/doctor/${doc.id}`)}
+                  onClick={() => navigate(`/consult/doctor/${doc.id}`)}
                   className="min-w-[280px] flex-shrink-0 bg-white shadow-lg shadow-slate-200/50 rounded-[2rem] p-8 text-center hover:shadow-2xl cursor-pointer transition-all duration-300 border border-slate-100 group"
                 >
                   <div className="relative inline-block mb-6">

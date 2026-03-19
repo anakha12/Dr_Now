@@ -128,7 +128,7 @@ const DoctorDetail = () => {
               </div>
 
               <motion.button
-                onClick={() => navigate(`/user/book/${id}`)}
+                onClick={() => navigate(`/book/${id}`)}
                 className="w-full py-4 bg-teal-600 hover:bg-teal-700 text-white font-bold rounded-2xl shadow-lg shadow-teal-500/30 transition-all flex items-center justify-center gap-2 text-lg hover:-translate-y-1"
                 whileTap={{ scale: 0.98 }}
               >

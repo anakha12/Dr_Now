@@ -64,9 +64,9 @@ const handleLogout = async () => {
 };
 
   const navLinks = [
-    { name: "Home", path: "/user/dashboard" },
-    { name: "About", path: "/user/about" },
-    { name: "Contact", path: "/user/contact" },
+    { name: "Home", path: "/" },
+    { name: "About", path: "/about" },
+    { name: "Contact", path: "/contact" },
   ];
 
   return (
@@ -81,7 +81,7 @@ const handleLogout = async () => {
       >
         <div className="container mx-auto px-6 max-w-7xl flex justify-between items-center">
           {/* Logo */}
-          <Link to="/user/dashboard" className="flex items-center gap-2 group">
+          <Link to="/dashboard" className="flex items-center gap-2 group">
             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-teal-500 to-emerald-600 text-white flex items-center justify-center shadow-md group-hover:shadow-lg transition-all group-hover:-translate-y-0.5">
               <Stethoscope className="w-6 h-6" />
             </div>
@@ -123,7 +123,7 @@ const handleLogout = async () => {
               {isAuthenticated && user ? (
                 <div className="flex items-center gap-4">
                   <Link
-                    to="/user/profile"
+                    to="/profile"
                     className="flex items-center gap-2 text-sm font-bold text-slate-700 hover:text-teal-600 transition-colors group"
                   >
                     <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center group-hover:bg-teal-50 transition-colors">

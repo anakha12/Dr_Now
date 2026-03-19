@@ -113,7 +113,7 @@ const UpdateProfile: React.FC = () => {
       
       await updateUserProfile(data);
       addNotification(Messages.USER.PROFILE_UPDATE_SUCCESS, "SUCCESS");
-      navigate("/user/profile");
+      navigate("/profile");
 
     } catch (error: unknown) {
       const err = handleError(error, Messages.USER.UPDATE_FAILED);
@@ -140,7 +140,7 @@ const UpdateProfile: React.FC = () => {
     return (
       <div className="flex flex-col items-center justify-center p-20 min-h-[60vh]">
          <p className="text-xl font-bold text-slate-800">Failed to load profile data.</p>
-         <button onClick={() => navigate("/user/profile")} className="mt-4 text-teal-600 hover:underline">
+         <button onClick={() => navigate("/profile")} className="mt-4 text-teal-600 hover:underline">
            Return to Profile
          </button>
       </div>
@@ -162,7 +162,7 @@ const UpdateProfile: React.FC = () => {
       >
         <div>
           <button 
-            onClick={() => navigate("/user/profile")}
+            onClick={() => navigate("/profile")}
             className="flex items-center gap-2 text-sm font-bold text-slate-500 hover:text-teal-600 transition-colors mb-2"
           >
             <ArrowLeft className="w-4 h-4" /> Back to Profile
@@ -379,7 +379,7 @@ const UpdateProfile: React.FC = () => {
           >
             <button
               type="button"
-              onClick={() => navigate("/user/profile")}
+              onClick={() => navigate("/profile")}
               className="w-full sm:w-auto px-6 py-3 bg-white border border-slate-200 text-slate-600 font-bold rounded-xl hover:bg-slate-50 hover:text-teal-600 transition-colors"
               disabled={isSaving}
             >

@@ -76,7 +76,7 @@ const Success = () => {
           </div>
           <h2 className="text-xl font-bold text-slate-900 mb-2">{Messages.DOCTOR.APPOINTMENTS.NO_BOOKINGS}</h2>
           <button
-            onClick={() => navigate("/user/dashboard")}
+            onClick={() => navigate("/")}
             className="mt-6 px-6 py-2.5 bg-teal-600 text-white font-semibold rounded-xl hover:bg-teal-700 transition"
           >
             Go to Dashboard
@@ -194,7 +194,7 @@ const Success = () => {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.7 }}
-            onClick={() => navigate("/user/bookings")}
+            onClick={() => navigate("/bookings")}
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             className="w-full py-4 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-xl shadow-lg shadow-slate-900/20 transition-all flex items-center justify-center gap-2 group"
