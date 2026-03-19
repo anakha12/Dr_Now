@@ -36,9 +36,7 @@ services:
 
   # 3. Your Node.js Server
   server:
-    build:
-      context: ./server
-      dockerfile: Dockerfile
+    image: yourdockerhubusername/drnow-server:latest # !! CHANGE THIS !! Replace with your Docker Hub username
     container_name: drnow-server
     expose:
       - "5000" # Exposes internally to nginx-proxy (Do not use 'ports' to keep it secure)

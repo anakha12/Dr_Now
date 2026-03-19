@@ -16,5 +16,5 @@ COPY . .
 EXPOSE 5000
 EXPOSE 3000
 
-# Start server in dev mode
-CMD ["npm", "run", "dev"]
+# Start server in production mode
+CMD ["npm", "start"]
