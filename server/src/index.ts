@@ -49,7 +49,7 @@ app.use(cookieParser());
 app.use(express.json()); 
 app.use('/uploads', express.static(path.join(__dirname, '..', 'uploads')));
 
-mongoose.connect(process.env.MONGO_URI || "mongodb://127.0.0.1:27017/drnow")
+mongoose.connect(process.env.MONGO_URI as string)
   .then(() => logger.info(AppMessages.MONGODB_CONNECTED))
   .catch(err => logger.error(AppMessages.MONGODB_ERROR(err), { stack: err.stack }));
 
