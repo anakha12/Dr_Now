@@ -5,6 +5,7 @@ import { AvailabilityRuleResponseDTO } from "../../../interfaces/dto/response/do
 import { GetDoctorBasicsDTO } from "../../../interfaces/dto/request/doctor-basic.dto";
 import { plainToInstance } from "class-transformer";
 import { ErrorMessages } from "../../../utils/Messages";
+import { AvailabilityRuleMapper } from "../../mappers/doctor/availability-rule.mapper";
 
 export class GetDoctorAvailabilityRulesUseCase
   extends BaseUseCase<GetDoctorBasicsDTO, AvailabilityRuleResponseDTO[]>
@@ -27,17 +28,6 @@ export class GetDoctorAvailabilityRulesUseCase
     }
 
 
-    const plainRules = rules.map(rule => ({
-      id: rule.id!,
-      doctorId: rule.doctorId,
-      dayOfWeek: rule.dayOfWeek,
-      startTime: rule.startTime,
-      endTime: rule.endTime,
-      slotDuration: rule.slotDuration,
-    }));
-
-    return plainToInstance(AvailabilityRuleResponseDTO, plainRules, {
-      excludeExtraneousValues: true,
-    });
+   return AvailabilityRuleMapper.toResponseDTO(rules);
   }
 }

@@ -1,4 +1,4 @@
-import { DoctorAvailabilityRule } from "../../domain/entities/doctorAvailabilityRule.entity";
+import { DoctorAvailabilityRule } from "../entities/doctorAvailabilityRuleEntity";
 
 
 export interface IAvailabilityRuleRepository {

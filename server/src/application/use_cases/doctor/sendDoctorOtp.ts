@@ -1,4 +1,4 @@
-import { IDoctorRepository } from "../../../domain/repositories/doctorRepository";
+import { IDoctorRepository } from "../../../domain/repositories/IDoctorRepository";
 import { DoctorRegisterDTO } from "../../../interfaces/dto/request/doctor-register.dto."
 import { ISendDoctorOtp } from "../interfaces/doctor/ISendDoctorOtp";
 import { redisClient } from "../../../config/redis";

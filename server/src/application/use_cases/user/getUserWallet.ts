@@ -1,5 +1,5 @@
 import { plainToInstance } from "class-transformer";
-import { IUserRepository } from "../../../domain/repositories/userRepository";
+import { IUserRepository } from "../../../domain/repositories/IUserRepository";
 import { IGetUserWallet } from "../interfaces/user/IGetUserWallet";
 import { UserWalletResponseDTO } from "../../../interfaces/dto/response/user/user-wallet.dto";
 import { ErrorMessages } from "../../../utils/Messages";

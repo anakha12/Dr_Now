@@ -1,4 +1,4 @@
-import { IAdminWalletRepository } from "../../../domain/repositories/adminWalletRepository";
+import { IAdminWalletRepository } from "../../../domain/repositories/IAdminWalletRepository";
 import { AdminWalletTransaction } from "../../../domain/entities/adminWalletEntity";
 import AdminWalletModel from "../models/adminWalletModel";
 import mongoose from "mongoose";

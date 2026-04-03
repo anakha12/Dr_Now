@@ -1,9 +1,11 @@
-import { IBookingRepository } from "../../../domain/repositories/bookingRepository";
+import { IBookingRepository } from "../../../domain/repositories/IBookingRepository";
 import { IGetUserBookings } from "../interfaces/user/IGetUserBookings";
 import { BookingResponseDTO } from "../../../interfaces/dto/response/user/bookings.dto";
 import { GetUserBookingsRequestDTO } from "../../../interfaces/dto/request/user-booking-user.dto";
 import { BaseUseCase } from "../base-usecase";
 import { BookingWithExtras } from "../../../domain/types/BookingWithExtras";
+import { BookingMapper } from "../../mappers/user/booking.mapper";
+
 
 export class GetUserBookings extends BaseUseCase<
   GetUserBookingsRequestDTO,
@@ -32,28 +34,8 @@ export class GetUserBookings extends BaseUseCase<
       dto.limit
     );
 
-    const bookingDTOs: BookingResponseDTO[] = (bookings as BookingWithExtras[]).map(b => ({
-      id: b.id,
-      userId: b.userId,
-      doctorId: b.doctorId,
-      doctorName: b.doctorName,
-      department: b.department,
-      patientName: b.patientName,
-      slot: { from: b.startTime, to: b.endTime },
-      date: b.date,
-      status: b.status,
-      paymentStatus: b.paymentStatus,
-      transactionId: b.transactionId,
-      doctorEarning: b.doctorEarning,
-      commissionAmount: b.commissionAmount,
-      payoutStatus: b.payoutStatus,
-      refundStatus: b.refundStatus,
-      cancellationReason: b.cancellationReason ?? '',
-      createdAt: b.createdAt,
-      time: `${b.startTime} - ${b.endTime}`,
-      amount: (b.doctorEarning ?? 0) + (b.commissionAmount ?? 0),
-      canCancel: b.paymentStatus === 'paid' && b.status !== 'Cancelled'
-    }));
+    const bookingDTOs: BookingResponseDTO[] =
+      BookingMapper.toResponseDTO(bookings as BookingWithExtras[]);
 
     return {
       bookings: bookingDTOs,

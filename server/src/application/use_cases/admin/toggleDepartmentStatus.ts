@@ -1,4 +1,4 @@
-import { IDepartmentRepository } from "../../../domain/repositories/departmentRepository";
+import { IDepartmentRepository } from "../../../domain/repositories/IDepartmentRepository";
 import { IToggleDepartmentStatusUseCase } from "../interfaces/admin/IToggleDepartmentStatusUseCase";
 
 

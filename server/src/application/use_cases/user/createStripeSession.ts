@@ -1,5 +1,5 @@
 import Stripe from "stripe";
-import { IDoctorRepository } from "../../../domain/repositories/doctorRepository";
+import { IDoctorRepository } from "../../../domain/repositories/IDoctorRepository";
 import { ICreateStripeSession } from "../interfaces/user/ICreateStripeSession";
 import { ErrorMessages } from "../../../utils/Messages";
 import { BaseUseCase } from "../base-usecase";
@@ -43,7 +43,7 @@ export class CreateStripeSession extends BaseUseCase<
           quantity: 1,
         },
       ],
-      success_url: `${process.env.CLIENT_URL}/user/success?userId=${userId}&doctorName=${encodeURIComponent(
+      success_url: `${process.env.CLIENT_URL}/success?userId=${userId}&doctorName=${encodeURIComponent(
         doctor.name
       )}&date=${date}&slotFrom=${slot.from}&slotTo=${slot.to}&fee=${fee}`,
       cancel_url: `${process.env.CLIENT_URL}/cancel`,

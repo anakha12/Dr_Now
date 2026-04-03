@@ -16,7 +16,7 @@ export const socketAuthMiddleware = async (
     const parsedCookies = cookie.parse(cookies);
 
     const token =
-      parsedCookies.accessToken || parsedCookies.userAccessToken;
+      parsedCookies.accessToken ;
 
     if (!token) {
       return next(new Error("Token missing"));

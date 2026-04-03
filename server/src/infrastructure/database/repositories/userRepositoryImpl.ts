@@ -1,10 +1,10 @@
 import UserModel, {IUSER} from "../models/userModel";
-import { IUserRepository } from "../../../domain/repositories/userRepository";
+import { IUserRepository } from "../../../domain/repositories/IUserRepository";
 import { UserEntity } from "../../../domain/entities/userEntity";
 import { WalletTransactionUser } from "../../../domain/entities/walletTransactionUserEntity";
 import { ErrorMessages, Messages } from "../../../utils/Messages";
 import { Role } from "../../../utils/Constance";
-import { BaseRepository } from "../../../domain/repositories/baseRepository";
+import { BaseRepository } from "../../../domain/repositories/IBaseRepository";
 import { Document, Types } from "mongoose";
 import { FilterQuery  } from "mongoose";
 

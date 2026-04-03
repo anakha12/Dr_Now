@@ -3,7 +3,7 @@ import { ILoginAdmin } from "../interfaces/admin/ILoginAdmin";
 import { AdminLoginDTO } from "../../../interfaces/dto/request/admin-login.dto";
 import { AdminLoginResponseDTO } from "../../../interfaces/dto/response/admin/login-response.dto";
 import { ITokenService } from "../../../interfaces/tokenServiceInterface";
-import { IUserRepository } from "../../../domain/repositories/userRepository";
+import { IUserRepository } from "../../../domain/repositories/IUserRepository";
 import { ErrorMessages } from "../../../utils/Messages";
 import { BaseUseCase } from "../base-usecase";
 import { plainToInstance } from "class-transformer";

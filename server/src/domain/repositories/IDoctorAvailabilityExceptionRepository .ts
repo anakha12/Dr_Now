@@ -1,5 +1,5 @@
 
-import { DoctorAvailabilityException } from "../entities/doctorAvailabilityException.entity";
+import { DoctorAvailabilityException } from "../entities/doctorAvailabilityExceptionEntity";
 
 export interface IDoctorAvailabilityExceptionRepository {
   createException(exception: Partial<DoctorAvailabilityException>): Promise<DoctorAvailabilityException>;

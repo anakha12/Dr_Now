@@ -1,4 +1,4 @@
-import { IDoctorRepository } from "../../../domain/repositories/doctorRepository";
+import { IDoctorRepository } from "../../../domain/repositories/IDoctorRepository";
 import { IGetUnverifiedDoctors } from "../interfaces/admin/IGetUnverifiedDoctors"; 
 import { UnverifiedDoctorResponseDTO } from "../../../interfaces/dto/response/admin/unverified-doctor-response.dto";
 import { GetUnverifiedDoctorsResponseDTO } from "../../../interfaces/dto/response/admin/unverified-doctor-response.dto";

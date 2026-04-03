@@ -1,6 +1,6 @@
-import { IBookingRepository } from "../../../domain/repositories/bookingRepository";
-import { IUserRepository } from "../../../domain/repositories/userRepository";
-import { IAdminWalletRepository } from "../../../domain/repositories/adminWalletRepository";
+import { IBookingRepository } from "../../../domain/repositories/IBookingRepository";
+import { IUserRepository } from "../../../domain/repositories/IUserRepository";
+import { IAdminWalletRepository } from "../../../domain/repositories/IAdminWalletRepository";
 import { ICancelDoctorBooking } from "../interfaces/doctor/ICancelDoctorBooking";
 import { CancelDoctorBookingResponseDTO } from "../../../interfaces/dto/response/doctor/cancel-doctor-booking-response.dto";
 import { ErrorMessages, Messages } from "../../../utils/Messages";

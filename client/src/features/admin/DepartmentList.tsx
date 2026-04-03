@@ -95,8 +95,12 @@ const DepartmentList = () => {
         err.issues.forEach((issue) => {
           addNotification(issue.message, "ERROR");
         });
+      }
+      else if (err instanceof Error) {
+      addNotification(err.message, "ERROR");
       } else {
         const error = handleError(err, Messages.AVAILABILITY.FETCH_DEPARTMENTS_FAILED);
+        
         addNotification(error.message, "ERROR");
       }
     }

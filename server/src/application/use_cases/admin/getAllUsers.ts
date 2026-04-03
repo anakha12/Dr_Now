@@ -1,8 +1,9 @@
-import { IUserRepository } from "../../../domain/repositories/userRepository";
+import { IUserRepository } from "../../../domain/repositories/IUserRepository";
 import { GetAllUsersRequestDTO } from "../../../interfaces/dto/request/get-all-users.request.dto";
 import { GetAllUsersResponseDTO, UserListItemDTO } from "../../../interfaces/dto/response/admin/get-all-users.response.dto";
 import { plainToInstance } from "class-transformer";
 import { validateOrReject } from "class-validator";
+import { UserMapper } from "../../mappers/admin/user.mapper";
 
 export class GetAllUsersUseCase {
   constructor(private readonly _userRepo: IUserRepository) {}
@@ -11,8 +12,7 @@ export class GetAllUsersUseCase {
 
     const dto = plainToInstance(GetAllUsersRequestDTO, input);
     await validateOrReject(dto, { whitelist: true });
-
-  
+    
     const skip = (dto.page - 1) * dto.limit;
 
     const sortOption = this.mapSort(dto.sort);
@@ -31,23 +31,7 @@ export class GetAllUsersUseCase {
       maxAge: dto.maxAge,
     });
 
-    const users: UserListItemDTO[] = usersEntities.map((user) => ({
-      id: user.id!,
-      name: user.name,
-      email: user.email,
-      age: user.age,
-      gender: user.gender,
-      phone: user.phone,
-      isBlocked: user.isBlocked,
-      dateOfBirth: user.dateOfBirth,
-      image: user.image,
-      profileCompletion: user.profileCompletion,
-      bloodGroup: user.bloodGroup,
-      address: user.address,
-      isVerified: user.isVerified,
-      role: user.role,
-      walletBalance: user.walletBalance,
-    }));
+    const users = UserMapper.toUserListDTO(usersEntities);
 
     return {
       users,

@@ -1,5 +1,5 @@
 import { BaseUseCase } from "../base-usecase";
-import { IDepartmentRepository } from "../../../domain/repositories/departmentRepository";
+import { IDepartmentRepository } from "../../../domain/repositories/IDepartmentRepository";
 import { GetDepartmentsRequestDTO } from "../../../interfaces/dto/request/get-departments-admin.dto";
 import { GetDepartmentsResponseDTO } from "../../../interfaces/dto/response/admin/get-departments.dto";
 import { DepartmentResponseDTO } from "../../../interfaces/dto/response/admin/department-response.dto";

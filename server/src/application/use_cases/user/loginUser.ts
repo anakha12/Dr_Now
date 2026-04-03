@@ -1,4 +1,4 @@
-import { IUserRepository } from "../../../domain/repositories/userRepository";
+import { IUserRepository } from "../../../domain/repositories/IUserRepository";
 import bcrypt from "bcrypt";
 import { ILoginUser } from "../interfaces/user/ILoginUser";
 import { UserLoginDTO } from "../../../interfaces/dto/request/user-login.dto";

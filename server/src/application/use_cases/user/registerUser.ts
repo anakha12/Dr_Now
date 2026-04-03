@@ -1,6 +1,6 @@
 // src/application/usecases/user/register-user.usecase.ts
 import { BaseUseCase } from "../base-usecase";
-import { IUserRepository } from "../../../domain/repositories/userRepository";
+import { IUserRepository } from "../../../domain/repositories/IUserRepository";
 import { RegisterUserRequestDTO } from "../../../interfaces/dto/request/register-user.dto";
 import { RegisterUserResponseDTO } from "../../../interfaces/dto/response/user/register-user.dto";
 import { plainToInstance } from "class-transformer";

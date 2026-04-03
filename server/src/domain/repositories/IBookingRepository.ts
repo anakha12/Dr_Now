@@ -1,4 +1,4 @@
-import { Booking } from "../entities/booking.entity";
+import { Booking } from "../entities/bookingEntity";
 import { PendingDoctorPayoutResponseDTO } from "../../interfaces/dto/response/admin/pending-doctor-payout.dto"
 import { BookingWithExtras } from "../types/BookingWithExtras";
 

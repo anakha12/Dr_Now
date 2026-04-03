@@ -1,4 +1,4 @@
-import { IBookingRepository } from "../../../domain/repositories/bookingRepository";
+import { IBookingRepository } from "../../../domain/repositories/IBookingRepository";
 import { DoctorBookingListResponseDTO } from "../../../interfaces/dto/response/doctor/doctor-booking-response.dto"
 import { IGetDoctorBookings } from "../interfaces/doctor/IGetDoctorBookings";
 import { plainToInstance } from "class-transformer";

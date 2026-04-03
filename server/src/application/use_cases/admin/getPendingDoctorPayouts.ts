@@ -1,4 +1,4 @@
-import { IBookingRepository } from "../../../domain/repositories/bookingRepository";
+import { IBookingRepository } from "../../../domain/repositories/IBookingRepository";
 import { IGetPendingDoctorPayoutsUseCase } from "../interfaces/admin/IGetPendingDoctorPayoutsUseCase";
 
 export class GetPendingDoctorPayouts implements IGetPendingDoctorPayoutsUseCase{

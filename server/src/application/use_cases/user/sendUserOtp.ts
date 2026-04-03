@@ -1,9 +1,9 @@
-import { IUserRepository } from "../../../domain/repositories/userRepository";
+import { IUserRepository } from "../../../domain/repositories/IUserRepository";
 import { sendMail } from "../../../services/mailService";
 import { UserRegisterDTO } from "../../../interfaces/dto/request/user-register.dto";
 import { ISendUserOtp } from "../interfaces/user/ISendUserOtp";
 import { redisClient } from "../../../config/redis";
-import { IDoctorRepository } from "../../../domain/repositories/doctorRepository";
+import { IDoctorRepository } from "../../../domain/repositories/IDoctorRepository";
 import { BaseUseCase } from "../base-usecase";
 
 export class SendUserOtp 

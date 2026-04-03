@@ -1,4 +1,4 @@
-import { IDoctorRepository } from "../../../domain/repositories/doctorRepository";
+import { IDoctorRepository } from "../../../domain/repositories/IDoctorRepository";
 import bcrypt from "bcrypt";
 import { IDoctorLogin } from "../interfaces/doctor/IDoctorLogin";
 import { ITokenService } from "../../../interfaces/tokenServiceInterface";

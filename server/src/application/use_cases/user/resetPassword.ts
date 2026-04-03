@@ -1,4 +1,4 @@
-import { IUserRepository } from "../../../domain/repositories/userRepository";
+import { IUserRepository } from "../../../domain/repositories/IUserRepository";
 import bcrypt from "bcrypt";
 import { IResetPassword } from "../interfaces/user/IResetPassword";
 import { ErrorMessages } from "../../../utils/Messages";

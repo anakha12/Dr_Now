@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 import BookingModel, { IBooking } from "../models/booking.model";
-import { Booking } from "../../../domain/entities/booking.entity";
-import { IBookingRepository } from "../../../domain/repositories/bookingRepository";
+import { Booking } from "../../../domain/entities/bookingEntity";
+import { IBookingRepository } from "../../../domain/repositories/IBookingRepository";
 import { PendingDoctorPayoutResponseDTO } from "../../../interfaces/dto/response/admin/pending-doctor-payout.dto";
 import { Role } from "../../../utils/Constance";
 import { BookingWithExtras } from "../../../domain/types/BookingWithExtras";
@@ -30,6 +30,18 @@ export class BookingRepositoryImpl implements IBookingRepository {
 
 
   async createBooking(booking: Booking): Promise<Booking> {
+
+    // const start =new Date();
+    // start.setHours(0,0,0,0);
+    // const end=new Date();
+    // end.setHours(23,59,59,999);
+    // const countNumber = await BookingModel.countDocument({
+    //   date:{$gt:start && $lt:end}
+    // });
+    // if(countNumber>5){
+    //   throw new Error("not possible to book more than 5 bokking in a day")
+    // }
+
     const newBooking = new BookingModel({
       doctorId: booking.doctorId,
       userId: booking.userId,
@@ -63,7 +75,7 @@ export class BookingRepositoryImpl implements IBookingRepository {
     page: number,
     limit: number
   ): Promise<{ bookings: Booking[]; totalPages: number }> {
-    await this.autoCancelExpiredBookings();
+    // await this.autoCancelExpiredBookings();
     const skip = (page - 1) * limit;
     const [bookings, total] = await Promise.all([
       BookingModel.find({ doctorId })
@@ -155,7 +167,7 @@ export class BookingRepositoryImpl implements IBookingRepository {
     page: number,
     limit: number
   ): Promise<{ bookings: Booking[]; total: number }> {
-    await this.autoCancelExpiredBookings();
+    // await this.autoCancelExpiredBookings();
     const skip = (page - 1) * limit;
     const [bookings, total] = await Promise.all([
       BookingModel.find({ userId })
@@ -265,11 +277,12 @@ const bookings: BookingWithExtras[] = bookingsRaw.map((b: BookingAggregateResult
 }
 
 
+
   async findBookingsByDoctorAndDate(
     doctorId: string,
     date: string
   ): Promise<Booking[]> {
-    await this.autoCancelExpiredBookings();
+    // await this.autoCancelExpiredBookings();
     const start = new Date(date);
     start.setHours(0, 0, 0, 0);
 

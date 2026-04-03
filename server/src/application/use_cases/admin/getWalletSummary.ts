@@ -1,5 +1,5 @@
-import { IAdminWalletRepository } from "../../../domain/repositories/adminWalletRepository";
-import { IBookingRepository } from "../../../domain/repositories/bookingRepository";
+import { IAdminWalletRepository } from "../../../domain/repositories/IAdminWalletRepository";
+import { IBookingRepository } from "../../../domain/repositories/IBookingRepository";
 import { IGetWalletSummaryUseCase } from "../interfaces/admin/IGetWalletSummaryUseCase";
 import { WalletSummaryResponseDTO } from "../../../interfaces/dto/response/admin/wallet-summary-response.dto";
 import { plainToInstance } from "class-transformer";

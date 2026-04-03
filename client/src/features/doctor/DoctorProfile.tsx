@@ -149,7 +149,6 @@ const DoctorProfileComponent = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validateForm()) {
-      addNotification(Messages.COMMON.CONFIRM, "ERROR");
       return;
     }
 
@@ -254,13 +253,13 @@ const DoctorProfileComponent = () => {
       ) : (
         // --- EDIT MODE ---
         <form onSubmit={handleSubmit} className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-          {/* Basic Fields */}
+          {/* Basic Fields with Labels */}
           {["name", "phone", "yearsOfExperience", "gender", "consultFee"].map((name) => (
             <div key={name} className="col-span-1">
+              <label className="font-semibold text-gray-700 mb-1 block">{name.replace(/([A-Z])/g, " $1")}</label>
               <input
                 type={name === "yearsOfExperience" || name === "consultFee" ? "number" : "text"}
                 name={name}
-                placeholder={name.replace(/([A-Z])/g, " $1")}
                 value={form[name as keyof DoctorProfileForm] as string | number}
                 onChange={handleChange}
                 className={`w-full border p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-600 ${errors[name] ? "border-red-500" : "border-gray-300"}`}
@@ -271,6 +270,7 @@ const DoctorProfileComponent = () => {
 
           {/* Specialization */}
           <div className="col-span-1">
+            <label className="font-semibold text-gray-700 mb-1 block">Specialization</label>
             <select
               name="specialization"
               value={form.specialization}
@@ -287,9 +287,9 @@ const DoctorProfileComponent = () => {
 
           {/* Bio */}
           <div className="col-span-1 sm:col-span-2">
+            <label className="font-semibold text-gray-700 mb-1 block">Bio</label>
             <textarea
               name="bio"
-              placeholder="Bio"
               value={form.bio}
               onChange={handleChange}
               className="w-full border p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-600"

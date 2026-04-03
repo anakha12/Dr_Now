@@ -1,4 +1,4 @@
-import { IUserRepository } from "../../../domain/repositories/userRepository";
+import { IUserRepository } from "../../../domain/repositories/IUserRepository";
 import { Messages } from "../../../utils/Messages";
 import { IUserLogout } from "../interfaces/user/IUserLogout";
 

@@ -19,7 +19,8 @@ export class Booking {
     public department?: string,
     public id?: string,
     public doctorName?: string,
-    public prescription?: IPrescription | null 
+    public prescription?: IPrescription | null,
+    public createdAt: string = new Date().toISOString()
   ) {}
 
 

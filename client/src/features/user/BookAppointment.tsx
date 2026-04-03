@@ -35,6 +35,13 @@ const fadeInUp: Variants = {
   visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" } }
 };
 
+type BookedSlot = {
+  startTime?: string;
+  endTime?: string;
+  from?: string;
+  to?: string;
+};
+
 const staggerContainer: Variants = {
   hidden: { opacity: 0 },
   visible: {
@@ -56,7 +63,7 @@ const BookAppointment = () => {
   const [exceptions, setExceptions] = useState<AvailabilityException[]>([]);
   const [availableSlots, setAvailableSlots] = useState<Slot[]>([]);
   const [selectedSlot, setSelectedSlot] = useState<Slot | null>(null);
-  const [bookedSlots, setBookedSlots] = useState<Slot[]>([]);
+  const [, setBookedSlots] = useState<Slot[]>([]);
   const [paymentMethod, setPaymentMethod] = useState<"stripe" | "wallet">("stripe");
 
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -107,7 +114,7 @@ const BookAppointment = () => {
     };
 
     fetchData();
-  }, [id]);
+  }, [id, addNotification]);
 
   // ------------------- Fetch booked & available slots -------------------
   useEffect(() => {
@@ -121,7 +128,7 @@ const BookAppointment = () => {
         const fetchedBookedSlots = await getBookedSlots(doctor.id, dateStr);
       
         setBookedSlots(fetchedBookedSlots);
-        logger.log(bookedSlots)
+        logger.log(fetchedBookedSlots)
         const dayOfWeek = selectedDate.getDay();
         const exception = exceptions.find((ex) => isSameDay(new Date(ex.date), selectedDate));
 
@@ -135,7 +142,9 @@ const BookAppointment = () => {
         }
 
         const bookedKeys = new Set(
-          fetchedBookedSlots.map((b: any) => `${b.startTime || b.from}-${b.endTime || b.to}`)
+          fetchedBookedSlots.map((b: BookedSlot) => 
+            `${b.startTime || b.from}-${b.endTime || b.to}`
+          )
         );
 
         slots = slots.map(slot => ({

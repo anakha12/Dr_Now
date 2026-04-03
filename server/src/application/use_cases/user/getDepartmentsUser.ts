@@ -1,4 +1,4 @@
-import { IDepartmentRepository } from "../../../domain/repositories/departmentRepository";
+import { IDepartmentRepository } from "../../../domain/repositories/IDepartmentRepository";
 import { plainToInstance } from "class-transformer";
 import { DepartmentResponseDTO } from "../../../interfaces/dto/response/user/department.dto";
 import { IGetDepartmentsUser } from "../interfaces/user/IGetDepartmentsUser";

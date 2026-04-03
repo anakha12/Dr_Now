@@ -1,4 +1,4 @@
-import { IBookingRepository } from "../../../domain/repositories/bookingRepository";
+import { IBookingRepository } from "../../../domain/repositories/IBookingRepository";
 import { SlotDto } from "../../../interfaces/dto/response/user/slot.dto";
 import { plainToInstance } from "class-transformer";
 import { IGetBookedSlots } from "../interfaces/user/IGetBookedSlots";

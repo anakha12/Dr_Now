@@ -1,8 +1,8 @@
 
 import { Stripe } from "stripe";
-import { IBookingRepository } from "../../../domain/repositories/bookingRepository";
-import { Booking } from "../../../domain/entities/booking.entity";
-import { IAdminWalletRepository } from "../../../domain/repositories/adminWalletRepository";
+import { IBookingRepository } from "../../../domain/repositories/IBookingRepository";
+import { Booking } from "../../../domain/entities/bookingEntity";
+import { IAdminWalletRepository } from "../../../domain/repositories/IAdminWalletRepository";
 import { ErrorMessages } from "../../../utils/Messages";
 
 

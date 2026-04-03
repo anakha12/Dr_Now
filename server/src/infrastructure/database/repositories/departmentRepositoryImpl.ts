@@ -1,7 +1,7 @@
 import { Types } from "mongoose";
-import { IDepartmentRepository } from "../../../domain/repositories/departmentRepository";
+import { IDepartmentRepository } from "../../../domain/repositories/IDepartmentRepository";
 import DepartmentModel, { IDepartment } from "../models/departmentModel";
-import { DepartmentEntity } from "../../../domain/entities/department.entity";
+import { DepartmentEntity } from "../../../domain/entities/departmentEntity";
 
 export class DepartmentRepositoryImpl implements IDepartmentRepository {
 

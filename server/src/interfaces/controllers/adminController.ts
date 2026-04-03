@@ -47,7 +47,7 @@ import { IGetDoctorByIdUseCase } from "../../application/use_cases/interfaces/ad
 
         const response = await this._loginAdmin.execute(req.body);
 
-        res.cookie("userAccessToken", response.accessToken, {
+        res.cookie("accessToken", response.accessToken, {
           httpOnly: true,
           secure: false,
           sameSite: "lax",
