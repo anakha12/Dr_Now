@@ -1,4 +1,4 @@
-import { IUserRepository } from "../../../domain/repositories/userRepository";
+import { IUserRepository } from "../../../domain/repositories/IUserRepository";
 import { IVerifyUserOtp } from "../interfaces/user/IVerifyUserOtp";
 
 import { getOTP, deleteOTP } from "../../../services/otpService";

@@ -1,4 +1,4 @@
-import { IDoctorRepository } from "../../../domain/repositories/doctorRepository";
+import { IDoctorRepository } from "../../../domain/repositories/IDoctorRepository";
 import { deleteOTP, getOTP } from "../../../services/otpService";
 import { ErrorMessages } from "../../../utils/Messages";
 import { IVerifyDoctorOtp } from "../interfaces/doctor/IVerifyDoctorOtp";

@@ -1,4 +1,4 @@
-import { IUserRepository } from "../../../domain/repositories/userRepository";
+import { IUserRepository } from "../../../domain/repositories/IUserRepository";
 import { ErrorMessages } from "../../../utils/Messages";
 import { ISendResetOtp } from "../interfaces/user/ISendResetOtp";
 

@@ -1,5 +1,5 @@
 import { plainToInstance } from "class-transformer";
-import { IDoctorRepository } from "../../../domain/repositories/doctorRepository";
+import { IDoctorRepository } from "../../../domain/repositories/IDoctorRepository";
 import { IGetDoctorById } from "../interfaces/user/IGetDoctorById";
 import { DoctorDetailsResponseDTO } from "../../../interfaces/dto/response/user/doctor-details.dto";
 

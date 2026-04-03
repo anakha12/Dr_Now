@@ -1,11 +1,12 @@
 import { IUpdateUserProfileUseCase } from "../interfaces/user/IUpdateUserProfile";
-import { IUserRepository } from "../../../domain/repositories/userRepository";
+import { IUserRepository } from "../../../domain/repositories/IUserRepository";
 import { UpdateUserProfileRequestDTO } from "../../../interfaces/dto/request/update-user-profile.dto";
 import { UpdateUserProfileResponseDTO } from "../../../interfaces/dto/response/user/update-user-profile.dto";
 import { plainToInstance } from "class-transformer";
 import { validateOrReject } from "class-validator";
 import { cloudinary, getSignedImageURL } from "../../../config/cloudinary";
 import { Messages } from "../../../utils/Messages";
+import { UpdateUserProfileMapper } from "../../mappers/user/update-user-profile.mapper";
 
 export class UpdateUserProfileUseCase implements IUpdateUserProfileUseCase {
   constructor(private _userRepository: IUserRepository) {}
@@ -30,53 +31,14 @@ export class UpdateUserProfileUseCase implements IUpdateUserProfileUseCase {
       });
       validatedDto.image = getSignedImageURL(result.public_id, result.format, 600);
     }
-
-
-    const isFirstCompletion =
-      !existingUser.profileCompletion &&
-      validatedDto.name &&
-      validatedDto.email &&
-      validatedDto.phone &&
-      validatedDto.dateOfBirth &&
-      validatedDto.gender &&
-      validatedDto.bloodGroup &&
-      validatedDto.address &&
-      validatedDto.image;
-
-
-    const updates: Record<string, unknown> = {
-      name: validatedDto.name,
-      email: validatedDto.email,
-      phone: validatedDto.phone,
-      gender: validatedDto.gender,
-      bloodGroup: validatedDto.bloodGroup,
-      address: validatedDto.address,
-      image: validatedDto.image,
-      profileCompletion: isFirstCompletion ? true : existingUser.profileCompletion,
-      age: validatedDto.age !== undefined ? Number(validatedDto.age) : undefined,
-      dateOfBirth: validatedDto.dateOfBirth
-        ? new Date(validatedDto.dateOfBirth)
-        : undefined,
-    };
-
-
-    const updatedUser = await this._userRepository.updateUserProfile(userId, updates);
-
-
-    return {
-      id: updatedUser.id,
-      name: updatedUser.name,
-      email: updatedUser.email,
-      phone: updatedUser.phone,
-      dateOfBirth: updatedUser.dateOfBirth
-        ? (updatedUser.dateOfBirth as Date).toISOString()
-        : undefined,
-      gender: updatedUser.gender,
-      bloodGroup: updatedUser.bloodGroup,
-      address: updatedUser.address,
-      image: updatedUser.image,
-      age: updatedUser.age !== undefined ? Number(updatedUser.age) : undefined,
-      profileCompletion: updatedUser.profileCompletion,
-    } as UpdateUserProfileResponseDTO;
+    const updates = UpdateUserProfileMapper.toUpdateData(
+      validatedDto,
+      existingUser
+    );
+    const updatedUser = await this._userRepository.updateUserProfile(
+      userId,
+      updates
+    );
+    return UpdateUserProfileMapper.toResponseDTO(updatedUser);
   }
 }

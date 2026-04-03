@@ -1,11 +1,12 @@
 
 import { IGetAllDoctorsUseCase } from "../interfaces/admin/IGetAllDoctors";
-import { IDoctorRepository } from "../../../domain/repositories/doctorRepository";
+import { IDoctorRepository } from "../../../domain/repositories/IDoctorRepository";
 import { GetAllDoctorsDTO } from "../../../interfaces/dto/request/get-all-doctor-admin.dto";
 import { DoctorResponseDTO } from "../../../interfaces/dto/response/admin/get-all-doctor.dto";
 import { plainToInstance } from "class-transformer";
 import { validateOrReject } from "class-validator";
 import { DoctorStatus, DoctorSort } from "../../../utils/Constance";
+import { DoctorMapper } from "../../mappers/admin/doctor.mapper";
 
 export class GetAllDoctors implements IGetAllDoctorsUseCase {
   constructor(private readonly _doctorRepo: IDoctorRepository) {}
@@ -34,28 +35,11 @@ export class GetAllDoctors implements IGetAllDoctorsUseCase {
     else if (dto.sort === DoctorSort.DATE_DESC) sortOption = { createdAt: -1 };
 
     filters.sort = sortOption;
-
     
     const doctorsEntities = await this._doctorRepo.getFilteredDoctors(filters, skip, dto.limit, sortOption);
     const totalDoctors = await this._doctorRepo.countFilteredDoctors(filters);
 
-    const doctors = doctorsEntities.map((doc) =>
-      plainToInstance(DoctorResponseDTO, {
-        id: doc.id,
-        name: doc.name,
-        email: doc.email,
-        phone: doc.phone,
-        yearsOfExperience: doc.yearsOfExperience,
-        specialization: doc.specialization,
-        profileImage: doc.profileImage,
-        gender: doc.gender,
-        consultFee: doc.consultFee,
-        isBlocked: doc.isBlocked,
-        isVerified: doc.isVerified,
-        role: doc.role,
-        age: doc.age,
-      })
-    );
+    const doctors = DoctorMapper.toResponseDTO(doctorsEntities);
 
     return {
       doctors,

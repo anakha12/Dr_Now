@@ -3,7 +3,7 @@ import { BaseUseCase } from "../base-usecase";
 import { EditDoctorAvailabilityRuleDTO } from "../../../interfaces/dto/request/edit-doctor-availability-rule.dto";
 import { IEditDoctorAvailabilityRule } from "../interfaces/doctor/IEditDoctorAvailabilityRuleUseCase";
 import { IAvailabilityRuleRepository } from "../../../domain/repositories/IAvailabilityRuleRepository";
-import { DoctorAvailabilityRule } from "../../../domain/entities/doctorAvailabilityRule.entity";
+import { DoctorAvailabilityRule } from "../../../domain/entities/doctorAvailabilityRuleEntity";
 import { Messages } from "../../../utils/Messages";
 
 export class EditDoctorAvailabilityRuleUseCase

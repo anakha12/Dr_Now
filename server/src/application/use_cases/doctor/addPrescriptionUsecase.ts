@@ -2,7 +2,7 @@
 import { BaseUseCase } from "../base-usecase";
 import { AddPrescriptionDTO } from "../../../interfaces/dto/request/add-prescription.dto";
 import { PrescriptionDTO } from "../../../interfaces/dto/response/prescription/prescription.dto";
-import { IPrescriptionRepository } from "../../../domain/repositories/prescriptionRepository";
+import { IPrescriptionRepository } from "../../../domain/repositories/IPrescriptionRepository";
 
 export class AddPrescriptionUseCase extends BaseUseCase<AddPrescriptionDTO, PrescriptionDTO> {
   constructor(private prescriptionRepo: IPrescriptionRepository) {

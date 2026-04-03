@@ -1,4 +1,4 @@
-import { IDoctorRepository } from "../../../domain/repositories/doctorRepository";
+import { IDoctorRepository } from "../../../domain/repositories/IDoctorRepository";
 import { Messages } from "../../../utils/Messages";
 import { ICompleteDoctorProfile } from "../interfaces/doctor/ICompleteDoctorProfile";
 import { CompleteDoctorProfileRequestDTO } from "../../../interfaces/dto/request/complete-doctor-profile-request.dto";

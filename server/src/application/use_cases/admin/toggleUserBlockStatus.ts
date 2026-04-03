@@ -1,6 +1,6 @@
 
 
-import { IUserRepository } from "../../../domain/repositories/userRepository";
+import { IUserRepository } from "../../../domain/repositories/IUserRepository";
 import { UserEntity } from "../../../domain/entities/userEntity";
 
 export class ToggleUserBlockStatusUseCase {

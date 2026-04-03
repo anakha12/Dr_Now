@@ -1,6 +1,6 @@
 import { IAvailabilityRuleRepository } from "../../../domain/repositories/IAvailabilityRuleRepository";
 import DoctorAvailabilityRuleModel, { IDoctorAvailabilityRule } from "../../database/models/availabilityRule.model";
-import { DoctorAvailabilityRule } from "../../../domain/entities/doctorAvailabilityRule.entity";
+import { DoctorAvailabilityRule } from "../../../domain/entities/doctorAvailabilityRuleEntity";
 import mongoose from "mongoose";
 import { ErrorMessages } from "../../../utils/Messages";
 

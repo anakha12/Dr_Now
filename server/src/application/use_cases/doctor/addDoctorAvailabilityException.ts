@@ -1,5 +1,5 @@
 import { AddDoctorAvailabilityExceptionDTO } from "../../../interfaces/dto/request/add-doctor-exception.dto";
-import { DoctorAvailabilityException } from "../../../domain/entities/doctorAvailabilityException.entity";
+import { DoctorAvailabilityException } from "../../../domain/entities/doctorAvailabilityExceptionEntity";
 import { DoctorAvailabilityExceptionResponseDTO } from "../../../interfaces/dto/response/doctor/doctor-exception-response.dto";
 import { IDoctorAvailabilityExceptionRepository } from "../../../domain/repositories/IDoctorAvailabilityExceptionRepository ";
 import { plainToInstance } from "class-transformer";

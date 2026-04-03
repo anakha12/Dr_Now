@@ -1,4 +1,4 @@
-import { DepartmentEntity } from "../../domain/entities/department.entity";
+import { DepartmentEntity } from "../entities/departmentEntity";
 
 export interface IDepartmentRepository {
   createDepartment(data: Partial< DepartmentEntity>): Promise<DepartmentEntity>;

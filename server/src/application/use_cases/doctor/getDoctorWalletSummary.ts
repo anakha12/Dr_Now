@@ -1,4 +1,4 @@
-import { IDoctorRepository } from "../../../domain/repositories/doctorRepository";
+import { IDoctorRepository } from "../../../domain/repositories/IDoctorRepository";
 import { IGetDoctorWalletSummary } from "../interfaces/doctor/IGetDoctorWalletSummary";
 import { plainToInstance } from "class-transformer";
 import { DoctorWalletSummaryDTO, WalletTransactionDTO } from "../../../interfaces/dto/response/doctor/doctor-wallet-summary.dto";

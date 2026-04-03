@@ -1,5 +1,5 @@
 
-import { IBookingRepository } from "../../../domain/repositories/bookingRepository";
+import { IBookingRepository } from "../../../domain/repositories/IBookingRepository";
 import { ICompleteBookingUseCase } from "../interfaces/doctor/ICompleteBookingUseCase";
 
 export class CompleteBookingUseCase implements ICompleteBookingUseCase {

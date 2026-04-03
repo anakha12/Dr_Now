@@ -1,5 +1,5 @@
 import { BaseUseCase } from "../base-usecase";
-import { IUserRepository } from "../../../domain/repositories/userRepository";
+import { IUserRepository } from "../../../domain/repositories/IUserRepository";
 import { GoogleLoginRequestDTO } from "../../../interfaces/dto/request/google-login.dto";
 import { GoogleLoginUserResponseDTO } from "../../../interfaces/dto/response/user/google-login-user.dto";
 import { plainToInstance } from "class-transformer";

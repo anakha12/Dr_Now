@@ -1,4 +1,4 @@
-import { IDoctorRepository } from "../../../domain/repositories/doctorRepository";
+import { IDoctorRepository } from "../../../domain/repositories/IDoctorRepository";
 import { sendMail } from "../../../services/mailService";
 import { EmailSubjects, EmailTemplates } from "../../../utils/Constance";
 import { ErrorMessages } from "../../../utils/Messages";

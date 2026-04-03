@@ -41,7 +41,7 @@ async refreshToken(req: Request, res: Response): Promise<void> {
     });
 
    res.cookie(
-    payloadWithoutExp.role === Role.DOCTOR  ? "accessToken" : "userAccessToken",
+    payloadWithoutExp.role === Role.DOCTOR  ? "accessToken" : "accessToken",
     accessToken,
     {
       httpOnly: true,

@@ -1,5 +1,5 @@
 
-import { Prescription } from "../entities/prescription.entity";
+import { Prescription } from "../entities/prescriptionEntity";
 
 export interface IPrescriptionRepository {
   addPrescription(

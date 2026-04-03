@@ -1,4 +1,4 @@
-import { IDepartmentRepository } from "../../../domain/repositories/departmentRepository";
+import { IDepartmentRepository } from "../../../domain/repositories/IDepartmentRepository";
 import { IGetAllDepartmentsUseCase } from "../interfaces/doctor/IGetAllDepartmentsUseCase";
 
 export class GetAllDepartments implements IGetAllDepartmentsUseCase{

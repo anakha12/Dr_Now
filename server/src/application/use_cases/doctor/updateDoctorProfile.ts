@@ -1,6 +1,6 @@
 
-import { IDoctorRepository } from "../../../domain/repositories/doctorRepository";
-import { IBookingRepository } from "../../../domain/repositories/bookingRepository";
+import { IDoctorRepository } from "../../../domain/repositories/IDoctorRepository";
+import { IBookingRepository } from "../../../domain/repositories/IBookingRepository";
 import { IUpdateDoctorProfile } from "../interfaces/doctor/IUpdateDoctorProfile";
 import { AppError } from "../../../utils/AppError";
 import { UpdateDoctorProfileDTO } from "../../../interfaces/dto/request/update-doctorProfile.dto";

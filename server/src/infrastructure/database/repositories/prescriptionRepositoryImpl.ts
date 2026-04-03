@@ -1,6 +1,6 @@
 
-import { IPrescriptionRepository } from "../../../domain/repositories/prescriptionRepository";
-import { Prescription } from "../../../domain/entities/prescription.entity";
+import { IPrescriptionRepository } from "../../../domain/repositories/IPrescriptionRepository";
+import { Prescription } from "../../../domain/entities/prescriptionEntity";
 import BookingModel from "../models/booking.model";
 
 export class PrescriptionRepositoryImpl implements IPrescriptionRepository {

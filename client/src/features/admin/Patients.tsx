@@ -8,6 +8,7 @@ import type { AdminUser } from "../../types/userProfile";
 import PatientDetails from "./PatientDetails";
 import logger from "../../utils/logger";
 import { FaSearch } from "react-icons/fa";
+import { useNotifications } from "../../hooks/useNotifications";
 
 const Patients = () => {
   const [patients, setPatients] = useState<AdminUser[]>([]);
@@ -19,6 +20,7 @@ const Patients = () => {
   const [genderFilter, setGenderFilter] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [sortOption, setSortOption] = useState("");
+  const { confirmMessage } = useNotifications();
 
   const patientsPerPage = 5;
 
@@ -54,19 +56,29 @@ const Patients = () => {
     return () => clearTimeout(delayDebounce);
   }, [fetchPatients]);
 
-  const handleToggleBlock = async (id: string, isBlocked: boolean) => {
-    try {
-      await toggleUserBlockStatus(id, isBlocked ? "unblock" : "block");
-      toast.success(
-        isBlocked
-          ? Messages.USER.UNBLOCK_SUCCESS
-          : Messages.USER.BLOCK_SUCCESS
-      );
-      fetchPatients();
-    } catch {
-      toast.error(Messages.USER.ACTION_FAILED);
-    }
-  };
+const handleToggleBlock = async (id: string, isBlocked: boolean) => {
+  const action = isBlocked ? "unblock" : "block";
+
+  const confirmed = await confirmMessage(
+    `Are you sure you want to ${action} this user?`
+  );
+
+  if (!confirmed) return; 
+
+  try {
+    await toggleUserBlockStatus(id, action);
+
+    toast.success(
+      isBlocked
+        ? Messages.USER.UNBLOCK_SUCCESS
+        : Messages.USER.BLOCK_SUCCESS
+    );
+
+    fetchPatients();
+  } catch {
+    toast.error(Messages.USER.ACTION_FAILED);
+  }
+};
 
   const handleViewDetails = (id: string) => {
     const user = patients.find((u) => u.id === id);

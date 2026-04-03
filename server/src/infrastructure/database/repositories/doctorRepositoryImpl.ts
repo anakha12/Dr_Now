@@ -1,5 +1,5 @@
 import DoctorModel, { IDoctor, Slot } from "../../database/models/doctorModel";
-import { IDoctorRepository } from "../../../domain/repositories/doctorRepository";
+import { IDoctorRepository } from "../../../domain/repositories/IDoctorRepository";
 import { DoctorEntity } from "../../../domain/entities/doctorEntity";
 import BookingModel from "../models/booking.model";
 import { ErrorMessages } from "../../../utils/Messages";

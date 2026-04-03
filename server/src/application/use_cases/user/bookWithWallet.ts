@@ -1,7 +1,7 @@
-import { IUserRepository } from "../../../domain/repositories/userRepository";
-import { IBookingRepository } from "../../../domain/repositories/bookingRepository";
-import { IDoctorRepository } from "../../../domain/repositories/doctorRepository";
-import { IAdminWalletRepository } from "../../../domain/repositories/adminWalletRepository";
+import { IUserRepository } from "../../../domain/repositories/IUserRepository";
+import { IBookingRepository } from "../../../domain/repositories/IBookingRepository";
+import { IDoctorRepository } from "../../../domain/repositories/IDoctorRepository";
+import { IAdminWalletRepository } from "../../../domain/repositories/IAdminWalletRepository";
 import { WalletTransactionUser } from "../../../domain/entities/walletTransactionUserEntity";
 import { IBookWithWallet } from "../interfaces/user/IBookWithWallet";
 import { ErrorMessages, Messages } from "../../../utils/Messages";

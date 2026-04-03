@@ -19,7 +19,7 @@ export const verifyToken = (requiredRoles: Role | Role[]) => {
   return (req: AuthRequest, res: Response, next: NextFunction) => {
     const rolesArray = Array.isArray(requiredRoles) ? requiredRoles : [requiredRoles];
 
-    const token = req.cookies?.userAccessToken || req.cookies?.accessToken;
+    const token = req.cookies?.accessToken || req.cookies?.accessToken;
     if (!token) return res.status(HttpStatus.UNAUTHORIZED).json({ message: Messages.TOKEN_MISSING });
 
     const jwtService = getJwtService();

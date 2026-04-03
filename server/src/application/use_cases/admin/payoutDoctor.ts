@@ -1,6 +1,6 @@
-import { IBookingRepository } from "../../../domain/repositories/bookingRepository";
-import { IAdminWalletRepository } from "../../../domain/repositories/adminWalletRepository";
-import { IDoctorRepository } from "../../../domain/repositories/doctorRepository";
+import { IBookingRepository } from "../../../domain/repositories/IBookingRepository";
+import { IAdminWalletRepository } from "../../../domain/repositories/IAdminWalletRepository";
+import { IDoctorRepository } from "../../../domain/repositories/IDoctorRepository";
 import { AdminWalletTransaction } from "../../../domain/entities/adminWalletEntity";
 import { IPayoutDoctorUseCase } from "../interfaces/admin/IPayoutDoctorUseCase";
 import { ErrorMessages } from "../../../utils/Messages";

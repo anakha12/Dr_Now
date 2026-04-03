@@ -91,7 +91,7 @@ export class UserController {
     const accessTokenMaxAge= Number(process.env.ACCESS_TOKEN_COOKIE_MAXAGE);
     const refreshTokenMaxAge= Number(process.env.REFRESH_TOKEN_COOKIE_MAXAGE);
   
-    res.cookie("userAccessToken", accessToken, {
+    res.cookie("accessToken", accessToken, {
       httpOnly: true,
       secure: false, 
       sameSite: "lax",                               
@@ -112,7 +112,7 @@ export class UserController {
 
  async logoutUserController(req: Request, res: Response): Promise<void> {
   try {
-    res.clearCookie("userAccessToken", {
+    res.clearCookie("accessToken", {
       httpOnly: true,
       sameSite: "lax",
       secure: process.env.NODE_ENV === "production",
@@ -143,7 +143,7 @@ export class UserController {
       const accessTokenMaxAge= Number(process.env.ACCESS_TOKEN_COOKIE_MAXAGE);
       const refreshTokenMaxAge= Number(process.env.REFRESH_TOKEN_COOKIE_MAXAGE);
   
-    res.cookie("userAccessToken", result.accessToken, {
+    res.cookie("accessToken", result.accessToken, {
       httpOnly: true,
       secure: false, 
       sameSite: "lax",                               
@@ -413,9 +413,7 @@ async getDoctorAvailabilityRules(req: Request, res: Response) {
 async getDoctorAvailabilityExceptions(req: Request, res: Response) {
   try {
     const { doctorId } = req.params;
-    console.log(doctorId)
     const exceptions = await this._getDoctorAvailabilityExceptionsUseCase.execute({doctorId});
-    console.log("exceptions",exceptions)
     res.status(HttpStatus.OK).json(exceptions);
   } catch (err: unknown) {
       handleControllerError(res, err, HttpStatus.BAD_REQUEST);

@@ -39,7 +39,7 @@ const Doctors = () => {
 
   const doctorsPerPage = 5;
   
-  const { addNotification } = useNotifications();
+  const { addNotification, confirmMessage } = useNotifications();
   
   useEffect(() => {
     const fetchDepartments = async () => {
@@ -87,21 +87,29 @@ const Doctors = () => {
     setCurrentPage(1);
   };
 
-  const handleBlockToggle = async (id: string, currentStatus: boolean) => {
-    try {
-      await toggleDoctorBlockStatus(id, currentStatus ? "unblock" : "block");
+const handleBlockToggle = async (id: string, currentStatus: boolean) => {
+  const isConfirmed = await confirmMessage(
+    currentStatus
+      ? "Are you sure you want to unblock this doctor?"
+      : "Are you sure you want to block this doctor?"
+  );
 
-      const msg = currentStatus
-        ? Messages.DOCTOR.UNBLOCK_SUCCESS
-        : Messages.DOCTOR.BLOCK_SUCCESS;
+  if (!isConfirmed) return;
 
-      addNotification(msg, "SUCCESS");
-      fetchDoctors();
-    } catch (error: unknown) {
-      const err = handleError(error, Messages.DOCTOR.ACTION_FAILED);
-      addNotification(err.message, "ERROR");
-    }
-  };
+  try {
+    await toggleDoctorBlockStatus(id, currentStatus ? "unblock" : "block");
+
+    const msg = currentStatus
+      ? Messages.DOCTOR.UNBLOCK_SUCCESS
+      : Messages.DOCTOR.BLOCK_SUCCESS;
+
+    addNotification(msg, "SUCCESS");
+    fetchDoctors();
+  } catch (error: unknown) {
+    const err = handleError(error, Messages.DOCTOR.ACTION_FAILED);
+    addNotification(err.message, "ERROR");
+  }
+};
 
   const handleViewDetails = async (id: string) => {
     try {

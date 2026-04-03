@@ -1,5 +1,5 @@
 import { plainToInstance } from "class-transformer";
-import { IBookingRepository } from "../../../domain/repositories/bookingRepository";
+import { IBookingRepository } from "../../../domain/repositories/IBookingRepository";
 import { BookingResponseDTO } from "../../../interfaces/dto/response/user/bookings.dto";
 import { ErrorMessages } from "../../../utils/Messages";
 import { AppError } from "../../../utils/AppError";

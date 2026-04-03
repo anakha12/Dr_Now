@@ -1,12 +1,14 @@
 import { BaseUseCase } from "../base-usecase";
 import { IGetBookingDetailsDoctor } from "../interfaces/doctor/IGetBookingDetailsDoctor";
-import { IBookingRepository } from "../../../domain/repositories/bookingRepository";
+import { IBookingRepository } from "../../../domain/repositories/IBookingRepository";
 import { BookingDetailsDoctorResponseDTO } from "../../../interfaces/dto/response/doctor/booking-details-doctor-response.dto";
 import { plainToInstance } from "class-transformer";
 import { AppError } from "../../../utils/AppError";
 import { ErrorMessages } from "../../../utils/Messages";
 import { HttpStatus } from "../../../utils/HttpStatus";
 import { GetBookingDetailsDoctorDTO } from "../../../interfaces/dto/request/get-booking-details-doctor.dto";
+import { BookingDoctorMapper } from "../../mappers/doctor/booking.mapper";
+
 
 export class GetBookingDetailsDoctor
   extends BaseUseCase<{ bookingId: string; doctorId: string }, BookingDetailsDoctorResponseDTO>
@@ -36,23 +38,6 @@ export class GetBookingDetailsDoctor
       );
     }
 
-    const totalAmount = (booking.doctorEarning ?? 0) + (booking.commissionAmount ?? 0);
-
-    return plainToInstance(BookingDetailsDoctorResponseDTO, {
-      id: booking.id,
-      patientName: booking.patientName ?? "",
-      department: booking.department ?? "",
-      date: booking.date,
-      slot: {
-        from: booking.startTime,
-        to: booking.endTime,
-      },
-      status: booking.status,
-      doctorEarning: booking.doctorEarning,
-      commissionAmount: booking.commissionAmount,
-      totalAmount,
-      payoutStatus: booking.payoutStatus,
-      cancellationReason: booking.cancellationReason,
-    });
+     return BookingDoctorMapper.toResponseDTO(booking);
   }
-}
+}  

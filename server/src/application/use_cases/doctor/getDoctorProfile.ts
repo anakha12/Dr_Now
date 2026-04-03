@@ -1,5 +1,5 @@
 // src/use-cases/doctor/get-doctor-profile.ts
-import { IDoctorRepository } from "../../../domain/repositories/doctorRepository";
+import { IDoctorRepository } from "../../../domain/repositories/IDoctorRepository";
 import { Messages } from "../../../utils/Messages";
 import { IGetDoctorProfile } from "../interfaces/doctor/IGetDoctorProfile";
 import { DoctorProfileResponseDTO } from "../../../interfaces/dto/response/doctor/doctor-profile-response.dto";

@@ -1,5 +1,5 @@
 import { plainToInstance } from "class-transformer";
-import { IUserRepository } from "../../../domain/repositories/userRepository";
+import { IUserRepository } from "../../../domain/repositories/IUserRepository";
 import { IGetUserProfile } from "../interfaces/user/IGetUserProfile";
 import { BasicUserProfileResponseDTO } from "../../../interfaces/dto/response/user/basic-user-profile.dto";
 import { FullUserProfileResponseDTO } from "../../../interfaces/dto/response/user/full-user-profile.dto";
