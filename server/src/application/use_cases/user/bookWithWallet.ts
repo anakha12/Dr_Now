@@ -5,6 +5,7 @@ import { IAdminWalletRepository } from "../../../domain/repositories/IAdminWalle
 import { WalletTransactionUser } from "../../../domain/entities/walletTransactionUserEntity";
 import { IBookWithWallet } from "../interfaces/user/IBookWithWallet";
 import { ErrorMessages, Messages } from "../../../utils/Messages";
+import { NotificationRepositoryImpl } from "../../../infrastructure/database/repositories/notificationRepositoryImpl";
 
 export class BookWithWalletUseCase implements IBookWithWallet {
   constructor(
@@ -65,6 +66,19 @@ export class BookWithWalletUseCase implements IBookWithWallet {
       },
       amountNum 
     );
+
+    // Trigger Notification for the Doctor
+    try {
+      const notificationRepository = new NotificationRepositoryImpl();
+      await notificationRepository.createNotification({
+        recipientId: doctorId,
+        message: `New Booking: Patient booked an appointment on ${date} (${slot.from} - ${slot.to}) via Wallet.`,
+        type: "success",
+        read: false,
+      });
+    } catch (notifErr) {
+      console.error("Failed to create notification", notifErr);
+    }
 
     return { message: Messages.WALLET_BOOKING_SUCCESS};
   }

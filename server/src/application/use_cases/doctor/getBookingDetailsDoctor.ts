@@ -2,7 +2,6 @@ import { BaseUseCase } from "../base-usecase";
 import { IGetBookingDetailsDoctor } from "../interfaces/doctor/IGetBookingDetailsDoctor";
 import { IBookingRepository } from "../../../domain/repositories/IBookingRepository";
 import { BookingDetailsDoctorResponseDTO } from "../../../interfaces/dto/response/doctor/booking-details-doctor-response.dto";
-import { plainToInstance } from "class-transformer";
 import { AppError } from "../../../utils/AppError";
 import { ErrorMessages } from "../../../utils/Messages";
 import { HttpStatus } from "../../../utils/HttpStatus";
