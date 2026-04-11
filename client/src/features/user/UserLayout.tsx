@@ -9,6 +9,7 @@ import type { RootState } from "../../redux/store";
 // import { socket } from "../../services/socket";
 import { motion, AnimatePresence } from "framer-motion";
 import logger from "../../utils/logger";
+import AppNotificationDropdown from "../notifications/AppNotificationDropdown";
 
 const UserLayout = () => {
   const [user, setUser] = useState<{ name: string } | null>(null);
@@ -122,6 +123,7 @@ const handleLogout = async () => {
             <div className="flex items-center gap-4 pl-6 border-l border-slate-200">
               {isAuthenticated && user ? (
                 <div className="flex items-center gap-4">
+                  <AppNotificationDropdown />
                   <Link
                     to="/profile"
                     className="flex items-center gap-2 text-sm font-bold text-slate-700 hover:text-teal-600 transition-colors group"

@@ -1,5 +1,5 @@
 
-
+//apiRoutes.ts
 export const AdminRoutes = {
   LOGIN: "/login",
   UNVERIFIED_DOCTORS: "/unverified-doctors",
@@ -17,7 +17,7 @@ export const AdminRoutes = {
   WALLET_SUMMARY: "/wallet-summary",
   PENDING_DOCTORS: "/pending-doctors",
   PAY_DOCTOR: (id: string) => `/pay-doctor/${id}`,
-   GET_DOCTOR_BY_ID: (id: string) => `/doctors/${id}`,
+  GET_DOCTOR_BY_ID: (id: string) => `/doctors/${id}`,
 };
 
 export const DoctorRoutes = {
@@ -80,4 +80,10 @@ export const UserRoutes = {
 
   FILTER_DOCTORS: "/doctors/filter",
   LOGOUT: "/logout",
+};
+
+export const NotificationRoutes = {
+  GET_NOTIFICATIONS: "/notifications",
+  MARK_AS_READ: (id: string) => `/notifications/${id}/read`,
+  MARK_ALL_AS_READ: "/notifications/read-all",
 };

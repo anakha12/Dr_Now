@@ -31,16 +31,19 @@ export class BookingRepositoryImpl implements IBookingRepository {
 
   async createBooking(booking: Booking): Promise<Booking> {
 
-    // const start =new Date();
-    // start.setHours(0,0,0,0);
-    // const end=new Date();
-    // end.setHours(23,59,59,999);
-    // const countNumber = await BookingModel.countDocument({
-    //   date:{$gt:start && $lt:end}
-    // });
-    // if(countNumber>5){
-    //   throw new Error("not possible to book more than 5 bokking in a day")
-    // }
+    const start =new Date();
+    start.setHours(0,0,0,0);
+    const end = new Date();
+    end.setHours(23,59,59,999);
+    const specialization= booking.department;
+
+    const countDocument= await BookingModel.countDocuments({
+      
+      department:specialization
+    })
+    if(countDocument>2){
+      throw new Error("only two bokking in same department is allowed")
+    }
 
     const newBooking = new BookingModel({
       doctorId: booking.doctorId,

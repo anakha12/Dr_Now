@@ -4,6 +4,7 @@ import type { RootState } from "../../redux/store";
 import { doctorLogout } from "../../redux/slices/authSlice";
 import { doctorSidebarItems } from "../../constants/sidebar";
 import Sidebar from "../../components/Sidebar";
+import AppNotificationDropdown from "../notifications/AppNotificationDropdown";
 
 const DoctorLayout = () => {
   const navigate = useNavigate();
@@ -42,15 +43,18 @@ const DoctorLayout = () => {
             {doctor?.name || "Doctor"}
           </h2>
 
-          <button
-            onClick={() => {
-              dispatch(doctorLogout());
-              navigate("/doctor/login");
-            }}
-            className="py-2 px-5 bg-teal-600 hover:bg-teal-700 text-white font-semibold rounded-lg shadow-sm transition"
-          >
-            Logout
-          </button>
+          <div className="flex items-center gap-6">
+            <AppNotificationDropdown />
+            <button
+              onClick={() => {
+                dispatch(doctorLogout());
+                navigate("/doctor/login");
+              }}
+              className="py-2 px-5 bg-teal-600 hover:bg-teal-700 text-white font-semibold rounded-lg shadow-sm transition"
+            >
+              Logout
+            </button>
+          </div>
         </header>
 
         {/* Page Content */}

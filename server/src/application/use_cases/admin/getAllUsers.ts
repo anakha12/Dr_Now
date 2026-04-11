@@ -1,6 +1,6 @@
 import { IUserRepository } from "../../../domain/repositories/IUserRepository";
 import { GetAllUsersRequestDTO } from "../../../interfaces/dto/request/get-all-users.request.dto";
-import { GetAllUsersResponseDTO, UserListItemDTO } from "../../../interfaces/dto/response/admin/get-all-users.response.dto";
+import { GetAllUsersResponseDTO } from "../../../interfaces/dto/response/admin/get-all-users.response.dto";
 import { plainToInstance } from "class-transformer";
 import { validateOrReject } from "class-validator";
 import { UserMapper } from "../../mappers/admin/user.mapper";

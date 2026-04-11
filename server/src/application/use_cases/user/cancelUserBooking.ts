@@ -6,6 +6,7 @@ import { ErrorMessages, Messages } from "../../../utils/Messages";
 import { CancelBookingRequestDTO } from "../../../interfaces/dto/request/cancel-booking.request.dto";
 import { CancelBookingResponseDTO } from "../../../interfaces/dto/response/user/cancel-booking.dto";
 import { BaseUseCase } from "../base-usecase";
+import { NotificationRepositoryImpl } from "../../../infrastructure/database/repositories/notificationRepositoryImpl";
 
 export class CancelUserBookingUseCase
   extends BaseUseCase<CancelBookingRequestDTO, CancelBookingResponseDTO>
@@ -90,6 +91,19 @@ export class CancelUserBookingUseCase
       bookingId,
       "Refunded"
     );
+
+    // Trigger Notification for the Doctor
+    try {
+      const notificationRepository = new NotificationRepositoryImpl();
+      await notificationRepository.createNotification({
+        recipientId: booking.doctorId.toString(),
+        message: `Cancellation: Patient ${user.name} has cancelled their appointment on ${booking.date} (${booking.startTime}).`,
+        type: "warning",
+        read: false,
+      });
+    } catch (err) {
+      console.error("Failed to create cancellation notification", err);
+    }
 
     return { success: true };
   }

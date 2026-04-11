@@ -1,10 +1,27 @@
-import { useState, type ReactNode } from "react";
+import { useState, useEffect, type ReactNode, useCallback } from "react";
+import { useSelector } from "react-redux";
 import { NotificationContext } from "./NotificationContext";
 import { Messages } from "../constants/messages";
 import type { Notification, NotificationType } from "../types/notification";
+import { notificationApiService } from "../services/notificationService";
+import { userAxios, doctorAxios, adminAxios } from "../services/axiosInstances";
+import type { RootState } from "../redux/store";
 
 export const NotificationProvider = ({ children }: { children: ReactNode }) => {
-  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [toasts, setToasts] = useState<Notification[]>([]);
+  const [dbNotifications, setDbNotifications] = useState<Notification[]>([]);
+
+  // Selection of axios instance based on current role
+  const userRoleState = useSelector((state: RootState) => state.userAuth);
+  const doctorRoleState = useSelector((state: RootState) => state.doctorAuth);
+  const adminRoleState = useSelector((state: RootState) => state.adminAuth);
+
+  const getAxiosInstance = useCallback(() => {
+    if (doctorRoleState.isAuthenticated) return doctorAxios;
+    if (adminRoleState.isAuthenticated) return adminAxios;
+    if (userRoleState.isAuthenticated) return userAxios;
+    return userAxios;
+  }, [doctorRoleState.isAuthenticated, adminRoleState.isAuthenticated, userRoleState.isAuthenticated]);
 
   const [confirmState, setConfirmState] = useState<{
     message: string;
@@ -18,22 +35,74 @@ export const NotificationProvider = ({ children }: { children: ReactNode }) => {
     resolve: (val: string | null) => void;
   } | null>(null);
 
+  // Map backend notifications to frontend types
+  const mapBackendNotification = useCallback((n: any): Notification => ({
+    id: n.id || n._id,
+    message: n.message,
+    type: (n.type?.toUpperCase() as NotificationType) || "INFO",
+    read: n.read || false,
+    timestamp: new Date(n.createdAt || Date.now()),
+  }), []);
+
+  const fetchDbNotifications = useCallback(async () => {
+    const isAnyAuth = userRoleState.isAuthenticated || doctorRoleState.isAuthenticated || adminRoleState.isAuthenticated;
+    if (!isAnyAuth) return;
+
+    try {
+      const axios = getAxiosInstance();
+      const response = await notificationApiService.getNotifications(axios);
+      if (response && response.success && response.notifications) {
+        const mapped = response.notifications.map(mapBackendNotification);
+        setDbNotifications(mapped);
+      }
+    } catch (error) {
+      console.error("Failed to fetch notifications from DB", error);
+    }
+  }, [getAxiosInstance, mapBackendNotification, userRoleState.isAuthenticated, doctorRoleState.isAuthenticated, adminRoleState.isAuthenticated]);
+
+  // Initial fetch and polling
+  useEffect(() => {
+    fetchDbNotifications();
+    const interval = setInterval(fetchDbNotifications, 30000); // Poll every 30s
+    return () => clearInterval(interval);
+  }, [fetchDbNotifications]);
+
   const addNotification = (message: string, type: NotificationType = "INFO") => {
-    const newNotification: Notification = {
-      id: Date.now().toString(),
+    const newToast: Notification = {
+      id: `toast-${Date.now()}`,
       message,
       type,
       read: false,
       timestamp: new Date(),
     };
 
-    setNotifications((prev) => [newNotification, ...prev]);
+    setToasts((prev) => [newToast, ...prev]);
 
     setTimeout(() => {
-      setNotifications((prev) =>
-        prev.filter((n) => n.id !== newNotification.id)
-      );
+      setToasts((prev) => prev.filter((t) => t.id !== newToast.id));
     }, 3000);
+  };
+
+  const markAsRead = async (id: string) => {
+    try {
+      const axios = getAxiosInstance();
+      await notificationApiService.markAsRead(id, axios);
+      setDbNotifications((prev) =>
+        prev.map((n) => (n.id === id ? { ...n, read: true } : n))
+      );
+    } catch (error) {
+      console.error("Failed to mark notification as read", error);
+    }
+  };
+
+  const markAllAsRead = async () => {
+    try {
+      const axios = getAxiosInstance();
+      await notificationApiService.markAllAsRead(axios);
+      setDbNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+    } catch (error) {
+      console.error("Failed to mark all as read", error);
+    }
   };
 
   const confirmMessage = (message: string): Promise<boolean> =>
@@ -46,9 +115,6 @@ export const NotificationProvider = ({ children }: { children: ReactNode }) => {
     new Promise((resolve) =>
       setInputPromptState({ message, placeholder, value: "", resolve })
     );
-
-  const markAllAsRead = () =>
-    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
 
   const handleConfirm = (choice: boolean) => {
     confirmState?.resolve(choice);
@@ -63,28 +129,30 @@ export const NotificationProvider = ({ children }: { children: ReactNode }) => {
   return (
     <NotificationContext.Provider
       value={{
-        notifications,
+        notifications: dbNotifications, // Expose persistent ones for bell/list
         addNotification,
+        markAsRead,
         markAllAsRead,
         confirmMessage,
         promptInput,
+        fetchNotifications: fetchDbNotifications,
       }}
     >
       {children}
 
-      {/* Notification UI */}
-      <div className="fixed top-5 right-5 z-50 space-y-2 w-80">
-        {notifications.map((n) => (
+      {/* Toast Overlay (Unchanged functionally, but uses 'toasts' state) */}
+      <div className="fixed top-20 right-5 z-[9999] space-y-2 w-80">
+        {toasts.map((n) => (
           <div
             key={n.id}
-            className={`px-4 py-3 rounded shadow text-white animate-slide-in-right transition-all duration-300 ${
+            className={`px-4 py-3 rounded shadow-lg text-white border-l-4 transform animate-slide-in-right transition-all duration-300 ${
               n.type === "SUCCESS"
-                ? "bg-green-600"
+                ? "bg-green-600 border-green-800"
                 : n.type === "ERROR"
-                ? "bg-red-600"
+                ? "bg-red-600 border-red-800"
                 : n.type === "WARNING"
-                ? "bg-yellow-600 text-black"
-                : "bg-blue-600"
+                ? "bg-yellow-600 border-yellow-800 text-black"
+                : "bg-blue-600 border-blue-800"
             }`}
           >
             {n.message}
@@ -94,23 +162,23 @@ export const NotificationProvider = ({ children }: { children: ReactNode }) => {
 
       {/* Confirm Modal */}
       {confirmState && (
-        <div className="fixed inset-0 bg-white/10 backdrop-blur-sm z-50 flex justify-center items-center">
-          <div className="bg-gray-200 rounded-2xl p-6 shadow-lg w-[90%] max-w-md">
-            <p className="text-lg mb-4 text-gray-800 font-semibold">
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[10000] flex justify-center items-center">
+          <div className="bg-white rounded-2xl p-6 shadow-2xl w-[90%] max-w-md border border-gray-100">
+            <p className="text-lg mb-6 text-gray-800 font-semibold leading-snug">
               {confirmState.message}
             </p>
 
-            <div className="flex justify-end gap-4">
+            <div className="flex justify-end gap-3">
               <button
                 onClick={() => handleConfirm(false)}
-                className="px-4 py-2 rounded bg-gray-300 hover:bg-gray-400"
+                className="px-5 py-2 rounded-xl text-gray-600 font-medium hover:bg-gray-100 transition-colors"
               >
                 {Messages.COMMON.CANCEL}
               </button>
 
               <button
                 onClick={() => handleConfirm(true)}
-                className="px-4 py-2 rounded bg-red-600 hover:bg-red-700 text-white"
+                className="px-6 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white font-bold shadow-md hover:shadow-lg transition-all"
               >
                 {Messages.COMMON.CONFIRM_BUTTON}
               </button>
@@ -121,9 +189,9 @@ export const NotificationProvider = ({ children }: { children: ReactNode }) => {
 
       {/* Input Prompt Modal */}
       {inputPromptState && (
-        <div className="fixed inset-0 bg-white/10 backdrop-blur-sm z-50 flex justify-center items-center">
-          <div className="bg-white rounded-2xl p-6 shadow-xl w-[90%] max-w-md">
-            <p className="text-lg font-semibold text-gray-800 mb-4">
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[10000] flex justify-center items-center">
+          <div className="bg-white rounded-2xl p-6 shadow-2xl w-[90%] max-w-md border border-gray-100">
+            <p className="text-lg font-semibold text-gray-800 mb-4 leading-snug">
               {inputPromptState.message}
             </p>
 
@@ -136,7 +204,7 @@ export const NotificationProvider = ({ children }: { children: ReactNode }) => {
                   prev ? { ...prev, value: e.target.value } : null
                 )
               }
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg mb-4"
+              className="w-full px-4 py-3 border border-gray-200 rounded-xl mb-6 outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
               autoFocus
               onKeyDown={(e) => {
                 if (e.key === "Enter") {
@@ -145,17 +213,17 @@ export const NotificationProvider = ({ children }: { children: ReactNode }) => {
               }}
             />
 
-            <div className="flex justify-end gap-4">
+            <div className="flex justify-end gap-3">
               <button
                 onClick={() => handleInputSubmit(null)}
-                className="px-4 py-2 rounded bg-gray-300 hover:bg-gray-400"
+                className="px-5 py-2 rounded-xl text-gray-600 font-medium hover:bg-gray-100 transition-colors"
               >
                 {Messages.COMMON.CANCEL}
               </button>
 
               <button
                 onClick={() => handleInputSubmit(inputPromptState.value)}
-                className="px-4 py-2 rounded bg-blue-600 hover:bg-blue-700 text-white"
+                className="px-6 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold shadow-md hover:shadow-lg transition-all"
               >
                 {Messages.COMMON.SUBMIT}
               </button>
@@ -165,4 +233,4 @@ export const NotificationProvider = ({ children }: { children: ReactNode }) => {
       )}
     </NotificationContext.Provider>
   );
-};
+};
