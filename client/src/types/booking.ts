@@ -19,6 +19,7 @@ export interface Booking {
   cancellationReason?: string;  
   canCancel?: boolean;
   time: string;
+  isReviewed?: boolean;
   prescription?: Prescription;
 }
 export type Prescription = {

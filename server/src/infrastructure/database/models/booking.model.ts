@@ -31,6 +31,7 @@ export interface IBooking extends Document {
   refundStatus?: 'NotRequired' | 'Refunded';
   cancellationReason?: string;
   prescription?: IPrescription;
+  isReviewed: boolean;
 }
 
 const MedicineSchema: Schema = new Schema({
@@ -80,6 +81,7 @@ const BookingSchema: Schema = new Schema<IBooking>(
     },
     cancellationReason: { type: String, default: '' },
     prescription: { type: PrescriptionSchema },
+    isReviewed: { type: Boolean, default: false },
   },
   { timestamps: true }
 );
