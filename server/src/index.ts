@@ -11,6 +11,7 @@ import prescriptionRoutes from "./interfaces/routes/prescriptionRoutes";
 import doctorRoutes from "./interfaces/routes/doctorRoutes";  
 import webhookRoutes from "./interfaces/routes/stripeWebhook";
 import notificationRoutes from "./interfaces/routes/notificationRoutes";
+import reviewRoutes from "./interfaces/routes/reviewRoutes";
 import cors from "cors";
 import path from "path";
 import { fileURLToPath } from "url";
@@ -60,6 +61,7 @@ app.use("/api/admin", adminRoutes);
 app.use("/api/doctor", doctorRoutes);
 app.use("/api/doctor", prescriptionRoutes);
 app.use("/api/notifications", notificationRoutes);
+app.use("/api/reviews", reviewRoutes);
 
 
 const port = Number(process.env.PORT);

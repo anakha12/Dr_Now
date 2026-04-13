@@ -20,6 +20,7 @@ export class Booking {
     public id?: string,
     public doctorName?: string,
     public prescription?: IPrescription | null,
+    public isReviewed: boolean = false,
     public createdAt: string = new Date().toISOString()
   ) {}
 

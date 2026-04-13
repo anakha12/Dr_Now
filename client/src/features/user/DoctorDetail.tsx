@@ -6,8 +6,12 @@ import { useNotifications } from "../../hooks/useNotifications";
 import { Messages } from "../../constants/messages";
 import type { DoctorProfile } from "../../types/doctorProfile";
 import logger from "../../utils/logger";
-import { FaGraduationCap, FaHospitalUser, FaTrophy, FaUserMd } from "react-icons/fa";
+import { FaGraduationCap, FaHospitalUser, FaTrophy, FaUserMd, FaStar } from "react-icons/fa";
 import { MdOutlineEmail, MdOutlinePhone } from "react-icons/md";
+import StarRating from "../../components/common/StarRating";
+import { reviewApiService } from "../../services/reviewService";
+import { rootAxios } from "../../services/axiosInstances";
+import type { Review, ReviewRatingBrief } from "../../types/review";
 
 const fadeInUp: Variants = {
   hidden: { opacity: 0, y: 30 },
@@ -29,21 +33,33 @@ const DoctorDetail = () => {
   const navigate = useNavigate();
   const { addNotification } = useNotifications();
   const [doctor, setDoctor] = useState<DoctorProfile | null>(null);
+  const [reviews, setReviews] = useState<Review[]>([]);
+  const [ratingBrief, setRatingBrief] = useState<ReviewRatingBrief>({ averageRating: 0, reviewCount: 0 });
+  const [loadingReviews, setLoadingReviews] = useState(true);
 
   useEffect(() => {
-    const fetchDoctor = async () => {
+    const fetchDoctorData = async () => {
       if (!id) return addNotification(Messages.DOCTOR_PROFILE.ERROR_FETCH, "ERROR");
 
       try {
-        const data = await getDoctorById(id);
-        setDoctor(data);
+        const [doctorData, reviewsData, ratingData] = await Promise.all([
+          getDoctorById(id),
+          reviewApiService.getDoctorReviews(id, rootAxios),
+          reviewApiService.getDoctorRating(id, rootAxios)
+        ]);
+        
+        setDoctor(doctorData);
+        setReviews(reviewsData);
+        setRatingBrief(ratingData);
       } catch (error) {
         logger.error(error);
         addNotification(Messages.DOCTOR_PROFILE.ERROR_FETCH, "ERROR");
+      } finally {
+        setLoadingReviews(false);
       }
     };
 
-    fetchDoctor();
+    fetchDoctorData();
   }, [id, addNotification]);
 
   if (!doctor) {
@@ -109,10 +125,18 @@ const DoctorDetail = () => {
                 Dr. {doctor.name}
               </h2>
               
-              <div className="inline-flex items-center justify-center gap-2 px-4 py-1.5 rounded-full bg-teal-50 text-teal-600 text-sm font-bold mb-6">
+              <div className="inline-flex items-center justify-center gap-2 px-4 py-1.5 rounded-full bg-teal-50 text-teal-600 text-sm font-bold mb-3">
                 <FaUserMd />
                 <span>{doctor.specialization || "General Specialist"}</span>
               </div>
+
+              {ratingBrief.reviewCount > 0 && (
+                <div className="flex items-center gap-2 mb-6">
+                  <StarRating rating={ratingBrief.averageRating} readonly size={18} />
+                  <span className="text-slate-900 font-bold text-sm">{ratingBrief.averageRating}</span>
+                  <span className="text-slate-400 text-xs font-medium">({ratingBrief.reviewCount})</span>
+                </div>
+              )}
 
               <div className="w-full h-px bg-slate-100 mb-6"></div>
 
@@ -284,6 +308,68 @@ const DoctorDetail = () => {
                     ) : null}
                   </div>
                </div>
+            </motion.div>
+
+            {/* Reviews Section */}
+            <motion.div variants={fadeInUp} className="bg-white rounded-[2rem] shadow-lg shadow-slate-200/40 border border-slate-100 p-8 md:p-10">
+              <div className="flex justify-between items-center mb-8 pb-4 border-b border-slate-100">
+                <h3 className="text-2xl font-extrabold text-slate-900 flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-yellow-50 text-yellow-600 flex items-center justify-center text-xl">
+                    <FaStar />
+                  </div>
+                  Patient Reviews
+                </h3>
+                {ratingBrief.reviewCount > 0 && (
+                  <div className="text-right">
+                    <div className="text-3xl font-black text-slate-900 leading-none">{ratingBrief.averageRating}</div>
+                    <div className="text-xs font-bold text-slate-400 uppercase tracking-widest mt-1">Overall Rating</div>
+                  </div>
+                )}
+              </div>
+
+              {loadingReviews ? (
+                <div className="flex justify-center py-12">
+                  <motion.div
+                    animate={{ rotate: 360 }}
+                    transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
+                    className="w-8 h-8 border-2 border-slate-200 border-t-teal-600 rounded-full"
+                  />
+                </div>
+              ) : reviews.length > 0 ? (
+                <div className="space-y-6">
+                  {reviews.map((review) => (
+                    <motion.div 
+                      key={review.id} 
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="p-6 bg-slate-50/50 rounded-3xl border border-slate-100 hover:border-teal-100 transition-colors"
+                    >
+                      <div className="flex justify-between items-start mb-3">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-full bg-white border border-slate-200 flex items-center justify-center text-slate-400 font-bold">
+                            {/* We don't have user name in review right now, could add to backend join */}
+                            P
+                          </div>
+                          <div>
+                            <p className="text-sm font-bold text-slate-900">Patient</p>
+                            <p className="text-xs text-slate-400 font-medium">
+                              {new Date(review.createdAt).toLocaleDateString("en-US", { month: 'short', day: 'numeric', year: 'numeric' })}
+                            </p>
+                          </div>
+                        </div>
+                        <StarRating rating={review.rating} readonly size={16} />
+                      </div>
+                      <p className="text-slate-600 leading-relaxed font-medium pl-1">
+                        "{review.comment}"
+                      </p>
+                    </motion.div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-12 bg-slate-50 rounded-3xl border border-slate-100 border-dashed">
+                  <p className="text-slate-400 font-medium italic">No reviews yet for this doctor.</p>
+                </div>
+              )}
             </motion.div>
           </div>
         </motion.div>

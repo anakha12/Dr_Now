@@ -8,7 +8,8 @@ import type { Booking } from "../../types/booking";
 import { Messages } from "../../constants/messages";
 import logger from "../../utils/logger";
 import { connectSocket, socket } from "../../services/socket";
-import { FaCalendarAlt, FaClock, FaUserMd, FaStethoscope, FaFilter, FaChevronLeft, FaChevronRight, FaCommentDots, FaEye, FaTimes, FaReceipt } from "react-icons/fa";
+import { FaCalendarAlt, FaClock, FaUserMd, FaStethoscope, FaFilter, FaChevronLeft, FaChevronRight, FaCommentDots, FaEye, FaTimes, FaReceipt, FaStar } from "react-icons/fa";
+import ReviewForm from "./ReviewForm";
 
 const ITEMS_PER_PAGE = 4;
 
@@ -126,6 +127,24 @@ const UserBookings = () => {
       case "Completed": return "bg-emerald-500";
       default: return "bg-blue-500";
     }
+  };
+
+  const [reviewModal, setReviewModal] = useState<{
+    isOpen: boolean;
+    bookingId: string;
+    doctorName: string;
+  }>({
+    isOpen: false,
+    bookingId: "",
+    doctorName: "",
+  });
+
+  const handleOpenReview = (bookingId: string, doctorName: string) => {
+    setReviewModal({
+      isOpen: true,
+      bookingId,
+      doctorName,
+    });
   };
 
   return (
@@ -346,6 +365,15 @@ const UserBookings = () => {
                       </button>
                     )}
 
+                    {booking.status === "Completed" && !booking.isReviewed && (
+                      <button
+                        onClick={() => handleOpenReview(booking.id, booking.doctorName || "")}
+                        className="px-5 py-2.5 bg-yellow-50 hover:bg-yellow-100 text-yellow-700 font-bold rounded-xl transition-colors flex items-center gap-2 text-sm"
+                      >
+                        <FaStar /> Rate Consultation
+                      </button>
+                    )}
+
                     {booking.status !== "Cancelled" && booking.status !== "Completed" && booking.canCancel && (
                       <button
                         onClick={() => handleCancel(booking.id)}
@@ -391,6 +419,14 @@ const UserBookings = () => {
           </motion.div>
         )}
       </div>
+
+      <ReviewForm
+        isOpen={reviewModal.isOpen}
+        onClose={() => setReviewModal({ ...reviewModal, isOpen: false })}
+        bookingId={reviewModal.bookingId}
+        doctorName={reviewModal.doctorName}
+        onSuccess={() => fetchBookings(currentPage)}
+      />
     </div>
   );
 };

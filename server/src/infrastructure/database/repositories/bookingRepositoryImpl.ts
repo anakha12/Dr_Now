@@ -259,6 +259,7 @@ async findUserBookingsWithFilters(
       name: string;
     };
     createdAt: Date;
+    isReviewed: boolean;
   };
 
 const bookings: BookingWithExtras[] = bookingsRaw.map((b: BookingAggregateResult) => {
@@ -271,6 +272,7 @@ const bookings: BookingWithExtras[] = bookingsRaw.map((b: BookingAggregateResult
     department: b.doctor?.specialization,
     patientName: b.user?.name,
     slot: { from: b.startTime, to: b.endTime },
+    isReviewed: b.isReviewed,
     createdAt: b.createdAt,
   };
 });
@@ -393,6 +395,10 @@ async updateBookingStatus(
   return this._toDomain(updated);
 }
 
+async updateIsReviewed(bookingId: string, isReviewed: boolean): Promise<void> {
+  await BookingModel.findByIdAndUpdate(bookingId, { isReviewed });
+}
+
   // -----------------------------
   // CANCEL & REFUND METHODS
   // -----------------------------
@@ -464,7 +470,8 @@ private _toDomain(booking: IBookingWithPopulatedDoctorAndUser): Booking {
   department,            
   booking._id.toString(), 
   doctorName,
-  booking.prescription ?? null              
+  booking.prescription ?? null,
+  booking.isReviewed              
 );
 
 }

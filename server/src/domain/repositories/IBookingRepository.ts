@@ -53,4 +53,5 @@ findUserBookingsWithFilters(
     bookingIds: string[]
   ): Promise<void>;
   updateBookingStatus(booking: Booking): Promise<Booking>;
+  updateIsReviewed(bookingId: string, isReviewed: boolean): Promise<void>;
 }

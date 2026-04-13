@@ -23,4 +23,11 @@ export const doctorAxios = createAxiosInstance({
   redirectPath: "/doctor/login",
   skipInterceptorUrls: ["/protected"],
 });
- 
+
+// Root API (generic)
+export const rootAxios = createAxiosInstance({
+  baseURL: `${import.meta.env.VITE_BACKEND_URL}/api`,
+  refreshEndpoint: "/refresh-token",
+  redirectPath: "/login",
+  skipInterceptorUrls: ["/protected"],
+});
