@@ -3,7 +3,6 @@ import { IGetDoctorAvailabilityRules } from "../interfaces/user/IGetDoctorAvaila
 import { IAvailabilityRuleRepository } from "../../../domain/repositories/IAvailabilityRuleRepository";
 import { AvailabilityRuleResponseDTO } from "../../../interfaces/dto/response/doctor/availability-rule-response.dto";
 import { GetDoctorBasicsDTO } from "../../../interfaces/dto/request/doctor-basic.dto";
-import { plainToInstance } from "class-transformer";
 import { ErrorMessages } from "../../../utils/Messages";
 import { AvailabilityRuleMapper } from "../../mappers/doctor/availability-rule.mapper";
 

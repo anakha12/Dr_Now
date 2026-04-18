@@ -1,12 +1,12 @@
 import { IBookingRepository } from "../../../domain/repositories/IBookingRepository";
 import { IUserRepository } from "../../../domain/repositories/IUserRepository";
 import { IAdminWalletRepository } from "../../../domain/repositories/IAdminWalletRepository";
+import { NotificationRepository } from "../../../domain/repositories/notificationRepository";
 import { ICancelUserBooking } from "../interfaces/user/ICancelUserBooking";
 import { ErrorMessages, Messages } from "../../../utils/Messages";
 import { CancelBookingRequestDTO } from "../../../interfaces/dto/request/cancel-booking.request.dto";
 import { CancelBookingResponseDTO } from "../../../interfaces/dto/response/user/cancel-booking.dto";
 import { BaseUseCase } from "../base-usecase";
-import { NotificationRepositoryImpl } from "../../../infrastructure/database/repositories/notificationRepositoryImpl";
 
 export class CancelUserBookingUseCase
   extends BaseUseCase<CancelBookingRequestDTO, CancelBookingResponseDTO>
@@ -15,7 +15,8 @@ export class CancelUserBookingUseCase
   constructor(
     private _bookingRepository: IBookingRepository,
     private _userRepository: IUserRepository,
-    private _adminWalletRepository: IAdminWalletRepository
+    private _adminWalletRepository: IAdminWalletRepository,
+    private _notificationRepository: NotificationRepository
   ) {
     super();
   }
@@ -94,8 +95,7 @@ export class CancelUserBookingUseCase
 
     // Trigger Notification for the Doctor
     try {
-      const notificationRepository = new NotificationRepositoryImpl();
-      await notificationRepository.createNotification({
+      await this._notificationRepository.createNotification({
         recipientId: booking.doctorId.toString(),
         message: `Cancellation: Patient ${user.name} has cancelled their appointment on ${booking.date} (${booking.startTime}).`,
         type: "warning",

@@ -21,8 +21,9 @@ export class NotificationController {
       }
       const notifications = await this.getNotificationsUseCase.execute(userId);
       res.status(200).json({ success: true, notifications });
-    } catch (error: any) {
-      res.status(500).json({ success: false, message: error.message });
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "Internal Server Error";
+      res.status(500).json({ success: false, message: errorMessage });
     }
   }
 
@@ -35,8 +36,9 @@ export class NotificationController {
         return;
       }
       res.status(200).json({ success: true, notification: updated });
-    } catch (error: any) {
-      res.status(500).json({ success: false, message: error.message });
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "Internal Server Error";
+      res.status(500).json({ success: false, message: errorMessage });
     }
   }
 
@@ -50,8 +52,9 @@ export class NotificationController {
       }
       await this.markAllAsReadUseCase.execute(userId);
       res.status(200).json({ success: true, message: "All notifications marked as read" });
-    } catch (error: any) {
-      res.status(500).json({ success: false, message: error.message });
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "Internal Server Error";
+      res.status(500).json({ success: false, message: errorMessage });
     }
   }
 }

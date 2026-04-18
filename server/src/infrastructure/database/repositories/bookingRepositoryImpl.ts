@@ -3,6 +3,7 @@ import BookingModel, { IBooking } from "../models/booking.model";
 import { Booking } from "../../../domain/entities/bookingEntity";
 import { IBookingRepository } from "../../../domain/repositories/IBookingRepository";
 import { PendingDoctorPayoutResponseDTO } from "../../../interfaces/dto/response/admin/pending-doctor-payout.dto";
+import { AdminAnalyticsResponseDTO } from "../../../interfaces/dto/response/admin/admin-analytics.dto";
 import { Role } from "../../../utils/Constance";
 import { BookingWithExtras } from "../../../domain/types/BookingWithExtras";
 import { FilterQuery,PipelineStage } from 'mongoose';
@@ -433,10 +434,11 @@ private _toDomain(booking: IBookingWithPopulatedDoctorAndUser): Booking {
   let doctorName: string | undefined;
   let department: string | undefined;
 
-  if (booking.doctorId && (booking.doctorId as any).name) {
-    doctorId = (booking.doctorId as any)._id.toString();
-    doctorName = (booking.doctorId as any).name;
-    department = (booking.doctorId as any).specialization;
+  if (booking.doctorId && "name" in booking.doctorId) {
+    const populatedDoctor = booking.doctorId as IPopulatedDoctor;
+    doctorId = populatedDoctor._id.toString();
+    doctorName = populatedDoctor.name;
+    department = populatedDoctor.specialization;
   } else {
     doctorId = booking.doctorId.toString();
   }
@@ -444,9 +446,10 @@ private _toDomain(booking: IBookingWithPopulatedDoctorAndUser): Booking {
   let patientId: string = "";
   let patientName: string | undefined;
 
-  if (booking.userId && (booking.userId as any).name) {
-    patientId = (booking.userId as any)._id.toString();
-    patientName = (booking.userId as any).name;
+  if (booking.userId && "name" in booking.userId) {
+    const populatedUser = booking.userId as IPopulatedUser;
+    patientId = populatedUser._id.toString();
+    patientName = populatedUser.name;
   } else {
     patientId = booking.userId.toString();
   }
@@ -475,7 +478,7 @@ private _toDomain(booking: IBookingWithPopulatedDoctorAndUser): Booking {
 
 }
 
-  async getAdminAnalytics(): Promise<any> {
+  async getAdminAnalytics(): Promise<AdminAnalyticsResponseDTO> {
     const last30Days = new Date();
     last30Days.setDate(last30Days.getDate() - 30);
 

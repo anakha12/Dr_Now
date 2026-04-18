@@ -1,6 +1,7 @@
 import { IBookingRepository } from "../../../domain/repositories/IBookingRepository";
 import { IUserRepository } from "../../../domain/repositories/IUserRepository";
 import { IAdminWalletRepository } from "../../../domain/repositories/IAdminWalletRepository";
+import { NotificationRepository } from "../../../domain/repositories/notificationRepository";
 import { ICancelDoctorBooking } from "../interfaces/doctor/ICancelDoctorBooking";
 import { CancelDoctorBookingResponseDTO } from "../../../interfaces/dto/response/doctor/cancel-doctor-booking-response.dto";
 import { ErrorMessages, Messages } from "../../../utils/Messages";
@@ -10,7 +11,8 @@ export class CancelDoctorBooking implements ICancelDoctorBooking {
   constructor(
     private _bookingRepository: IBookingRepository,
     private _userRepository: IUserRepository,
-    private _adminWalletRepository: IAdminWalletRepository
+    private _adminWalletRepository: IAdminWalletRepository,
+    private _notificationRepository: NotificationRepository
   ) {}
 
   async execute(
@@ -89,6 +91,18 @@ export class CancelDoctorBooking implements ICancelDoctorBooking {
     );
 
     await this._bookingRepository.updateRefundStatus(bookingId, "Refunded");
+
+    // Trigger Notification for the Patient
+    try {
+      await this._notificationRepository.createNotification({
+        recipientId: booking.userId.toString(),
+        message: `Cancellation: Your doctor has cancelled the appointment on ${booking.date} (${booking.startTime}). Reason: ${reason}`,
+        type: "warning",
+        read: false,
+      });
+    } catch (err) {
+      console.error("Failed to create cancellation notification for patient", err);
+    }
 
     return plainToInstance(CancelDoctorBookingResponseDTO, {
       success: true,

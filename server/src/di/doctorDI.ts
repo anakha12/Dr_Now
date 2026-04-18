@@ -6,6 +6,7 @@ import { DepartmentRepositoryImpl } from "../infrastructure/database/repositorie
 import { BookingRepositoryImpl } from "../infrastructure/database/repositories/bookingRepositoryImpl";
 import { AdminWalletRepositoryImpl } from "../infrastructure/database/repositories/adminWalletRepositoryImpl";
 import { DoctorAvailabilityExceptionRepositoryImpl } from "../infrastructure/database/repositories/doctorAvailabilityExceptionRepositoryImpl";
+import { NotificationRepositoryImpl } from "../infrastructure/database/repositories/notificationRepositoryImpl";
 
 
 import { SendDoctorOtp } from "../application/use_cases/doctor/sendDoctorOtp";
@@ -37,6 +38,7 @@ const  doctorRepository = new DoctorRepositoryImpl();
 const  departmentRepository = new DepartmentRepositoryImpl();
 const  bookingRepository = new BookingRepositoryImpl();
 const  adminWalletRepository = new AdminWalletRepositoryImpl();
+const notificationRepository = new NotificationRepositoryImpl();
 const availabilityRuleRepository = new AvailabilityRuleRepositoryImpl();
 const doctorAvailabilityExceptionRepository = new DoctorAvailabilityExceptionRepositoryImpl();
 
@@ -52,7 +54,7 @@ const updateDoctorProfile = new UpdateDoctorProfile(doctorRepository, bookingRep
 const addDoctorAvailabilityRule = new AddDoctorAvailabilityRuleUseCase(availabilityRuleRepository);
 const getDoctorAvailability = new GetDoctorAvailability(availabilityRuleRepository);
 const getDoctorBookings = new GetDoctorBookings(bookingRepository);
-const cancelDoctorBooking = new CancelDoctorBooking(bookingRepository,userRepository,adminWalletRepository);
+const cancelDoctorBooking = new CancelDoctorBooking(bookingRepository,userRepository,adminWalletRepository,notificationRepository);
 const getAllDepartments = new GetAllDepartments(departmentRepository);
 const getDoctorWalletSummary = new GetDoctorWalletSummary(doctorRepository);
 const completeDoctorProfile = new CompleteDoctorProfile(doctorRepository);

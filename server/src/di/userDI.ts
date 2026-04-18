@@ -7,6 +7,7 @@ import { DoctorRepositoryImpl } from "../infrastructure/database/repositories/do
 import { DepartmentRepositoryImpl } from "../infrastructure/database/repositories/departmentRepositoryImpl";
 import { BookingRepositoryImpl } from "../infrastructure/database/repositories/bookingRepositoryImpl";
 import { AdminWalletRepositoryImpl } from "../infrastructure/database/repositories/adminWalletRepositoryImpl";
+import { NotificationRepositoryImpl } from "../infrastructure/database/repositories/notificationRepositoryImpl";
 import { DoctorAvailabilityExceptionRepositoryImpl } from "../infrastructure/database/repositories/doctorAvailabilityExceptionRepositoryImpl";
 import { LoginUser } from "../application/use_cases/user/loginUser";
 import { BookWithWalletUseCase } from "../application/use_cases/user/bookWithWallet";
@@ -43,6 +44,7 @@ const doctorRepository = new DoctorRepositoryImpl();
 const departmentRepository = new DepartmentRepositoryImpl();
 const bookingRepository = new BookingRepositoryImpl();
 const adminWalletRepository = new AdminWalletRepositoryImpl();
+const notificationRepository = new NotificationRepositoryImpl();
 const availabilityRuleRepository = new AvailabilityRuleRepositoryImpl();
 const doctorAvailabilityExceptionRepository = new DoctorAvailabilityExceptionRepositoryImpl();
 
@@ -54,7 +56,8 @@ const bookWithWalletUseCase= new BookWithWalletUseCase(
                                   userRepository,
                                   doctorRepository,
                                   bookingRepository,
-                                  adminWalletRepository
+                                  adminWalletRepository,
+                                  notificationRepository
                                 );
 
 const registerUser = new RegisterUser(userRepository);
@@ -70,7 +73,7 @@ const createStripeSession = new CreateStripeSession(doctorRepository, stripe);
 const getBookedSlots = new GetBookedSlotsUseCase(bookingRepository);
 const getUserProfile = new GetUserProfile(userRepository)
 const getUserBookings = new GetUserBookings(bookingRepository);
-const cancelBooking = new CancelUserBookingUseCase(bookingRepository,userRepository,adminWalletRepository)
+const cancelBooking = new CancelUserBookingUseCase(bookingRepository,userRepository,adminWalletRepository,notificationRepository)
 const getBookingDetails = new GetBookingDetails(bookingRepository)
 const getDepartments = new GetDepartmentsUser(departmentRepository);
 const getUserWallet = new GetUserWalletUseCase(userRepository)

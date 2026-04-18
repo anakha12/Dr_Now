@@ -3,13 +3,15 @@ import { Stripe } from "stripe";
 import { IBookingRepository } from "../../../domain/repositories/IBookingRepository";
 import { Booking } from "../../../domain/entities/bookingEntity";
 import { IAdminWalletRepository } from "../../../domain/repositories/IAdminWalletRepository";
+import { NotificationRepository } from "../../../domain/repositories/notificationRepository";
 import { ErrorMessages } from "../../../utils/Messages";
 
 
 export class StripeWebhookUseCase {
   constructor(
     private readonly _bookingRepo: IBookingRepository,
-    private readonly _adminWalletRepo: IAdminWalletRepository
+    private readonly _adminWalletRepo: IAdminWalletRepository,
+    private readonly _notificationRepo: NotificationRepository
   ) {}
 
   async handleCheckoutSession(session: Stripe.Checkout.Session) {
@@ -65,5 +67,17 @@ export class StripeWebhookUseCase {
       },
       commissionAmount
     );
+
+    // Trigger Notification for the Doctor
+    try {
+      await this._notificationRepo.createNotification({
+        recipientId: metadata.doctorId,
+        message: `New Booking: Patient booked an appointment on ${metadata.date} (${metadata.slotFrom} - ${metadata.slotTo}) via Stripe.`,
+        type: "success",
+        read: false,
+      });
+    } catch (notifErr) {
+      console.error("Failed to create notification for doctor (Stripe)", notifErr);
+    }
   }
 }
