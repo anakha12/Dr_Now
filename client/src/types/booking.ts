@@ -16,6 +16,7 @@ export interface Booking {
   doctorEarning?: number;      
   commissionAmount?: number;   
   payoutStatus?: string;       
+  paymentStatus?: string;
   cancellationReason?: string;  
   canCancel?: boolean;
   time: string;

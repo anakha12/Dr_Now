@@ -342,7 +342,7 @@ const UserBookings = () => {
                       </div>
                       <div>
                         <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-0.5">Booking ID</p>
-                        <p className="font-semibold text-slate-800 truncate max-w-[120px]" title={booking.id}>{booking.id.substring(0, 8).toUpperCase()}</p>
+                        <p className="font-semibold text-teal-700 truncate max-w-[120px]" title={booking.id}>#{booking.id.slice(-6).toUpperCase()}</p>
                       </div>
                     </div>
                   </div>

@@ -25,6 +25,7 @@ export class BookingDoctorMapper {
       totalAmount,
 
       payoutStatus: booking.payoutStatus,
+      paymentStatus: booking.paymentStatus,
       cancellationReason: booking.cancellationReason ?? undefined,
 
       createdAt: booking.createdAt,

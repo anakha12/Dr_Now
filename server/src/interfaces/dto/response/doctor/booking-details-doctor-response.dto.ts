@@ -42,6 +42,9 @@ export class BookingDetailsDoctorResponseDTO {
   payoutStatus!: 'Pending' | 'Paid';
 
   @Expose()
+  paymentStatus!: string;
+
+  @Expose()
   cancellationReason?: string;
 
    @Expose()

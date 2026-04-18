@@ -4,6 +4,7 @@ import { IDoctorRepository } from "../../../domain/repositories/IDoctorRepositor
 import { IAdminWalletRepository } from "../../../domain/repositories/IAdminWalletRepository";
 import { WalletTransactionUser } from "../../../domain/entities/walletTransactionUserEntity";
 import { IBookWithWallet } from "../interfaces/user/IBookWithWallet";
+import { Booking } from "../../../domain/entities/bookingEntity";
 import { ErrorMessages, Messages } from "../../../utils/Messages";
 import { NotificationRepositoryImpl } from "../../../infrastructure/database/repositories/notificationRepositoryImpl";
 
@@ -42,16 +43,18 @@ export class BookWithWalletUseCase implements IBookWithWallet {
     const commissionAmount = parseFloat((amount * commissionRate).toFixed(2));
     const doctorEarning = parseFloat((amount - commissionAmount).toFixed(2));
 
-    const booking = await this._bookingRepository.createBooking({
+    const booking = await this._bookingRepository.createBooking(new Booking(
       doctorId,
       userId,
-      slot,
       date,
-      paymentStatus: "paid",
-      status: "Upcoming",
-      commissionAmount,
+      slot.from,
+      slot.to,
+      "Upcoming",
+      "paid",
+      undefined,
       doctorEarning,
-    });
+      commissionAmount
+    ));
     const amountNum = typeof amount === "string" ? parseFloat(amount) : amount; 
 
     

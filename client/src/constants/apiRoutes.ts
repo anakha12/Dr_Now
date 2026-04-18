@@ -18,6 +18,7 @@ export const AdminRoutes = {
   PENDING_DOCTORS: "/pending-doctors",
   PAY_DOCTOR: (id: string) => `/pay-doctor/${id}`,
   GET_DOCTOR_BY_ID: (id: string) => `/doctors/${id}`,
+  ANALYTICS: "/analytics",
 };
 
 export const DoctorRoutes = {

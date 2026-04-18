@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
+import type { ReactNode } from "react";
 import {
   getAllUsers,
   getAllDoctors,
-  getAllDepartments,
   getWalletSummary,
-  getUnverifiedDoctors,
+  getDashboardAnalytics,
 } from "../../services/adminService";
 import { Messages } from "../../constants/messages";
 import { toast } from "react-hot-toast";
@@ -18,16 +18,26 @@ import {
   XAxis,
   YAxis,
   Tooltip,
-  Legend,
+  AreaChart,
+  Area,
 } from "recharts";
-import { FaUsers, FaUserMd, FaClipboardList, FaFileInvoiceDollar } from "react-icons/fa";
-import { motion, type Variants } from "framer-motion";
+import { FaUsers, FaUserMd, FaChartLine, FaRegTimesCircle } from "react-icons/fa";
+import { motion } from "framer-motion";
+import type { Variants } from "framer-motion";
 
 interface WalletSummary {
   totalBalance: number;
   totalCommission: number;
   pendingDoctorPayouts: number;
   transactionCount?: number;
+}
+
+interface AnalyticsData {
+  bookingStatusBreakdown: { status: string; count: number }[];
+  revenueTrend: { date: string; revenue: number }[];
+  departmentPopularity: { department: string; count: number }[];
+  topDoctors: { doctorId: string; doctorName: string; earnings: number; consultations: number }[];
+  cancellationRate: number;
 }
 
 const containerVariants: Variants = {
@@ -50,14 +60,13 @@ const itemVariants: Variants = {
 const Dashboard = () => {
   const [totalUsers, setTotalUsers] = useState(0);
   const [totalDoctors, setTotalDoctors] = useState(0);
-  const [totalDepartments, setTotalDepartments] = useState(0);
-  const [pendingDoctorVerification, setPendingDoctorVerification] = useState(0);
   const [walletSummary, setWalletSummary] = useState<WalletSummary>({
     totalBalance: 0,
     totalCommission: 0,
     pendingDoctorPayouts: 0,
     transactionCount: 0,
   });
+  const [analytics, setAnalytics] = useState<AnalyticsData | null>(null);
 
   const pageLimit = 1; // for count calculation
 
@@ -67,15 +76,13 @@ const Dashboard = () => {
         const [
           usersData,
           doctorsData,
-          departmentsData,
           walletData,
-          unverifiedDoctorsData,
+          analyticsData,
         ] = await Promise.all([
           getAllUsers(1, pageLimit, "", "", "", undefined, undefined, ""), 
           getAllDoctors({ page: 1, limit: pageLimit }),
-          getAllDepartments(),
           getWalletSummary(),
-          getUnverifiedDoctors(1, 1000),
+          getDashboardAnalytics(),
         ]);
 
         // Calculate total counts based on totalPages
@@ -87,8 +94,6 @@ const Dashboard = () => {
           ((doctorsData.totalPages || 0) - 1) * pageLimit + (doctorsData.doctors?.length || 0)
         );
 
-        setTotalDepartments(departmentsData.departments?.length || 0);
-
         setWalletSummary({
           totalBalance: walletData.totalBalance,
           totalCommission: walletData.totalCommission,
@@ -96,7 +101,7 @@ const Dashboard = () => {
           transactionCount: walletData.transactionCount,
         });
 
-        setPendingDoctorVerification(unverifiedDoctorsData.doctors?.length || 0);
+        setAnalytics(analyticsData);
       } catch (error) {
         toast.error(Messages.USER.FETCH_FAILED);
         console.error("Dashboard fetch error:", error);
@@ -111,23 +116,9 @@ const Dashboard = () => {
     { name: "Doctors", value: totalDoctors },
   ];
 
-  const verifiedDoctorData = [
-    { name: "Verified", value: totalDoctors - pendingDoctorVerification },
-    { name: "Pending Verification", value: pendingDoctorVerification },
-  ];
-
-  const PIE_COLORS = ["#14b8a6", "#3b82f6"]; // Teal and Blue
-  const STATUS_COLORS = ["#10b981", "#f59e0b"]; // Emerald and Amber
-  const BAR_COLORS = ["#3b82f6", "#f59e0b", "#14b8a6"]; // Blue, Amber, Teal
-
-  const walletDataChart = [
-    {
-      name: "Wallet Stats",
-      TotalBalance: walletSummary.totalBalance,
-      PendingPayouts: walletSummary.pendingDoctorPayouts,
-      Commission: walletSummary.totalCommission,
-    },
-  ];
+  const PIE_COLORS = ["#14b8a6", "#3b82f6", "#f59e0b", "#ef4444", "#8b5cf6"];
+  const STATUS_COLORS = ["#10b981", "#3b82f6", "#ef4444"]; 
+  const REVENUE_CHART_COLOR = "#3b82f6";
 
   return (
     <div className="min-h-screen bg-slate-50/50 p-6 md:p-8 font-sans">
@@ -145,12 +136,12 @@ const Dashboard = () => {
           </div>
         </motion.div>
 
-        {/* Stat cards */}
         <motion.div variants={containerVariants} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           <StatCard 
-            title="Total Users" 
-            value={totalUsers} 
-            icon={<FaUsers size={28} />} 
+            title="Total Revenue" 
+            value={walletSummary.totalCommission} 
+            prefix="₹"
+            icon={<FaChartLine size={28} />} 
             color="bg-gradient-to-br from-indigo-500 to-indigo-700"
             shadowColor="shadow-indigo-500/30"
           />
@@ -162,24 +153,110 @@ const Dashboard = () => {
             shadowColor="shadow-teal-500/30"
           />
           <StatCard 
-            title="Departments" 
-            value={totalDepartments} 
-            icon={<FaClipboardList size={28} />} 
+            title="Total Users" 
+            value={totalUsers} 
+            icon={<FaUsers size={28} />} 
             color="bg-gradient-to-br from-blue-500 to-blue-700"
             shadowColor="shadow-blue-500/30"
           />
           <StatCard 
-            title="Pending Approvals" 
-            value={pendingDoctorVerification} 
-            icon={<FaFileInvoiceDollar size={28} />} 
+            title="Cancellation Rate" 
+            value={analytics?.cancellationRate || 0} 
+            suffix="%"
+            icon={<FaRegTimesCircle size={28} />} 
             color="bg-gradient-to-br from-rose-500 to-rose-700"
             shadowColor="shadow-rose-500/30"
           />
         </motion.div>
 
+        {/* Analytics Section 1 */}
+        <motion.div variants={containerVariants} className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <ChartCard title="Revenue Trend (Last 30 Days)">
+              <ResponsiveContainer width="100%" height={300}>
+                <AreaChart data={analytics?.revenueTrend || []}>
+                  <defs>
+                    <linearGradient id="colorRev" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor={REVENUE_CHART_COLOR} stopOpacity={0.3}/>
+                      <stop offset="95%" stopColor={REVENUE_CHART_COLOR} stopOpacity={0}/>
+                    </linearGradient>
+                  </defs>
+                  <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 12 }} />
+                  <YAxis axisLine={false} tickLine={false} tick={{ fill: '#64748b' }} tickFormatter={(val) => `₹${val}`} />
+                  <Tooltip 
+                    contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)' }}
+                  />
+                  <Area type="monotone" dataKey="revenue" stroke={REVENUE_CHART_COLOR} fillOpacity={1} fill="url(#colorRev)" strokeWidth={3} />
+                </AreaChart>
+              </ResponsiveContainer>
+            </ChartCard>
+
+            <ChartCard title="Department Popularity">
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart data={analytics?.departmentPopularity || []} layout="vertical">
+                  <XAxis type="number" hide />
+                  <YAxis dataKey="department" type="category" axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 12 }} width={100} />
+                  <Tooltip 
+                    cursor={{ fill: '#f1f5f9' }}
+                    contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)' }}
+                  />
+                  <Bar dataKey="count" fill="#14b8a6" radius={[0, 4, 4, 0]} barSize={20} />
+                </BarChart>
+              </ResponsiveContainer>
+            </ChartCard>
+        </motion.div>
+
         {/* Charts */}
         <motion.div variants={containerVariants} className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           
+          <ChartCard title="Booking Status Overview">
+            <ResponsiveContainer width="100%" height={250}>
+              <PieChart>
+                <Pie
+                  data={analytics?.bookingStatusBreakdown || []}
+                  dataKey="count"
+                  nameKey="status"
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={60}
+                  outerRadius={85}
+                  label={({ name, percent = 0 }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                  labelLine={false}
+                  stroke="none"
+                >
+                  {(analytics?.bookingStatusBreakdown || []).map((_, index) => (
+                    <Cell key={index} fill={STATUS_COLORS[index % STATUS_COLORS.length]} />
+                  ))}
+                </Pie>
+                <Tooltip 
+                  contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)' }} 
+                  itemStyle={{ color: '#334155', fontWeight: 600 }}
+                />
+              </PieChart>
+            </ResponsiveContainer>
+          </ChartCard>
+
+          <ChartCard title="Top Performing Doctors">
+            <div className="space-y-4">
+              {(analytics?.topDoctors || []).map((doc, idx) => (
+                <div key={doc.doctorId} className="flex items-center justify-between p-3 bg-slate-50 rounded-2xl hover:bg-slate-100 transition-colors">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-full bg-teal-100 text-teal-600 flex items-center justify-center font-bold text-xs">
+                      {idx + 1}
+                    </div>
+                    <div>
+                      <p className="font-bold text-slate-800 text-sm line-clamp-1">Dr. {doc.doctorName}</p>
+                      <p className="text-[10px] text-slate-500 font-medium uppercase tracking-wider">{doc.consultations} Consultations</p>
+                    </div>
+                  </div>
+                  <p className="font-bold text-teal-600 text-sm">₹{doc.earnings.toLocaleString()}</p>
+                </div>
+              ))}
+              {(!analytics || analytics.topDoctors.length === 0) && (
+                 <p className="text-center text-slate-400 py-10">No doctor data yet</p>
+              )}
+            </div>
+          </ChartCard>
+
           <ChartCard title="Platform Demographics">
             <ResponsiveContainer width="100%" height={250}>
               <PieChart>
@@ -207,50 +284,6 @@ const Dashboard = () => {
             </ResponsiveContainer>
           </ChartCard>
 
-          <ChartCard title="Doctor Verification Status">
-            <ResponsiveContainer width="100%" height={250}>
-              <PieChart>
-                <Pie
-                  data={verifiedDoctorData}
-                  dataKey="value"
-                  nameKey="name"
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={60}
-                  outerRadius={85}
-                  label={({ name, percent = 0 }) => `${String(name || '').split(' ')[0]} ${(percent * 100).toFixed(0)}%`}
-                  labelLine={false}
-                  stroke="none"
-                >
-                  {verifiedDoctorData.map((_, index) => (
-                    <Cell key={index} fill={STATUS_COLORS[index % STATUS_COLORS.length]} />
-                  ))}
-                </Pie>
-                <Tooltip 
-                  contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)' }}
-                  itemStyle={{ color: '#334155', fontWeight: 600 }}
-                />
-              </PieChart>
-            </ResponsiveContainer>
-          </ChartCard>
-
-          <ChartCard title="Wallet Summary (₹)" className="lg:col-span-1">
-            <ResponsiveContainer width="100%" height={250}>
-              <BarChart data={walletDataChart} margin={{ top: 20, right: 30, left: 0, bottom: 0 }}>
-                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#64748b' }} />
-                <YAxis axisLine={false} tickLine={false} tick={{ fill: '#64748b' }} tickFormatter={(value) => `₹${value}`} />
-                <Tooltip 
-                  cursor={{ fill: '#f1f5f9' }}
-                  contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)' }}
-                />
-                <Legend iconType="circle" wrapperStyle={{ paddingTop: '20px' }} />
-                <Bar dataKey="TotalBalance" name="Total Balance" fill={BAR_COLORS[0]} radius={[4, 4, 0, 0]} barSize={30} />
-                <Bar dataKey="PendingPayouts" name="Pending Payouts" fill={BAR_COLORS[1]} radius={[4, 4, 0, 0]} barSize={30} />
-                <Bar dataKey="Commission" name="Commission" fill={BAR_COLORS[2]} radius={[4, 4, 0, 0]} barSize={30} />
-              </BarChart>
-            </ResponsiveContainer>
-          </ChartCard>
-
         </motion.div>
       </motion.div>
     </div>
@@ -258,7 +291,7 @@ const Dashboard = () => {
 };
 
 // Gradient stat card with hover animations
-const StatCard = ({ title, value, icon, color, shadowColor }: { title: string; value: number; icon: React.ReactNode; color: string; shadowColor: string }) => (
+const StatCard = ({ title, value, icon, color, shadowColor, prefix = "", suffix = "" }: { title: string; value: number; icon: ReactNode; color: string; shadowColor: string; prefix?: string; suffix?: string }) => (
   <motion.div 
     variants={itemVariants}
     whileHover={{ y: -5, scale: 1.02 }}
@@ -271,7 +304,7 @@ const StatCard = ({ title, value, icon, color, shadowColor }: { title: string; v
     <div className="relative z-10 flex items-center justify-between">
       <div>
         <p className="text-white/80 text-sm font-semibold uppercase tracking-wider mb-1">{title}</p>
-        <h3 className="text-4xl font-extrabold">{value.toLocaleString()}</h3>
+        <h3 className="text-4xl font-extrabold">{prefix}{value.toLocaleString()}{suffix}</h3>
       </div>
       <div className="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center border border-white/20 shadow-inner">
         {icon}
@@ -281,7 +314,7 @@ const StatCard = ({ title, value, icon, color, shadowColor }: { title: string; v
 );
 
 // Chart card with glassmorphic container padding
-const ChartCard = ({ title, children, className = "" }: { title: string; children: React.ReactNode; className?: string }) => (
+const ChartCard = ({ title, children, className = "" }: { title: string; children: ReactNode; className?: string }) => (
   <motion.div 
     variants={itemVariants}
     className={`bg-white border border-slate-100 shadow-xl shadow-slate-200/40 rounded-[2rem] p-6 lg:p-8 hover:shadow-2xl transition-shadow ${className}`}

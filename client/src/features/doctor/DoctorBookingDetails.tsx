@@ -82,7 +82,7 @@ const DoctorBookingDetails = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-gray-700 text-lg">
           <Item
             label={Messages.DOCTOR.BOOKING_DETAILS.LABELS.BOOKING_ID}
-            value={booking.id}
+            value={`#${booking.id.slice(-6).toUpperCase()}`}
             icon={<FileText size={20} />}
           />
           <Item
@@ -130,6 +130,11 @@ const DoctorBookingDetails = () => {
           <Item
             label={Messages.DOCTOR.BOOKING_DETAILS.LABELS.COMMISSION_AMOUNT}
             value={`₹${booking.commissionAmount || 0}`}
+            icon={<CreditCard size={20} />}
+          />
+          <Item
+            label={Messages.DOCTOR.BOOKING_DETAILS.LABELS.PAYMENT_STATUS}
+            value={booking.paymentStatus || Messages.DOCTOR.BOOKING_DETAILS.PENDING}
             icon={<CreditCard size={20} />}
           />
           <Item
