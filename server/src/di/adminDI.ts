@@ -24,6 +24,8 @@ import { GetPendingDoctorPayouts } from "../application/use_cases/admin/getPendi
 import { GetWalletSummary } from "../application/use_cases/admin/getWalletSummary";
 import { PayoutDoctorUseCase } from "../application/use_cases/admin/payoutDoctor";
 import { GetDoctorByIdUseCase } from "../application/use_cases/admin/getDoctorById";
+import { EditDepartmentUseCase } from "../application/use_cases/admin/editDepartment";
+import { GetAdminAnalytics } from "../application/use_cases/admin/getAdminAnalytics";
 
 // --- Repositories ---
 const userRepository = new UserRepositoryImpl();
@@ -57,7 +59,9 @@ export const createAdminController = () => {
   const getPendingDoctorPayouts = new GetPendingDoctorPayouts(bookingRepository);
   const getWalletSummary = new GetWalletSummary(adminWalletRepository, bookingRepository);
   const payoutDoctor = new PayoutDoctorUseCase(bookingRepository, doctorRepository, adminWalletRepository);
-  const getDoctorById = new GetDoctorByIdUseCase(doctorRepository)
+  const getDoctorById = new GetDoctorByIdUseCase(doctorRepository);
+  const editDepartment = new EditDepartmentUseCase(departmentRepository);
+  const getAdminAnalytics = new GetAdminAnalytics(bookingRepository);
 
   return new AdminController(
     loginAdmin,
@@ -74,7 +78,9 @@ export const createAdminController = () => {
     getPendingDoctorPayouts,
     getWalletSummary,
     payoutDoctor,
-    getDoctorById
+    getDoctorById,
+    editDepartment,
+    getAdminAnalytics
   );
 };
 

@@ -254,9 +254,17 @@ const DoctorProfileComponent = () => {
         // --- EDIT MODE ---
         <form onSubmit={handleSubmit} className="grid grid-cols-1 sm:grid-cols-2 gap-5">
           {/* Basic Fields with Labels */}
-          {["name", "phone", "yearsOfExperience", "gender", "consultFee"].map((name) => (
+          {(["name", "phone", "yearsOfExperience", "gender", "consultFee"] as const).map((name) => {
+            const labelMap: Record<string, string> = {
+              name: "Name",
+              phone: "Phone",
+              yearsOfExperience: "Years Of Experience",
+              gender: "Gender",
+              consultFee: "Consult Fee",
+            };
+            return (
             <div key={name} className="col-span-1">
-              <label className="font-semibold text-gray-700 mb-1 block">{name.replace(/([A-Z])/g, " $1")}</label>
+              <label className="font-semibold text-gray-700 mb-1 block">{labelMap[name]}</label>
               <input
                 type={name === "yearsOfExperience" || name === "consultFee" ? "number" : "text"}
                 name={name}
@@ -266,7 +274,8 @@ const DoctorProfileComponent = () => {
               />
               {errors[name] && <p className="text-red-500 text-sm mt-1">{errors[name]}</p>}
             </div>
-          ))}
+          )})}
+
 
           {/* Specialization */}
           <div className="col-span-1">

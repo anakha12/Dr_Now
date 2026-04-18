@@ -31,19 +31,19 @@ export class BookingRepositoryImpl implements IBookingRepository {
 
   async createBooking(booking: Booking): Promise<Booking> {
 
-    const start =new Date();
-    start.setHours(0,0,0,0);
-    const end = new Date();
-    end.setHours(23,59,59,999);
-    const specialization= booking.department;
+    // const start =new Date();
+    // start.setHours(0,0,0,0);
+    // const end = new Date();
+    // end.setHours(23,59,59,999);
+    // const specialization= booking.department;
 
-    const countDocument= await BookingModel.countDocuments({
+    // const countDocument= await BookingModel.countDocuments({
       
-      department:specialization
-    })
-    if(countDocument>2){
-      throw new Error("only two bokking in same department is allowed")
-    }
+    //   department:specialization
+    // })
+    // if(countDocument>2){
+    //   throw new Error("only two bokking in same department is allowed")
+    // }
 
     const newBooking = new BookingModel({
       doctorId: booking.doctorId,
@@ -433,23 +433,22 @@ private _toDomain(booking: IBookingWithPopulatedDoctorAndUser): Booking {
   let doctorName: string | undefined;
   let department: string | undefined;
 
-  if (booking.doctorId instanceof mongoose.Types.ObjectId) {
-    doctorId = booking.doctorId.toString();
+  if (booking.doctorId && (booking.doctorId as any).name) {
+    doctorId = (booking.doctorId as any)._id.toString();
+    doctorName = (booking.doctorId as any).name;
+    department = (booking.doctorId as any).specialization;
   } else {
-    doctorId = booking.doctorId._id.toString();
-    doctorName = booking.doctorId.name;
-    department = booking.doctorId.specialization;
+    doctorId = booking.doctorId.toString();
   }
 
-
-  let patientId: string;
+  let patientId: string = "";
   let patientName: string | undefined;
 
-  if (booking.userId instanceof mongoose.Types.ObjectId) {
-    patientId = booking.userId.toString();
+  if (booking.userId && (booking.userId as any).name) {
+    patientId = (booking.userId as any)._id.toString();
+    patientName = (booking.userId as any).name;
   } else {
-    patientId = booking.userId._id.toString();
-    patientName = booking.userId.name;
+    patientId = booking.userId.toString();
   }
 
   return new Booking(
@@ -476,5 +475,83 @@ private _toDomain(booking: IBookingWithPopulatedDoctorAndUser): Booking {
 
 }
 
+  async getAdminAnalytics(): Promise<any> {
+    const last30Days = new Date();
+    last30Days.setDate(last30Days.getDate() - 30);
+
+    const [
+      statusBreakdown,
+      revenueTrend,
+      departmentPopularity,
+      topDoctors,
+      cancellationStats
+    ] = await Promise.all([
+      BookingModel.aggregate([
+        { $group: { _id: "$status", count: { $sum: 1 } } },
+        { $project: { status: "$_id", count: 1, _id: 0 } }
+      ]),
+      BookingModel.aggregate([
+        { $match: { paymentStatus: 'paid', createdAt: { $gte: last30Days } } },
+        {
+          $group: {
+            _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
+            revenue: { $sum: "$commissionAmount" }
+          }
+        },
+        { $sort: { _id: 1 } },
+        { $project: { date: "$_id", revenue: 1, _id: 0 } }
+      ]),
+      BookingModel.aggregate([
+        {
+          $lookup: {
+            from: "doctors",
+            localField: "doctorId",
+            foreignField: "_id",
+            as: "doctor"
+          }
+        },
+        { $unwind: "$doctor" },
+        { $group: { _id: "$doctor.specialization", count: { $sum: 1 } } },
+        { $project: { department: "$_id", count: 1, _id: 0 } }
+      ]),
+      BookingModel.aggregate([
+        { $match: { status: 'Completed' } },
+        { $group: { _id: "$doctorId", earnings: { $sum: "$doctorEarning" }, consultations: { $sum: 1 } } },
+        { $sort: { earnings: -1 } },
+        { $limit: 5 },
+        {
+          $lookup: {
+            from: "doctors",
+            localField: "_id",
+            foreignField: "_id",
+            as: "doctor"
+          }
+        },
+        { $unwind: "$doctor" },
+        { $project: { doctorId: "$_id", doctorName: "$doctor.name", earnings: 1, consultations: 1, _id: 0 } }
+      ]),
+      BookingModel.aggregate([
+        {
+          $group: {
+            _id: null,
+            total: { $sum: 1 },
+            cancelled: { $sum: { $cond: [{ $eq: ["$status", "Cancelled"] }, 1, 0] } }
+          }
+        }
+      ])
+    ]);
+
+    const totalBookings = cancellationStats[0]?.total || 0;
+    const cancelledBookings = cancellationStats[0]?.cancelled || 0;
+    const cancellationRate = totalBookings > 0 ? (cancelledBookings / totalBookings) * 100 : 0;
+
+    return {
+      bookingStatusBreakdown: statusBreakdown,
+      revenueTrend: revenueTrend,
+      departmentPopularity: departmentPopularity,
+      topDoctors: topDoctors,
+      cancellationRate: parseFloat(cancellationRate.toFixed(2))
+    };
+  }
 
 }

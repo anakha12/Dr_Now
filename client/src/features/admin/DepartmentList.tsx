@@ -6,6 +6,7 @@ import {
   getAllDepartments,
   toggleDepartmentStatus,
   addDepartment,
+  editDepartment,
 } from "../../services/adminService";
 import type { Department, DepartmentResponse } from "../../types/department";
 import { Messages } from "../../constants/messages";
@@ -27,6 +28,7 @@ const DepartmentList = () => {
   const [newDeptName, setNewDeptName] = useState("");
   const [newDescription, setNewDescription] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
+  const [editingDeptId, setEditingDeptId] = useState<string | null>(null);
   const { addNotification } = useNotifications();
   const itemsPerPage = 5;
 
@@ -72,7 +74,14 @@ const DepartmentList = () => {
     }
   };
 
-  const handleAddDepartment = async () => {
+  const handleEditClick = (dept: Department) => {
+    setEditingDeptId(dept.id);
+    setNewDeptName(dept.Departmentname);
+    setNewDescription(dept.Description);
+    setShowAddForm(true);
+  };
+
+  const handleSaveDepartment = async () => {
     try {
 
       addDepartmentSchema.parse({
@@ -80,15 +89,24 @@ const DepartmentList = () => {
         Description: newDescription,
       });
 
-      await addDepartment({
-        Departmentname: newDeptName,
-        Description: newDescription,
-      });
+      if (editingDeptId) {
+        await editDepartment(editingDeptId, {
+          Departmentname: newDeptName,
+          Description: newDescription,
+        });
+        addNotification("Department updated successfully", "SUCCESS");
+      } else {
+        await addDepartment({
+          Departmentname: newDeptName,
+          Description: newDescription,
+        });
+        addNotification(Messages.AVAILABILITY.ADD_RULE_SUCCESS, "SUCCESS");
+      }
 
-      addNotification(Messages.AVAILABILITY.ADD_RULE_SUCCESS, "SUCCESS");
       setNewDeptName("");
       setNewDescription("");
       setShowAddForm(false);
+      setEditingDeptId(null);
       fetchDepartments();
     } catch (err: unknown) {
       if (err instanceof ZodError) {
@@ -144,7 +162,14 @@ const DepartmentList = () => {
                 ? 'bg-slate-100 text-slate-700 hover:bg-slate-200 outline outline-1 outline-slate-200' 
                 : 'bg-teal-600 hover:bg-teal-700 text-white shadow-sm'
             }`}
-            onClick={() => setShowAddForm(!showAddForm)}
+            onClick={() => {
+              if (showAddForm) {
+                setEditingDeptId(null);
+                setNewDeptName("");
+                setNewDescription("");
+              }
+              setShowAddForm(!showAddForm);
+            }}
           >
             {showAddForm ? "Cancel" : <><FaPlus className="text-xs" /> Add Department</>}
           </button>
@@ -163,7 +188,7 @@ const DepartmentList = () => {
           >
             <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
               <h3 className="text-lg font-semibold text-slate-800 mb-5 pb-3 border-b border-slate-100">
-                Add New Department
+                {editingDeptId ? "Edit Department" : "Add New Department"}
               </h3>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
@@ -197,9 +222,9 @@ const DepartmentList = () => {
               <div className="flex justify-end pt-5">
                 <button
                   className="bg-teal-600 hover:bg-teal-700 text-white px-6 py-2 rounded-md font-medium text-sm shadow-sm transition-colors"
-                  onClick={handleAddDepartment}
+                  onClick={handleSaveDepartment}
                 >
-                  Save Department
+                  {editingDeptId ? "Update Department" : "Save Department"}
                 </button>
               </div>
             </div>
@@ -246,16 +271,24 @@ const DepartmentList = () => {
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                      <button
-                        onClick={() => handleToggleStatus(dept.id, dept.status)}
-                        className={`inline-flex items-center justify-center px-3 py-1.5 rounded-md text-xs font-semibold transition-colors ${
-                          dept.status === "Listed"
-                            ? "bg-white border border-red-300 text-red-700 hover:bg-red-50"
-                            : "bg-white border border-green-300 text-green-700 hover:bg-green-50"
-                        }`}
-                      >
-                        {dept.status === "Listed" ? "Unlist" : "List"}
-                      </button>
+                      <div className="flex items-center justify-end gap-2">
+                        <button
+                          onClick={() => handleEditClick(dept)}
+                          className="inline-flex items-center justify-center px-3 py-1.5 rounded-md text-xs font-semibold transition-colors bg-white border border-blue-300 text-blue-700 hover:bg-blue-50"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => handleToggleStatus(dept.id, dept.status)}
+                          className={`inline-flex items-center justify-center px-3 py-1.5 rounded-md text-xs font-semibold transition-colors ${
+                            dept.status === "Listed"
+                              ? "bg-white border border-red-300 text-red-700 hover:bg-red-50"
+                              : "bg-white border border-green-300 text-green-700 hover:bg-green-50"
+                          }`}
+                        >
+                          {dept.status === "Listed" ? "Unlist" : "List"}
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))

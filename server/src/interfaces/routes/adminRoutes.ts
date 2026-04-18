@@ -25,10 +25,12 @@ router.patch("/users/:id/:action", verifyToken(Role.ADMIN), (req, res) => adminC
 
 router.post("/departments", verifyToken(Role.ADMIN), (req, res) => adminController.createDepartment(req, res));
 router.get("/departments", verifyToken(Role.ADMIN), (req, res) => adminController.getDepartments(req, res));
+router.put("/departments/:id", verifyToken(Role.ADMIN), (req, res) => adminController.editDepartment(req, res));
 router.patch("/departments/:id/status", verifyToken(Role.ADMIN), (req, res) => adminController.toggleDepartmentStatus(req, res));
 
 router.get("/pending-doctors", verifyToken(Role.ADMIN), (req, res) => adminController.getPendingDoctors(req, res));
 router.get("/wallet-summary", verifyToken(Role.ADMIN), (req, res) => adminController.getWalletSummary(req, res));
+router.get("/analytics", verifyToken(Role.ADMIN), (req, res) => adminController.getAnalytics(req, res));
 router.post("/pay-doctor/:id", verifyToken(Role.ADMIN), (req, res) => adminController.payoutDoctor(req, res));
 router.get("/doctors/:id", verifyToken(Role.ADMIN), (req, res) => adminController.getDoctorById(req, res));
 

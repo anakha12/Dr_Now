@@ -73,7 +73,7 @@ const BookingDetails = () => {
         </h1>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-gray-700 text-lg">
-          <Item label={Messages.DOCTOR.BOOKING_DETAILS.LABELS.BOOKING_ID} value={booking.id} icon={<FileText size={20} />} />
+          <Item label={Messages.DOCTOR.BOOKING_DETAILS.LABELS.BOOKING_ID} value={`#${booking.id.slice(-6).toUpperCase()}`} icon={<FileText size={20} />} />
           <Item label={Messages.DOCTOR.BOOKING_DETAILS.LABELS.DOCTOR_NAME} value={booking.doctorName || "N/A"} icon={<User size={20} />} />
           <Item label={Messages.DOCTOR.BOOKING_DETAILS.LABELS.DEPARTMENT} value={booking.department || "N/A"} icon={<User size={20} />} />
           <Item
@@ -90,7 +90,7 @@ const BookingDetails = () => {
           />
           <Item
             label={Messages.DOCTOR.BOOKING_DETAILS.LABELS.PAYMENT_STATUS}
-            value={booking.payoutStatus ?? "N/A"} 
+            value={booking.paymentStatus ?? "N/A"} 
             icon={<CreditCard size={20} />}
           />
           <Item

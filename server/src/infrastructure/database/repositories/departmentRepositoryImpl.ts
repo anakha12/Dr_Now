@@ -64,4 +64,13 @@ export class DepartmentRepositoryImpl implements IDepartmentRepository {
       { new: true }
     );
   }
+
+  async updateDepartment(id: string, data: Partial<DepartmentEntity>): Promise<DepartmentEntity | null> {
+    const updated = await DepartmentModel.findByIdAndUpdate(
+      new Types.ObjectId(id),
+      { $set: data },
+      { new: true }
+    );
+    return updated ? this._toDomain(updated) : null;
+  }
 }

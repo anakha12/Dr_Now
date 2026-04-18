@@ -13,11 +13,13 @@ import { IToggleUserBlockStatusUseCase } from "../../application/use_cases/inter
 import { ICreateDepartmentUseCase } from "../../application/use_cases/interfaces/admin/ICreateDepartmentUseCase";
 import { IGetDepartmentsUseCase } from "../../application/use_cases/interfaces/admin/IGetDepartmentsUseCase";
 import { IToggleDepartmentStatusUseCase } from "../../application/use_cases/interfaces/admin/IToggleDepartmentStatusUseCase";
+import { IEditDepartmentUseCase } from "../../application/use_cases/interfaces/admin/IEditDepartmentUseCase";
 import { IGetPendingDoctorPayoutsUseCase } from "../../application/use_cases/interfaces/admin/IGetPendingDoctorPayoutsUseCase";
 import { IGetWalletSummaryUseCase } from "../../application/use_cases/interfaces/admin/IGetWalletSummaryUseCase";
 import { IPayoutDoctorUseCase } from "../../application/use_cases/interfaces/admin/IPayoutDoctorUseCase";
 import { IGetAllDoctorsUseCase } from "../../application/use_cases/interfaces/admin/IGetAllDoctors";
 import { IGetDoctorByIdUseCase } from "../../application/use_cases/interfaces/admin/IGetDoctorById";
+import { IGetAdminAnalyticsUseCase } from "../../application/use_cases/interfaces/admin/IGetAdminAnalyticsUseCase";
 
   export class AdminController {
     
@@ -36,7 +38,9 @@ import { IGetDoctorByIdUseCase } from "../../application/use_cases/interfaces/ad
       private _getPendingDoctorPayoutsUseCase: IGetPendingDoctorPayoutsUseCase,
       private _getWalletSummaryUseCase: IGetWalletSummaryUseCase,
       private _payoutDoctorUseCase: IPayoutDoctorUseCase,
-      private _getDoctorByIdUseCase: IGetDoctorByIdUseCase
+      private _getDoctorByIdUseCase: IGetDoctorByIdUseCase,
+      private _editDepartmentUseCase: IEditDepartmentUseCase,
+      private _getAdminAnalyticsUseCase: IGetAdminAnalyticsUseCase
 
     ) {
     
@@ -208,6 +212,16 @@ async getAllUsers(req: Request, res: Response): Promise<void> {
     }
   }
 
+  async editDepartment(req: Request, res: Response) {
+    try {
+      const id = req.params.id;
+      const dept = await this._editDepartmentUseCase.execute(id, req.body);
+      res.status(HttpStatus.OK).json(dept);
+    } catch (err: unknown) {
+      handleControllerError(res, err, HttpStatus.BAD_REQUEST);
+    }
+  }
+
   async getPendingDoctors(req: Request, res: Response) {
     try {
       const page = parseInt(req.query.page as string) || 1;
@@ -252,4 +266,12 @@ async getAllUsers(req: Request, res: Response): Promise<void> {
   }
 
 
-  }
+      async getAnalytics(req: Request, res: Response): Promise<void> {
+      try {
+        const analytics = await this._getAdminAnalyticsUseCase.execute();
+        res.status(HttpStatus.OK).json(analytics);
+      } catch (err: unknown) {
+        handleControllerError(res, err);
+      }
+    }
+}

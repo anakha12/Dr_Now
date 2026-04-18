@@ -1,12 +1,15 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { useParams } from "react-router-dom";
 import { socket, connectSocket } from "../../services/socket";
 import type { ChatMessage } from "../../types/chatMessage";
 import { useNotifications } from "../../hooks/useNotifications";
+import { getBookingDetails } from "../../services/userService";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
-  Send, Phone, PhoneOff, PhoneIncoming, User as UserIcon, MessageSquare 
+  Send, Phone, PhoneOff, PhoneIncoming, User as UserIcon, MessageSquare, Clock 
 } from "lucide-react";
+
+const EARLY_ACCESS_MINUTES = 5;
 
 const ChatPage = () => {
   const { bookingId } = useParams<{ bookingId: string }>();
@@ -17,12 +20,97 @@ const ChatPage = () => {
   const [incomingCall, setIncomingCall] = useState(false);
   const { addNotification, confirmMessage } = useNotifications();
 
+  const [bookingSlot, setBookingSlot] = useState<{ date: string; from: string; to: string } | null>(null);
+  const [callAllowed, setCallAllowed] = useState(false);
+  const [callStatusMsg, setCallStatusMsg] = useState("");
+  const [otherPartyName, setOtherPartyName] = useState("");
+
   const bottomRef = useRef<HTMLDivElement>(null);
   const localVideoRef = useRef<HTMLVideoElement>(null);
   const remoteVideoRef = useRef<HTMLVideoElement>(null);
 
   const peerConnection = useRef<RTCPeerConnection | null>(null);
   const offerRef = useRef<RTCSessionDescriptionInit | null>(null);
+
+  // ---------------- BOOKING TIME CHECK ----------------
+
+  const checkBookingTime = useCallback(() => {
+    if (!bookingSlot) {
+      setCallAllowed(false);
+      setCallStatusMsg("Loading booking info...");
+      return;
+    }
+
+    const now = new Date();
+    const { date, from, to } = bookingSlot;
+
+    // Parse booking start & end times
+    const [startH, startM] = from.split(":").map(Number);
+    const [endH, endM] = to.split(":").map(Number);
+
+    const bookingDate = new Date(date);
+    const start = new Date(bookingDate);
+    start.setHours(startH, startM, 0, 0);
+
+    const end = new Date(bookingDate);
+    end.setHours(endH, endM, 0, 0);
+
+    // Allow early access
+    const earlyStart = new Date(start.getTime() - EARLY_ACCESS_MINUTES * 60 * 1000);
+
+    if (now < earlyStart) {
+      const diff = earlyStart.getTime() - now.getTime();
+      const mins = Math.floor(diff / 60000);
+      const hrs = Math.floor(mins / 60);
+      const remainMins = mins % 60;
+      setCallAllowed(false);
+      setCallStatusMsg(
+        hrs > 0
+          ? `Call available in ${hrs}h ${remainMins}m`
+          : `Call available in ${remainMins}m`
+      );
+    } else if (now > end) {
+      setCallAllowed(false);
+      setCallStatusMsg("Booking time has ended");
+    } else {
+      setCallAllowed(true);
+      setCallStatusMsg("");
+    }
+  }, [bookingSlot]);
+
+  // Fetch booking details
+  useEffect(() => {
+    if (!bookingId) return;
+    const fetchBooking = async () => {
+      try {
+        const data = await getBookingDetails(bookingId);
+        const booking = data.booking || data;
+        setBookingSlot({
+          date: booking.date,
+          from: booking.slot?.from || booking.startTime || "",
+          to: booking.slot?.to || booking.endTime || "",
+        });
+
+        let docName = booking.doctorName;
+        if (docName) {
+          docName = docName.toLowerCase().startsWith("dr") ? docName : `Dr. ${docName}`;
+        }
+        setOtherPartyName(docName || "Doctor");
+      } catch (err) {
+        console.error("Failed to fetch booking details:", err);
+        // If we can't fetch, allow the call as a fallback
+        setCallAllowed(true);
+      }
+    };
+    fetchBooking();
+  }, [bookingId]);
+
+  // Re-check time every 30 seconds 
+  useEffect(() => {
+    checkBookingTime();
+    const interval = setInterval(checkBookingTime, 30000);
+    return () => clearInterval(interval);
+  }, [checkBookingTime]);
 
   // ---------------- CLEANUP ----------------
 
@@ -223,32 +311,45 @@ const ChatPage = () => {
              <MessageSquare className="w-6 h-6" />
           </div>
           <div>
-            <h2 className="font-extrabold text-xl text-slate-800 tracking-tight">Consultation Chat</h2>
+            <h2 className="font-extrabold text-xl text-slate-800 tracking-tight">Chat with {otherPartyName ? otherPartyName : "Doctor"}</h2>
             <p className="text-sm font-medium text-emerald-600 flex items-center gap-1">
               <span className="w-2 h-2 rounded-full bg-emerald-500"></span> Connected
             </p>
           </div>
         </div>
 
-        {!isCalling ? (
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={handleStartCall}
-            className="flex items-center gap-2 bg-gradient-to-r from-teal-600 to-emerald-600 text-white px-5 py-2.5 rounded-xl font-bold shadow-lg shadow-teal-500/30 hover:shadow-teal-500/50 transition-all border border-teal-500"
-          >
-             <Phone className="w-4 h-4" /> Start Video
-          </motion.button>
-        ) : (
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={handleEndCall}
-            className="flex items-center gap-2 bg-gradient-to-r from-rose-500 to-red-600 text-white px-5 py-2.5 rounded-xl font-bold shadow-lg shadow-rose-500/30 hover:shadow-rose-500/50 transition-all border border-rose-500"
-          >
-             <PhoneOff className="w-4 h-4" /> End Call
-          </motion.button>
-        )}
+        <div className="flex items-center gap-3">
+          {!callAllowed && !isCalling && callStatusMsg && (
+            <div className="flex items-center gap-2 text-sm font-medium text-amber-600 bg-amber-50 border border-amber-200 px-3 py-1.5 rounded-xl">
+              <Clock className="w-4 h-4" />
+              {callStatusMsg}
+            </div>
+          )}
+          {!isCalling ? (
+            <motion.button
+              whileHover={callAllowed ? { scale: 1.05 } : {}}
+              whileTap={callAllowed ? { scale: 0.95 } : {}}
+              onClick={handleStartCall}
+              disabled={!callAllowed}
+              className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold shadow-lg transition-all border ${
+                callAllowed
+                  ? "bg-gradient-to-r from-teal-600 to-emerald-600 text-white shadow-teal-500/30 hover:shadow-teal-500/50 border-teal-500"
+                  : "bg-slate-200 text-slate-400 border-slate-300 cursor-not-allowed shadow-none"
+              }`}
+            >
+               <Phone className="w-4 h-4" /> Start Video
+            </motion.button>
+          ) : (
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={handleEndCall}
+              className="flex items-center gap-2 bg-gradient-to-r from-rose-500 to-red-600 text-white px-5 py-2.5 rounded-xl font-bold shadow-lg shadow-rose-500/30 hover:shadow-rose-500/50 transition-all border border-rose-500"
+            >
+               <PhoneOff className="w-4 h-4" /> End Call
+            </motion.button>
+          )}
+        </div>
       </div>
 
       {/* INCOMING CALL OVERLAY */}

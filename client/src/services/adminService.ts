@@ -203,6 +203,21 @@ export const addDepartment = async (data: {
   }
 };
 
+export const editDepartment = async (
+  id: string,
+  data: {
+    Departmentname: string;
+    Description: string;
+  }
+) => {
+  try {
+    const response = await adminAxios.put(`${AdminRoutes.ALL_DEPARTMENTS}/${id}`, data);
+    return response.data;
+  } catch (error) {
+    throw handleError(error, Messages.AVAILABILITY.FETCH_DEPARTMENTS_FAILED);
+  }
+};
+
 export const getWalletSummary = async () => {
   try {
     const response = await adminAxios.get(AdminRoutes.WALLET_SUMMARY);
@@ -229,5 +244,14 @@ export const payoutDoctor = async (doctorId: string) => {
     return response.data;
   } catch (error) {
     throw handleError(error, Messages.DOCTOR.PAYOUT_FAILED);
+  }
+};
+
+export const getDashboardAnalytics = async () => {
+  try {
+    const response = await adminAxios.get(AdminRoutes.ANALYTICS);
+    return response.data;
+  } catch (error) {
+    throw handleError(error, "Failed to fetch dashboard analytics");
   }
 };

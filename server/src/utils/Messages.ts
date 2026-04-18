@@ -100,6 +100,7 @@ export const ErrorMessages = {
   FEE_INVALID: "Invalid fee in session metadata",
 
   INSUFFICIENT_WALLET_BALANCE: "Insufficient wallet balance",
+  DEPARTMENT_NOT_FOUND: "Department not found",
 }; 
 
 export const RedisMessages = {
