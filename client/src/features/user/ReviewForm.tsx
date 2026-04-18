@@ -46,8 +46,14 @@ const ReviewForm: React.FC<ReviewFormProps> = ({
       addNotification("Review submitted successfully!", "SUCCESS");
       onSuccess();
       onClose();
-    } catch (error: any) {
-      const message = error.response?.data?.error || "Failed to submit review";
+    } catch (error) {
+      let message = "Failed to submit review";
+      if (error && typeof error === "object" && "response" in error) {
+        const axiosError = error as { response?: { data?: { message?: string; error?: string } } };
+        message = axiosError.response?.data?.message || axiosError.response?.data?.error || "Failed to submit review";
+      } else if (error instanceof Error) {
+        message = error.message;
+      }
       addNotification(message, "ERROR");
     } finally {
       setLoading(false);

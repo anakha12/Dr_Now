@@ -1,6 +1,6 @@
 import { NotificationRepository } from "../../../domain/repositories/notificationRepository";
 import { NotificationEntity } from "../../../domain/entities/notificationEntity";
-import NotificationModel from "../models/notificationModel";
+import NotificationModel, { INotification } from "../models/notificationModel";
 import mongoose from "mongoose";
 
 export class NotificationRepositoryImpl implements NotificationRepository {
@@ -37,7 +37,7 @@ export class NotificationRepositoryImpl implements NotificationRepository {
     await NotificationModel.findByIdAndDelete(notificationId).exec();
   }
 
-  private mapToEntity(doc: any): NotificationEntity {
+  private mapToEntity(doc: INotification): NotificationEntity {
     return {
       id: doc._id.toString(),
       recipientId: doc.recipientId.toString(),

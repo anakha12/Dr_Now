@@ -85,10 +85,9 @@ const DoctorChatPage = () => {
     if (!bookingId) return;
     const fetchBooking = async () => {
       try {
-        const data = await getDoctorBookingDetails(bookingId);
-        const booking = data as any;
+        const booking = await getDoctorBookingDetails(bookingId);
         setBookingSlot({
-          date: booking.date,
+          date: booking.date || "",
           from: booking.slot?.from || booking.startTime || "",
           to: booking.slot?.to || booking.endTime || "",
         });

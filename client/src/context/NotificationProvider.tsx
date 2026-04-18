@@ -7,6 +7,15 @@ import { notificationApiService } from "../services/notificationService";
 import { userAxios, doctorAxios, adminAxios } from "../services/axiosInstances";
 import type { RootState } from "../redux/store";
 
+interface BackendNotification {
+  id?: string;
+  _id?: string;
+  message: string;
+  type: string;
+  read: boolean;
+  createdAt: string;
+}
+
 export const NotificationProvider = ({ children }: { children: ReactNode }) => {
   const [toasts, setToasts] = useState<Notification[]>([]);
   const [dbNotifications, setDbNotifications] = useState<Notification[]>([]);
@@ -36,8 +45,8 @@ export const NotificationProvider = ({ children }: { children: ReactNode }) => {
   } | null>(null);
 
   // Map backend notifications to frontend types
-  const mapBackendNotification = useCallback((n: any): Notification => ({
-    id: n.id || n._id,
+  const mapBackendNotification = useCallback((n: BackendNotification): Notification => ({
+    id: n.id || (n._id as string),
     message: n.message,
     type: (n.type?.toUpperCase() as NotificationType) || "INFO",
     read: n.read || false,

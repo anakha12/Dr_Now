@@ -2,18 +2,19 @@ import { IUserRepository } from "../../../domain/repositories/IUserRepository";
 import { IBookingRepository } from "../../../domain/repositories/IBookingRepository";
 import { IDoctorRepository } from "../../../domain/repositories/IDoctorRepository";
 import { IAdminWalletRepository } from "../../../domain/repositories/IAdminWalletRepository";
+import { NotificationRepository } from "../../../domain/repositories/notificationRepository";
 import { WalletTransactionUser } from "../../../domain/entities/walletTransactionUserEntity";
 import { IBookWithWallet } from "../interfaces/user/IBookWithWallet";
-import { Booking } from "../../../domain/entities/bookingEntity";
 import { ErrorMessages, Messages } from "../../../utils/Messages";
-import { NotificationRepositoryImpl } from "../../../infrastructure/database/repositories/notificationRepositoryImpl";
+import { Booking } from "../../../domain/entities/bookingEntity";
 
 export class BookWithWalletUseCase implements IBookWithWallet {
   constructor(
     private _userRepository: IUserRepository,
     private _doctorRepository: IDoctorRepository,
     private _bookingRepository: IBookingRepository,
-    private _adminWalletRepo: IAdminWalletRepository 
+    private _adminWalletRepo: IAdminWalletRepository,
+    private _notificationRepository: NotificationRepository
   ) {}
 
   async execute(
@@ -72,8 +73,7 @@ export class BookWithWalletUseCase implements IBookWithWallet {
 
     // Trigger Notification for the Doctor
     try {
-      const notificationRepository = new NotificationRepositoryImpl();
-      await notificationRepository.createNotification({
+      await this._notificationRepository.createNotification({
         recipientId: doctorId,
         message: `New Booking: Patient booked an appointment on ${date} (${slot.from} - ${slot.to}) via Wallet.`,
         type: "success",

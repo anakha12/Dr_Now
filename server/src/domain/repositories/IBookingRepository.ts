@@ -2,6 +2,7 @@ import { Booking } from "../entities/bookingEntity";
 import { PendingDoctorPayoutResponseDTO } from "../../interfaces/dto/response/admin/pending-doctor-payout.dto"
 import { BookingWithExtras } from "../types/BookingWithExtras";
 
+import { AdminAnalyticsResponseDTO } from "../../interfaces/dto/response/admin/admin-analytics.dto";
 
 export interface IBookingRepository {
   createBooking(booking: Booking): Promise<Booking>;
@@ -54,5 +55,5 @@ findUserBookingsWithFilters(
   ): Promise<void>;
   updateBookingStatus(booking: Booking): Promise<Booking>;
   updateIsReviewed(bookingId: string, isReviewed: boolean): Promise<void>;
-  getAdminAnalytics(): Promise<any>;
+  getAdminAnalytics(): Promise<AdminAnalyticsResponseDTO>;
 }
