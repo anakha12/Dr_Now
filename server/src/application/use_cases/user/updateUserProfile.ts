@@ -4,7 +4,7 @@ import { UpdateUserProfileRequestDTO } from "../../../interfaces/dto/request/upd
 import { UpdateUserProfileResponseDTO } from "../../../interfaces/dto/response/user/update-user-profile.dto";
 import { plainToInstance } from "class-transformer";
 import { validateOrReject } from "class-validator";
-import { cloudinary, getSignedImageURL } from "../../../config/cloudinary";
+import { cloudinary } from "../../../config/cloudinary";
 import { Messages } from "../../../utils/Messages";
 import { UpdateUserProfileMapper } from "../../mappers/user/update-user-profile.mapper";
 
@@ -27,9 +27,8 @@ export class UpdateUserProfileUseCase implements IUpdateUserProfileUseCase {
       const result = await cloudinary.uploader.upload(validatedDto.file.path, {
         folder: "users",
         public_id: `user_${userId}_${Date.now()}`,
-        type: "authenticated",
       });
-      validatedDto.image = getSignedImageURL(result.public_id, result.format, 600);
+      validatedDto.image = result.secure_url;
     }
     const updates = UpdateUserProfileMapper.toUpdateData(
       validatedDto,

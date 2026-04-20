@@ -13,17 +13,29 @@ import NotFound from "../features/NotFound";
 
 const AdminRoutes = () => {
   const location = useLocation();
-  const isAuthenticated = useSelector((state: RootState) => state.adminAuth.isAuthenticated);
+  const adminAuth = useSelector((state: RootState) => state.adminAuth);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const isRehydrated = (adminAuth as any)._persist?.rehydrated ?? true;
+  const isAuthenticated = adminAuth.isAuthenticated;
+
+  // Wait for redux-persist to finish rehydrating before making redirect decisions
+  if (!isRehydrated) return null;
 
   return (
     <Routes>
-      <Route path="/login" element={<AdminLogin />} />
+      <Route 
+        path="/login" 
+        element={
+          isAuthenticated ? <Navigate to="/admin/dashboard" replace /> : <AdminLogin />
+        } 
+      />
       <Route
         path="/"
         element={
           isAuthenticated ? <AdminLayout /> : <Navigate to="/admin/login"  state={{ form: location}}/>
         }
       >
+        <Route index element={<Navigate to="dashboard" replace />} />
         <Route path="dashboard" element={<AdminDashboard />} />
         <Route path="doctor-verification" element={<DoctorVerification />} />
         <Route path="doctors" element={<Doctors />} />

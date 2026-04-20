@@ -126,6 +126,7 @@ const UserProfile = () => {
                   <img
                     src={user.image || "/default-avatar.png"}
                     alt="Profile"
+                    onError={(e) => { e.currentTarget.src = "/default-avatar.png"; }}
                     className="w-full h-full rounded-full object-cover border-4 border-white"
                   />
                 </div>

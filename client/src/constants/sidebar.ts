@@ -15,7 +15,6 @@ export const doctorSidebarItems = [
   { label: "Dashboard", key: "dashboard" },
   { label: "Appointments", key: "appointments" },
   { label: "Current Schedules", key: "current-schedules" },
-  { label: "Chat", key: "chat" },
   { label: "Wallet", key: "wallet" },
   { label: "Profile", key: "profile" },
   { label: "Logout", key: "logout" },

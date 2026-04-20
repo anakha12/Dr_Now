@@ -21,16 +21,25 @@ import PrescriptionView from "../features/doctor/PrescriptionView";
 
 const DoctorRoutes = () => {
 
-  const isDoctorLoggedIn  = useSelector(
-    (state: RootState) => state.doctorAuth.isAuthenticated
-  );
+  const doctorAuth = useSelector((state: RootState) => state.doctorAuth);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const isRehydrated = (doctorAuth as any)._persist?.rehydrated ?? true;
+  const isDoctorLoggedIn = doctorAuth.isAuthenticated;
+
+  // Wait for redux-persist to finish rehydrating before making redirect decisions
+  if (!isRehydrated) return null;
 
   return (
     <Routes>
       {/* Public routes */}
       <Route path="register" element={<DoctorRegister />} />
        <Route path="profile-complete" element={<DoctorProfileComplete />} />
-      <Route path="login" element={<DoctorLogin />} />
+      <Route 
+        path="login" 
+        element={
+          isDoctorLoggedIn ? <Navigate to="/doctor/dashboard" replace /> : <DoctorLogin />
+        } 
+      />
       <Route path="waiting-verification" element={<DoctorWaitingVerification />} />
       <Route path="rejected" element={<DoctorRejected />} />
 
@@ -45,6 +54,7 @@ const DoctorRoutes = () => {
           )
         }
       >
+        <Route index element={<Navigate to="dashboard" replace />} />
         <Route path="dashboard" element={<Dashboard />} />
         <Route path="profile" element={<DoctorProfileComponent />} />
         <Route path="current-schedules" element={<CurrentSchedules/>}/>
