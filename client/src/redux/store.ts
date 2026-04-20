@@ -12,18 +12,30 @@ import {
 } from "redux-persist";
 import storage from "redux-persist/lib/storage";
 
-const persistConfig = {
+const userPersistConfig = {
   key: "userAuth",
   storage,
 };
 
-const persistedUserReducer = persistReducer(persistConfig, userAuthReducer);
+const doctorPersistConfig = {
+  key: "doctorAuth",
+  storage,
+};
+
+const adminPersistConfig = {
+  key: "adminAuth",
+  storage,
+};
+
+const persistedUserReducer = persistReducer(userPersistConfig, userAuthReducer);
+const persistedDoctorReducer = persistReducer(doctorPersistConfig, doctorAuthReducer);
+const persistedAdminReducer = persistReducer(adminPersistConfig, adminAuthReducer);
 
 export const store = configureStore({
   reducer: {
     userAuth: persistedUserReducer,
-    doctorAuth: doctorAuthReducer,
-    adminAuth: adminAuthReducer,
+    doctorAuth: persistedDoctorReducer,
+    adminAuth: persistedAdminReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

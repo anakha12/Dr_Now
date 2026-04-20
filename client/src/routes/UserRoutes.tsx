@@ -26,11 +26,20 @@ import NotFound from "../features/NotFound";
 import About from "../features/user/About";
 import Contact from "../features/user/Contact";
 
-const UserRoutes = () => {
+// Guard for routes that require login
+const PrivateRoute = ({ isAuthenticated, children }: { isAuthenticated: boolean; children: React.ReactNode }) => {
   const location = useLocation();
-  const { isAuthenticated } = useSelector(
-    (state: RootState) => state.userAuth
-  );
+  return isAuthenticated ? <>{children}</> : <Navigate to="/login" state={{ from: location }} replace />;
+};
+
+const UserRoutes = () => {
+  const userAuth = useSelector((state: RootState) => state.userAuth);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const isRehydrated = (userAuth as any)._persist?.rehydrated ?? true;
+  const { isAuthenticated } = userAuth;
+
+  // Wait for redux-persist to finish rehydrating before making redirect decisions
+  if (!isRehydrated) return null;
 
   return (
     <Routes>
@@ -51,25 +60,19 @@ const UserRoutes = () => {
 
       <Route
         path="/"
-        element={
-          isAuthenticated ? (
-            <UserLayout />
-          ) : (
-            <Navigate to="/login" state={{ from: location }} />
-          )
-        }
+        element={<UserLayout />}
       >
         <Route index element={<Dashboard />} />
         <Route path="online-consultation" element={<OnlineConsultation />} />
         <Route path="doctors" element={<DoctorListing />} />
         <Route path="consult/doctor/:id" element={<DoctorDetail />} />
-        <Route path="book/:id" element={<BookAppointment />} />
-        <Route path="notifications" element={<UserNotifications />} />
-        <Route path="bookings/:id" element={<BookingDetails />} />
+        <Route path="book/:id" element={<PrivateRoute isAuthenticated={isAuthenticated}><BookAppointment /></PrivateRoute>} />
+        <Route path="notifications" element={<PrivateRoute isAuthenticated={isAuthenticated}><UserNotifications /></PrivateRoute>} />
+        <Route path="bookings/:id" element={<PrivateRoute isAuthenticated={isAuthenticated}><BookingDetails /></PrivateRoute>} />
         <Route path="about" element={<About />} />
         <Route path="contact" element={<Contact />} />
 
-        <Route element={<ProfileLayout />}>
+        <Route element={<PrivateRoute isAuthenticated={isAuthenticated}><ProfileLayout /></PrivateRoute>}>
           <Route path="profile" element={<UserProfile />} />
           <Route path="bookings" element={<UserBookings />} />
           <Route path="wallet" element={<UserWallet />} />
@@ -77,7 +80,7 @@ const UserRoutes = () => {
           <Route path="chat/:bookingId" element={<ChatPage />} />
         </Route>
 
-        <Route path="prescription" element={<UserPrescriptionView />} />
+        <Route path="prescription" element={<PrivateRoute isAuthenticated={isAuthenticated}><UserPrescriptionView /></PrivateRoute>} />
         <Route path="*" element={<NotFound />} />
       </Route>
 

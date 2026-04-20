@@ -37,15 +37,13 @@ const handleSubmit = async (e: React.FormEvent) => {
 
     const res = await loginService(email, password);
 
-   
     localStorage.setItem("token", res.token);
 
-   
     dispatch(setAuth({ isAuthenticated: true, user: res.user }));
 
     toast.success(Messages.AUTH.LOGIN_SUCCESS);
 
-   setTimeout(() => navigate(redirectPath, { replace: true }), 1200);
+    navigate(redirectPath, { replace: true });
   } catch (err: unknown) {
     if (err instanceof ZodError) {
       err.issues.forEach((issue) => toast.error(issue.message));

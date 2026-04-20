@@ -1,6 +1,7 @@
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import type { RootState } from "../../redux/store"; 
+import type { RootState } from "../../redux/store";
+import { persistor } from "../../redux/store";
 import { doctorLogout } from "../../redux/slices/authSlice";
 import { doctorSidebarItems } from "../../constants/sidebar";
 import Sidebar from "../../components/Sidebar";
@@ -16,9 +17,10 @@ const DoctorLayout = () => {
 
   const active = location.pathname.split("/")[2] || "dashboard";
 
-  const handleSidebarClick = (key: string) => {
+  const handleSidebarClick = async (key: string) => {
     if (key === "logout") {
       dispatch(doctorLogout());
+      await persistor.purge();
       navigate("/doctor/login");
     } else {
       navigate(`/doctor/${key}`);
@@ -46,8 +48,9 @@ const DoctorLayout = () => {
           <div className="flex items-center gap-6">
             <AppNotificationDropdown />
             <button
-              onClick={() => {
+              onClick={async () => {
                 dispatch(doctorLogout());
+                await persistor.purge();
                 navigate("/doctor/login");
               }}
               className="py-2 px-5 bg-teal-600 hover:bg-teal-700 text-white font-semibold rounded-lg shadow-sm transition"

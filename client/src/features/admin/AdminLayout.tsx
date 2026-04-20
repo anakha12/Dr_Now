@@ -2,6 +2,7 @@ import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import { Toaster, toast } from "react-hot-toast";
 import { useDispatch } from "react-redux";
 import { adminLogout } from "../../redux/slices/authSlice";
+import { persistor } from "../../redux/store";
 import { Messages } from "../../constants/messages";
 import { adminSidebarItems } from "../../constants/sidebar";
 import { AdminRoutes } from "../../constants/routes";
@@ -46,9 +47,10 @@ const AdminLayout = () => {
     setIsMobileMenuOpen(false);
   }, [location.pathname]);
 
-  const handleSidebarClick = (key: string) => {
+  const handleSidebarClick = async (key: string) => {
     if (key === "logout") {
       dispatch(adminLogout());
+      await persistor.purge();
       toast.success(Messages.AUTH.LOGOUT_SUCCESS);
       navigate(AdminRoutes.LOGIN);
     } else {

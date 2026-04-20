@@ -1,6 +1,7 @@
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { userLogout } from "../../redux/slices/authSlice";
+import { persistor } from "../../redux/store";
 import { profileSidebarItems } from "../../constants/sidebar";
 import { socket } from "../../services/socket";
 import { motion, AnimatePresence } from "framer-motion";
@@ -38,10 +39,11 @@ const ProfileLayout = () => {
     setIsMobileMenuOpen(false);
   }, [location.pathname]);
 
-  const handleSidebarClick = (key: string) => {
+  const handleSidebarClick = async (key: string) => {
     if (key === "logout") {
-      socket.disconnect(); 
+      socket.disconnect();
       dispatch(userLogout());
+      await persistor.purge();
       navigate("/login");
     } else {
       navigate(`/${key}`);

@@ -183,6 +183,7 @@ const UpdateProfile: React.FC = () => {
                   <img
                     src={preview || formData.image || "/default-avatar.png"}
                     alt="Profile Preview"
+                    onError={(e) => { e.currentTarget.src = "/default-avatar.png"; }}
                     className="w-full h-full rounded-full object-cover border-4 border-white bg-white"
                   />
                 </div>
